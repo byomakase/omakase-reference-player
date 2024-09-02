@@ -1,0 +1,255 @@
+/*!
+ * Copyright 2024 ByOmakase, LLC (https://byomakase.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import "variables-root";
+@import "vendor";
+@import "variables";
+@import "variables-dark";
+@import "utilities";
+
+@import "type";
+@import "buttons";
+@import "accordion";
+@import "placeholders";
+@import "offcanvas";
+@import "icons";
+
+@import "player-controls";
+@import "timeline-controls";
+@import "vu-meter";
+@import "telemetry";
+
+html, body {
+  height: 100%;
+}
+
+header {
+  nav.navbar {
+    --app-dark-rgb: 42, 44, 52;
+    height: 70px;
+    padding: 0;
+
+    .navbar-brand {
+      img {
+        height: 36px;
+      }
+    }
+
+    #header-nav {
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 20px;
+
+      ul.nav-tabs {
+        border: 0;
+
+        .nav-link {
+          color: $color-2;
+          min-width: 100px;
+          height: 43px;
+          border: 0;
+          border-color: $black;
+          margin: 0;
+
+          &.active {
+            background-color: $color-6;
+            color: $white;
+            border-right: 1px solid $black;
+          }
+        }
+      }
+    }
+  }
+}
+
+main {
+  min-width: 500px;
+}
+
+#north-pole {
+  border-bottom: 1px solid $color-5;
+  background-color: $color-5;
+
+  #metadata-explorer-wrapper {
+    //overflow-y: scroll;
+    max-height: 0;
+    min-width: 0;
+
+    @media (max-width: 1000px) { // down
+      display: none;
+    }
+
+    #metadata-explorer {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid $color-5;
+    }
+
+    #metadata-nav {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+      background-color: $color-6;
+      padding-left: 30px;
+
+      ul.nav-pills {
+        .nav-item {
+          height: 40px;
+
+          &:first-child {
+            .nav-link {
+              padding-left: 0;
+            }
+          }
+        }
+
+        .nav-link {
+          font-weight: 400;
+          color: $color-2;
+          background-color: $color-6;
+
+          border-radius: 0;
+          margin: 0;
+          height: 100%;
+          text-align: left;
+          padding-left: 20px;
+          padding-right: 20px;
+
+          &.active {
+            font-weight: 800;
+            color: $white;
+            background-color: $color-6;
+          }
+        }
+      }
+    }
+
+    #metadata-content {
+      padding: 20px 30px;
+      flex-grow: 1;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+  }
+
+  #vu-meter-wrapper, #telemetry-wrapper {
+
+
+    @media (max-width: 1300px) { // down
+      display: none;
+    }
+  }
+
+  #player-wrapper {
+    min-height: 0;
+    min-width: 600px;
+
+    @media (min-width: 2300px) { // up
+      //border: 1px solid yellow;
+      min-width: 1000px;
+      max-width: 1000px;
+    }
+
+    @media (min-width: 1800px) and (max-width: 2300px) { // down
+      //border: 1px solid red;
+      min-width: 800px;
+      max-width: 800px;
+    }
+
+    @media (max-width: 1800px) { // down
+      //border: 1px solid green;
+      width: 600px;
+    }
+
+    @media (max-width: 1000px) { // down
+      //border: 1px solid blue;
+      width: 100%;
+    }
+
+    #player-controls {
+      background-color: $color-1;
+      border-left: 1px solid $color-5;
+    }
+  }
+}
+
+#south-pole {
+  #timeline-controls {
+    height: 43px;
+    background-color: $color-6;
+    border-bottom: 1px solid $body-bg-dark;
+  }
+
+  #timeline {
+    min-width: 500px;
+  }
+
+  #timeline-configurator {
+    overflow: hidden;
+  }
+}
+
+.offcanvas {
+  @media (min-width: 1300px) { // up
+    --app-offcanvas-width: 50%;
+  }
+
+  @media (max-width: 1300px) { // down
+    --app-offcanvas-width: 70%;
+  }
+
+  @media (max-width: 1000px) { // down
+    --app-offcanvas-width: 100%;
+  }
+}
+
+.modal-content {
+  --app-modal-bg: #454853;
+
+  .modal-header {
+    border: 0;
+    padding-bottom: 0;
+  }
+
+  .modal-body {
+    padding-top: 0;
+    text-align: center;
+
+    .robot-title {
+      text-align: center;
+      padding-top: 20px;
+      padding-bottom: 20px;
+
+      img {
+        padding-bottom: 35px;
+      }
+
+      h4 {
+        color: #FFE790;
+        border-bottom: 1px solid $color-7;
+        padding-bottom: 20px;
+        width: 100px;
+      }
+    }
+  }
+
+  .modal-footer {
+    border: 0;
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+}

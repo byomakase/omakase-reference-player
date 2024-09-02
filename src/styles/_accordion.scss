@@ -1,0 +1,79 @@
+/*!
+ * Copyright 2024 ByOmakase, LLC (https://byomakase.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.accordion {
+  .accordion-header {
+    border-radius: $accordion-border-radius;
+  }
+
+  .accordion-body {
+    max-width: 1000px;
+  }
+}
+
+.accordion-button {
+  overflow: hidden;
+
+  .btn-link {
+    font-family: $font-family-nunito;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 700;
+    padding: 5px 0;
+  }
+
+  &:after {
+    display: none;
+    //order: -1; //swap order
+    //margin-left: 0;
+    //margin-right: 0.5em; // just extra space between text and icon
+  }
+
+  .btn-link {
+    color: #FFF;
+    text-decoration: none;
+  }
+
+  .btn-source-info-name {
+    i {
+      color: $color-2;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  }
+
+  .btn-metadata {
+    text-transform: uppercase;
+    color: $color-2;
+    border-left: 1px solid $accordion-border-color;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-left: 20px;
+    padding-right: 10px;
+
+    i {
+      svg {
+        margin-bottom: 1px;
+      }
+    }
+  }
+
+  &.custom-header {
+    &:after {
+      color: $color-2;
+    }
+  }
+}

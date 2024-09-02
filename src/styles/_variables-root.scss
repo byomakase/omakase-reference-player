@@ -1,0 +1,35 @@
+/*!
+ * Copyright 2024 ByOmakase, LLC (https://byomakase.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+@import 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap';
+
+$font-family-nunito: "Nunito Sans", sans-serif;
+$font-family-open-sans: 'Open Sans', sans-serif;
+
+$color-1: #353742; // TODO rename
+$color-2: #CACFEA;
+$color-3: #1c1628;
+$color-4: #655372;
+$color-5: #13141B;
+$color-6: #3A3D4B;
+$color-7: #292D43;
+$color-8: #FDF5AD;
+$color-9: #444964;
+$color-10: #494D5E;
+$color-11: #00A3E9;
+
+$font-1: $font-family-open-sans; // TODO rename

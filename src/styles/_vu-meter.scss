@@ -1,0 +1,143 @@
+/*!
+ * Copyright 2024 ByOmakase, LLC (https://byomakase.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#vu-meter {
+  border-top: 1px solid $color-5;
+
+  // expandable frame
+  .vu-meter-frame {
+
+    .vu-meter-header {
+      height: 40px;
+      background-color: $color-7;
+      border-bottom: 1px solid $color-5;
+    }
+
+    .vu-meter-eq {
+      background-color: $color-6;
+
+      .web-audio-peak-meter {
+
+        > div {
+          // immediate container
+
+          > div {
+            &:nth-child(1) {
+              // bars container with scale
+              //background-color: red;
+
+              > div {
+                // each bar
+                > div {
+                  &:nth-child(1) {
+                    // scale above bar
+                    //background-color: coral;
+                  }
+
+                  &:nth-child(2) {
+                    // bar
+                    //background-color: #3E44FE;
+                    //border-top-left-radius: 100px;
+                    //border-top-right-radius: 100px;
+                  }
+                }
+              }
+            }
+
+            &:nth-child(2) {
+              //background-color: indianred;
+            }
+          }
+        }
+      }
+
+      .channel-labels {
+        > div {
+          font-family: $font-family-nunito;
+          text-align: center;
+          width: 24px;
+          //background-color: darkorange;
+          margin-right: 7px;
+          font-size: 12px;
+          color: #70849A;
+        }
+      }
+    }
+
+    &.minimized {
+      .channel-labels {
+        display: none !important;
+      }
+
+      .web-audio-peak-meter {
+        font-family: $font-family-nunito;
+
+        > div {
+          // immediate container
+
+          > div {
+            &:nth-child(1) {
+              // bars container with scale
+              width: 100% !important;
+              > div {
+                // each bar
+                > div {
+                  &:nth-child(1) {
+                    // scale above bar
+                    display: none;
+                    height: 0 !important;
+                  }
+
+                  &:nth-child(2) {
+                    // bar
+                    height: 100% !important;
+                  }
+                }
+              }
+            }
+
+            &:nth-child(2) {
+              display: none;
+              width: 0 !important;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .btn-group {
+    height: 100%;
+
+    .btn {
+      border-radius: 0 2px 0 0;
+      border: 0;
+    }
+
+    .btn-minimize, .btn-maximize {
+      width: 50px;
+      background-size: 30px 30px;
+    }
+
+    .btn-maximize {
+      background: $color-7 url("/assets/images/timeline/icon-double-chevron-left.svg") no-repeat center;
+    }
+
+    .btn-minimize {
+      background: $color-7 url("/assets/images/timeline/icon-double-chevron-right.svg") no-repeat center;
+    }
+  }
+}

@@ -1,0 +1,72 @@
+<!--
+  ~ Copyright 2024 ByOmakase, LLC (https://byomakase.org)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<main class="d-flex flex-column">
+  <div id="north-pole" class="d-flex" #northPole>
+    <div id="metadata-explorer-wrapper" class="flex-grow-1" #metadataExplorerWrapper>
+      @if (showMetadata$|async) {
+        <div appMetadataExplorer [sessionData]="sessionData"></div>
+      }
+    </div>
+    @if (hasTelemetryLane) {
+    <div id="telemetry-wrapper" #telemetryWrapper>
+      <div appTelemetry [videoApi]="omakasePlayerApi?.video" class="h-100" [ngClass]="{ 'has-vu-meter': isVuMeterSupported }"></div>
+    </div>
+   }
+    @if (isVuMeterSupported) {
+      <div id="vu-meter-wrapper">
+        <div appVuMeter [videoApi]="omakasePlayerApi?.video" class="h-100"></div>
+      </div>
+    }
+    <div id="player-wrapper" class="d-flex flex-column" #playerWrapper>
+      <div id="player-wrapper-inner" #playerWrapperInner>
+        @if (showPlayer$|async) {
+          <div appOmakasePlayerVideo (onReady)="onOmakasePlayerVideoReady($event)" [config]="OmakasePlayerConstants.OMAKASE_PLAYER_CONFIG"></div>
+          <div appPlayerControls [videoApi]="omakasePlayerApi?.video" [masterManifests]="masterManifests" [currentMasterManifest]="currentMasterManifest"
+               (onManifestChange)="handleManifestChange($event)"
+          ></div>
+        } @else {
+          <div class="placeholder placeholder-wave placeholder-player w-100"></div>
+          <div class="placeholder placeholder-wave placeholder-player-controls w-100"></div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div id="south-pole" class="flex-grow-1 d-flex flex-column">
+    <div class="d-flex">
+      <div id="timeline" class="flex-grow-1 d-flex flex-column">
+        <div class="flex-grow-1" appOmakasePlayerTimeline [omakasePlayerApi]="omakasePlayerApi" [config]="OmakasePlayerConstants.TIMELINE_CONFIG"
+             (onReady)="onOmakasePlayerTimelineReady($event)" (onSubtitlesLoaded)="onOmakasePlayerSubtitlesLoaded($event)">
+          <div class="h-100 d-flex flex-column">
+            <div class="flex-grow-1">
+              @for (index of [0, 1, 2]; track index) {
+                <div class="placeholder placeholder-wave placeholder-timeline-lane w-100 m"></div>
+                <div class="placeholder placeholder-wave placeholder-timeline-lane w-100 s"></div>
+                <div class="placeholder placeholder-wave placeholder-timeline-lane w-100 l"></div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+<!--      <div timelineConfigurator [timelineApi]="omakasePlayerApi?.timeline"></div>-->
+    </div>
+
+  </div>
+</main>
+
+
+

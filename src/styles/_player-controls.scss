@@ -1,0 +1,272 @@
+/*!
+ * Copyright 2024 ByOmakase, LLC (https://byomakase.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#player-controls {
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 42px;
+
+  @media (min-width: 650px) and (max-width: 1000px), (min-width: 1900px) {
+    height: 45px;
+  }
+
+  .btn {
+    border-radius: 0;
+    border: none;
+  }
+
+  .dropdown-item {
+    font-family: $font-family-nunito;
+    font-size: 13px;
+  }
+
+  .btn-group-player-controls, .btn-group-speed {
+    height: 45px;
+  }
+
+  .btn-group-player-controls {
+    .btn {
+      width: 35px;
+
+      i {
+        font-size: 11pt;
+      }
+
+      @media (min-width: 650px) and (max-width: 1000px), (min-width: 1900px) {
+        width: 40px;
+        i {
+          font-size: 12pt;
+        }
+      }
+
+      i svg {
+        height: 2.5em;
+        width: 2.5em;
+        margin-top: -3px;
+        margin-left: -10px;
+      }
+    }
+
+    .btn-fast-rewind {
+      border-radius: 0;
+      margin-right: 8px;
+    }
+
+    .btn-fast-forward {
+      border-radius: 0;
+      margin-left: 8px;
+    }
+
+    .btn-fullscreen {
+      width: 40px;
+    }
+  }
+
+  .btn-group-speed {
+    .btn-speed {
+      //width: 110px;
+      border-radius: 0;
+
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 700;
+      text-align: left;
+
+      &:after {
+        display: none;
+      }
+    }
+
+    .dropdown-menu {
+      min-width: 100px;
+
+      .dropdown-item {
+        padding: 5px 2px;
+        //width: 100px;
+      }
+    }
+  }
+
+  .btn-group-manifest {
+    .btn-manifest {
+      //width: 110px;
+      border-radius: 0;
+
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      text-align: left;
+
+      &:after {
+        display: none;
+      }
+    }
+
+    .dropdown-menu {
+      min-width: 150px;
+
+      .dropdown-item {
+        text-align: left !important;
+        padding: 5px 2px 5px 10px;
+      }
+    }
+  }
+
+
+  $volume-control-width: 97px;
+
+  $volume-control-track-width: 55px;
+  $volume-control-track-color: #000000;
+  $volume-control-track-disabled-color: #000000;
+  $volume-control-track-progress-color: #3E44FE;
+  $volume-control-track-disabled-progress-color: #464646;
+
+  $volume-control-track-height: 5px;
+  $volume-control-track-border-radius: 5px;
+
+  $volume-control-thumb-color: #ffffff;
+  $volume-control-thumb-disabled-color: #a8a8a8;
+  $volume-control-thumb-width: 10px;
+  $volume-control-thumb-height: 10px;
+  $volume-control-thumb-margin-top: $volume-control-track-height * -0.5;
+  $volume-control-thumb-border-radius: 10px;
+
+  .volume-control {
+    display: flex;
+    align-items: center;
+    overflow-x: hidden;
+    height: 100%;
+    min-width: $volume-control-width;
+    //background-color: yellow;
+    z-index: 99;
+
+    &:hover {
+      //background-color: deeppink;
+
+      input {
+        width: $volume-control-track-width !important;
+        //background-color: black;
+      }
+    }
+
+    button {
+      height: 100%;
+      width: 40px;
+      padding: 0;
+      margin: 0;
+      //background-color: pink;
+
+      &:hover {
+        + input {
+          width: $volume-control-track-width !important;
+        }
+      }
+    }
+
+    &.muted {
+
+    }
+
+    // baseline, reset styles
+    input[type="range"] {
+      --app-volume-control-progress-percent: 0%; // ### we will set this CSS variable with JS to show track progress ###
+      --app-volume-control-track-color: #{$volume-control-track-color};
+      --app-volume-control-track-progress-color: #{$volume-control-track-progress-color};
+      --app-volume-control-thumb-color: #{$volume-control-thumb-color};
+
+      overflow: hidden;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      //background-color: green;
+      cursor: pointer;
+      height: 100%;
+      width: 0;
+      //width: $volume-control-track-width;
+      padding-right: 0;
+      transition: .2s ease;
+
+      &:hover, &:active {
+        width: $volume-control-track-width;
+        //background-color: deeppink;
+      }
+
+      // removes default focus
+      &:focus {
+        outline: none;
+      }
+
+      &:disabled {
+        --app-volume-control-track-color: #{$volume-control-track-disabled-color};
+        --app-volume-control-track-progress-color: #{$volume-control-track-disabled-progress-color};
+        --app-volume-control-thumb-color: #{$volume-control-thumb-disabled-color};
+      }
+
+      // Chrome, Safari, Opera and Edge Chromium styles
+      // slider track
+      &::-webkit-slider-runnable-track {
+        background-color: var(--app-volume-control-track-color);
+        border-radius: $volume-control-track-border-radius;
+        height: $volume-control-track-height;
+      }
+
+      // slider thumb
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none; /* Override default look */
+        appearance: none;
+        margin-top: $volume-control-thumb-margin-top; /* Centers thumb on the track */
+        background-color: var(--app-volume-control-thumb-color);
+        border-radius: $volume-control-thumb-border-radius;
+        height: $volume-control-thumb-height;
+        width: $volume-control-thumb-width;
+      }
+
+      &::-webkit-slider-runnable-track {
+        background-image: linear-gradient(
+            90deg,
+            var(--app-volume-control-track-progress-color) var(--app-volume-control-progress-percent),
+            var(--app-volume-control-track-color) var(--app-volume-control-progress-percent)
+        );
+      }
+
+      // Firefox
+      // slider track
+      &::-moz-range-track {
+        background-color: var(--app-volume-control-track-color);
+        border-radius: $volume-control-track-border-radius;
+        height: $volume-control-track-height;
+      }
+
+      // slider thumb
+      &::-moz-range-thumb {
+        background-color: var(--app-volume-control-thumb-color);
+        border: none; /*Removes extra border that FF applies*/
+        border-radius: $volume-control-thumb-border-radius;
+        height: $volume-control-thumb-height;
+        width: $volume-control-thumb-width;
+      }
+
+      // progress
+      &::-moz-range-progress {
+        background-image: linear-gradient(
+            90deg,
+            var(--app-volume-control-track-progress-color) var(--app-volume-control-progress-percent),
+            var(--app-volume-control-track-color) var(--app-volume-control-progress-percent)
+        );
+      }
+    }
+  }
+}

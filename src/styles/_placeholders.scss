@@ -1,0 +1,59 @@
+/*!
+ * Copyright 2024 ByOmakase, LLC (https://byomakase.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.placeholder {
+  border-radius: 8px;
+
+  border-radius: 0px;
+
+  font-size: 0.7em;
+  background-color: #454857;
+
+  //backgroundFill: '#292D43',
+  //rightBackgroundFill: '#454857',
+}
+
+.placeholder-timeline-lane {
+  margin-bottom: 1px;
+
+  &.xs {
+    min-height: 20px;
+  }
+
+  &.s {
+    min-height: 40px;
+  }
+
+  &.m {
+    min-height: 60px;
+  }
+
+  &.l {
+    min-height: 100px;
+  }
+}
+
+.placeholder-player {
+  aspect-ratio: 16/9; // to mimic <video> element
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.placeholder-player-controls {
+  height: 45px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
