@@ -1,27 +1,58 @@
-# App
+# Omakase Reference Player
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.2.0.
+The Omakase Reference Player is an application focused on a QC usecase that showcases the main capabilities of the [Omakase Player](https://player.byomakase.org/).
 
-## Development server
+# Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+1. Execute commands to install dependencies and start development server:
+```bash
+npm install
+ng serve --port 3000 --open
+```
 
-## Code scaffolding
+2. Navigate to [http://localhost:3000/?session=http://localhost:3000/demo-assets/tears-of-steel/v1_10-SEC/tears-of-steel_24fps_10-SEC.json](http://localhost:3000/?session=http://localhost:3000/demo-assets/tears-of-steel/v1_10-SEC/tears-of-steel_24fps_10-SEC.json) 
+to open application in dev mode with default demo session file.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+![Alt text](screenshot.png)
+
+The application will automatically reload if you change any of the source files.
+
+In development mode, `/demo-assets` directory is served in development server root and `http://localhost:3000/demo-assets/` is the root location for demo files.
+
+# Configuration guide
+
+Application requires a JSON configuration file to be passed as a `session` query parameter in the URL. 
+
+The configuration file describes the media that is presented in the player as well as the layout of the timeline (see default demo example). 
+
+`JSON` configuration file must correspond to structure defined in `src/model/domain.model.ts`:
+
+```ts
+export interface SessionData {
+  authentication?: AuthenticationData;
+  data: {
+    source_info: SourceInfo[];
+    media_info: MediaInfo[];
+    master_manifests: MasterManifest[];
+    media_tracks: MediaTracks;
+    presentation: Presentation;
+  };
+}
+```
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Run `ng build --configuration=dev --localize=false --base-href=/` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-## Running unit tests
+## Links
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+- Omakase Player Web: [https://player.byomakase.org/](https://player.byomakase.org/)
+- Omakase Player GitHub: [https://github.com/byomakase/omakase-player](https://github.com/byomakase/omakase-player)
+- Omakase Media Tools GitHub: [https://github.com/byomakase/omakase-media-tools](https://github.com/byomakase/omakase-media-tools)
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
 ## Further help
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+CORS must be taken into account if configuration file is served from different domain than server running Omakase Reference Player
+
+

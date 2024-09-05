@@ -20,7 +20,7 @@ import {SharedModule} from '../../../shared/shared.module';
 import {animate, AnimationEvent, state, style, transition, trigger} from '@angular/animations';
 import {Select, Store} from '@ngxs/store';
 import {TelemetryCue, TelemetryState, TelemetryStateModel} from './telemetry.state';
-import {filter, map, Observable, sampleTime, Subject, Subscription, take, takeUntil} from 'rxjs';
+import {filter, map, Observable, sampleTime, Subject, Subscription, switchMap, take, takeUntil} from 'rxjs';
 import {OmakaseVttCue, OmakaseVttCueEvent, VideoApi} from '@byomakase/omakase-player';
 import {TelemetryLane, TimelineService} from '../../timeline/timeline.service';
 import {TelemetryActions} from './telemetry.actions';
@@ -116,6 +116,7 @@ export class TelemetryComponent implements OnInit, OnDestroy {
   private _cueSubscription?: Subscription;
   private _videoSubscription?: Subscription;
   private _seekSubscription?: Subscription;
+  private _replaySubscription?: Subscription;
 
   private _lastSelectedLane?: TelemetryLane;
   private _selectedLaneTitle?: string;
@@ -159,6 +160,7 @@ export class TelemetryComponent implements OnInit, OnDestroy {
           this._cueSubscription?.unsubscribe();
           this._videoSubscription?.unsubscribe();
           this._seekSubscription?.unsubscribe();
+          this._replaySubscription?.unsubscribe();
           const visibility = this.store.selectSnapshot(TelemetryState.visibility);
           if (selectedLaneId) {
             const selectedLane = this.timelineService.getTimelineLaneById(selectedLaneId) as TelemetryLane;
@@ -176,6 +178,7 @@ export class TelemetryComponent implements OnInit, OnDestroy {
             this._cueSubscription = this.getCueEventsSubscription(selectedLane!);
             this._videoSubscription = this.getVideoProgressSubscription();
             this._seekSubscription = this.getVideoSeekSubscription();
+            this._replaySubscription = this.getVideoReplaySubscription();
             if (visibility === 'minimized') {
               this.store.dispatch(new Maximize());
             }
@@ -288,6 +291,19 @@ export class TelemetryComponent implements OnInit, OnDestroy {
     return videoController.onSeeked$.pipe(takeUntil(this._destroyed$)).subscribe((seekEvent) => {
       const cues = this.getCuesUntilTime(seekEvent.currentTime);
       this.store.dispatch(new SetCues(cues));
+    });
+  }
+
+  private getVideoReplaySubscription(): Subscription {
+    const videoController = this.timelineService.getVideoController();
+    return videoController.onEnded$.pipe(
+      switchMap(() => 
+        videoController.onPlay$.pipe(
+          takeUntil(videoController.onSeeked$)
+        )
+      )
+    ).subscribe(() => {
+      this.store.dispatch(new SetCues([]));
     });
   }
 

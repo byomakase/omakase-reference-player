@@ -85,8 +85,16 @@ export class Constants {
         default: {
           maxTimeToFirstByteMs: 30000,
           maxLoadTimeMs: 60000,
-          timeoutRetry: null,
-          errorRetry: null
+          timeoutRetry: {
+            maxNumRetry: 4,
+            retryDelayMs: 0,
+            maxRetryDelayMs: 0
+          },
+          errorRetry: {
+            maxNumRetry: 6,
+            retryDelayMs: 3000,
+            maxRetryDelayMs: 8000
+          }
         }
       },
       // backBufferLength: 90

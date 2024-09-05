@@ -98,7 +98,7 @@ interface PlayerControlsFormGroup {
           </button>
           <div class="dropdown-menu" ngbDropdownMenu>
             @for (masterManifest of filteredMasterManifests; track masterManifest) {
-              <button ngbDropdownItem (click)="buttonClickSetManifest(masterManifest)" class="text-center" [class.active]="masterManifest.id === currentMasterManifest?.id">
+              <button ngbDropdownItem (click)="buttonClickSetManifest(masterManifest)" class="text-center" [class.active]="masterManifest.id === currentMasterManifest?.id" [disabled]="isDisabled">
                 {{ masterManifest.name }}
               </button>
             }

@@ -30,7 +30,7 @@ import {z} from 'zod';
 import {AudioMediaTrack, BasicAuthenticationData, BearerAuthenticationData, Channel, MasterManifest, SessionData, TextMediaTrack, VideoMediaTrack} from '../../model/domain.model';
 import {DomainUtil} from '../../util/domain-util';
 import {TimelineService} from '../timeline/timeline.service';
-import {MediaPlaylist} from 'hls.js';
+import {ErrorData, MediaPlaylist} from 'hls.js';
 import {AudioGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/audio-grouping-lane';
 import {VideoGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/video-grouping-lane';
 import {AudioChannelLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/audio-channel-lane';
@@ -45,6 +45,9 @@ import {MetadataExplorerComponent} from './metadata-explorer/metadata-explorer.c
 import {VuMeterComponent} from './vu-meter/vu-meter.component';
 import {TelemetryComponent} from './telemetry/telemetry.component';
 import {CustomAudioTrackLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/custom-audio-track-lane';
+import {Store} from '@ngxs/store';
+import {AppActions} from '../../shared/state/app.actions';
+import ShowExceptionModal = AppActions.ShowExceptionModal;
 
 @Component({
   selector: 'app-main',
@@ -115,13 +118,14 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   private _groupingLanes?: BaseGroupingLane<any>[];
 
 
-  private _manifestLoadBreaker$ = new Subject<void>(); // TODO rename me
+  private _manifestLoadBreaker$ = new Subject<void>();
 
   constructor(protected route: ActivatedRoute,
               protected mainService: MainService,
               protected timelineService: TimelineService,
               protected windowService: WindowService,
-              protected renderer: Renderer2) {
+              protected renderer: Renderer2,
+              protected store: Store) {
 
     fromEvent<Event>(this.windowService.window, 'resize').pipe(takeUntil(this._destroyed$)).subscribe(event => {
       this.adjustMetadataExplorerStyles();
@@ -197,10 +201,6 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         this.omakasePlayerApi!.alerts.warn('HDR playback not supported on this platform. Use Safari to view HDR options.', { autodismiss: true });
       }
 
-      // TODO remove, omakasePlayer console debugging
-      // @ts-ignore
-      window['omakasePlayer'] = this._omakasePlayerApi;
-
       this.timelineService.omakasePlayerApi = omakasePlayerApi;
 
       this._omakasePlayerVideoPlayerReady$.next(true);
@@ -222,30 +222,35 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         dropFrame: isNullOrUndefined(this._currentMasterManifest!.drop_frame) ? false : this._currentMasterManifest!.drop_frame,
         ffom: isNullOrUndefined(this._currentMasterManifest!.ffom) ? void 0 : this._currentMasterManifest!.ffom,
         authentication: this._sessionData?.authentication as BasicAuthenticationData | BearerAuthenticationData
-      }).pipe(take(1)).subscribe(video => {
+      }).pipe(take(1)).subscribe({
 
-        // populate audio tracks from hls stream
-        this._hlsMediaPlaylists = this._omakasePlayerApi!.video.getAudioTracks() as MediaPlaylist[];
-        this._hlsMediaPlaylistsByName = new Map<string, MediaPlaylist>();
-        this._hlsMediaPlaylists.forEach(hlsMediaPlaylist => {
-          this._hlsMediaPlaylistsByName!.set(hlsMediaPlaylist.name, hlsMediaPlaylist);
-        });
+        next: (video) => {
+          // populate audio tracks from hls stream
+          this._hlsMediaPlaylists = this._omakasePlayerApi!.video.getAudioTracks() as MediaPlaylist[];
+          this._hlsMediaPlaylistsByName = new Map<string, MediaPlaylist>();
+          this._hlsMediaPlaylists.forEach(hlsMediaPlaylist => {
+            this._hlsMediaPlaylistsByName!.set(hlsMediaPlaylist.name, hlsMediaPlaylist);
+          });
 
-        this._onHlsMediaPlaylistsLoaded$.next(this._hlsMediaPlaylists);
+          this._onHlsMediaPlaylistsLoaded$.next(this._hlsMediaPlaylists);
 
-        if (this.isVuMeterSupported) {
-          this.vuMeter.mediaElement = this._omakasePlayerApi!.video.getHTMLVideoElement();
-        }
-
-        this.populateVideoHelpMenu();
-
-        this.omakasePlayerApi!.video.onAudioSwitched$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
-          next: (event) => {
-            this._onAudioSwitched$.next(event.audioTrack as MediaPlaylist)
+          if (this.isVuMeterSupported) {
+            this.vuMeter.mediaElement = this._omakasePlayerApi!.video.getHTMLVideoElement();
           }
-        })
 
-        completeSub(o$);
+          this.populateVideoHelpMenu();
+
+          this.omakasePlayerApi!.video.onAudioSwitched$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
+            next: (event) => {
+              this._onAudioSwitched$.next(event.audioTrack as MediaPlaylist)
+            }
+          })
+
+          // @ts-ignore
+          this.omakasePlayerApi!.video.getHls().on('hlsError', this.hlsFragLoadErrorHandler);
+
+          completeSub(o$);
+        }
       })
     })
   }
@@ -264,14 +269,6 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       })
     })
   }
-
-  // private populateTimeline(): void {
-  //   this.cleanTimeline();
-  //   this._groupingLanes = [];
-  //   this.processVideoMediaTracks();
-  //   this.processAudioMediaTracks();
-  //   this.processTextTracks();
-  // }
 
   private cleanTimeline(): void {
     this._omakasePlayerApi?.timeline?.removeTimelineLanes(this._omakasePlayerApi?.timeline?.getTimelineLanes().map(p => p.id))
@@ -440,7 +437,6 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     this._audioMediaTracks = this._sessionData!.data.media_tracks.audio;
     this._textMediaTracks = this._sessionData!.data.media_tracks.text;
 
-
     // start video & timeline load
     let videoPlayerReady$ = new Subject<void>();
     let timelineReady$ = new Subject<void>();
@@ -451,6 +447,13 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     let timelineExceptTextTracksPopulated$ = new Subject<void>();
     let timelineTextTracksPopulated$ = new Subject<void>();
     let timelinePopulated$ = new Subject<void>();
+
+    this._manifestLoadBreaker$.pipe(take(1)).subscribe(() => {
+      // remove listeners set for error handling
+      // @ts-ignore
+      this.omakasePlayerApi?.video.getHls().off('hlsError', this.hlsFragLoadErrorHandler)
+      // this.omakasePlayerApi?.video.getHls().removeAllListeners();
+    })
 
     // videoPlayerReady$.subscribe({
     //   next: () => {
@@ -595,6 +598,14 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     this._omakasePlayerSubtitlesLoaded$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe(() => {
       omakaseSubtitlesLoaded$.next();
     })
+  }
+
+  private hlsFragLoadErrorHandler(hlsErrorData: ErrorData) {
+    if (hlsErrorData.type === 'networkError' && hlsErrorData.details === 'fragLoadError' && hlsErrorData.fatal) {
+      this.store.dispatch(new ShowExceptionModal({
+        message: 'Playback stalled, could not fetch required segments from server'
+      }))
+    }
   }
 
   private validateSessionData(sessionData: SessionData): boolean {
