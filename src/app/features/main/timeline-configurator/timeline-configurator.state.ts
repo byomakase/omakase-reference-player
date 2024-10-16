@@ -17,18 +17,25 @@
 import {Injectable} from '@angular/core';
 import {Action, Selector, State, StateContext} from '@ngxs/store';
 import {TimelineConfiguratorActions} from './timeline-configurator.actions';
+import {DropdownOption} from '../../../shared/components/dropdown/dropdown.component';
 import Minimize = TimelineConfiguratorActions.Minimize;
 import Maximize = TimelineConfiguratorActions.Maximize;
 import ToggleMinimizeMaximize = TimelineConfiguratorActions.ToggleMinimizeMaximize;
+import SelectLane = TimelineConfiguratorActions.SelectLane;
+import SetLaneOptions = TimelineConfiguratorActions.SetLaneOptions;
 
 export interface TimelineConfiguratorStateModel {
-  visibility: 'minimized' | 'maximized'
+  visibility: 'minimized' | 'maximized',
+  selectedLaneId: string | undefined,
+  laneOptions: DropdownOption<string>[];
 }
 
 @State<TimelineConfiguratorStateModel>({
   name: 'timelineConfigurator',
   defaults: {
-    visibility: 'minimized'
+    visibility: 'minimized',
+    selectedLaneId: undefined,
+    laneOptions: []
   }
 })
 @Injectable()
@@ -37,6 +44,16 @@ export class TimelineConfiguratorState {
   @Selector()
   static visibility(state: TimelineConfiguratorStateModel) {
     return state.visibility;
+  }
+
+  @Selector()
+  static selectedLaneId(state: TimelineConfiguratorStateModel) {
+    return state.selectedLaneId;
+  }
+
+  @Selector()
+  static laneOptions(state: TimelineConfiguratorStateModel) {
+    return state.laneOptions;
   }
 
   @Action(Minimize)
@@ -61,6 +78,22 @@ export class TimelineConfiguratorState {
     ctx.patchState({
       visibility: state.visibility === 'minimized' ? 'maximized' : 'minimized',
     })
+  }
+
+  @Action(SelectLane)
+  selectLane(ctx: StateContext<TimelineConfiguratorStateModel>, { selectedLaneId }: SelectLane) {
+    const state = ctx.getState();
+    ctx.patchState({
+      selectedLaneId,
+    });
+  }
+
+  @Action(SetLaneOptions)
+  setLaneOptions(ctx: StateContext<TimelineConfiguratorStateModel>, { options }: SetLaneOptions) {
+    const state = ctx.getState();
+    ctx.patchState({
+      laneOptions: options,
+    });
   }
 
 }

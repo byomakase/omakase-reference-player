@@ -47,7 +47,12 @@ import {TelemetryComponent} from './telemetry/telemetry.component';
 import {CustomAudioTrackLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/custom-audio-track-lane';
 import {Store} from '@ngxs/store';
 import {AppActions} from '../../shared/state/app.actions';
+import {ChartLegendComponent} from './chart-legend/chart-legend.component';
+import {TimelineConfiguratorState} from './timeline-configurator/timeline-configurator.state';
+import {TimelineConfiguratorActions} from './timeline-configurator/timeline-configurator.actions';
 import ShowExceptionModal = AppActions.ShowExceptionModal;
+import SelectConfigLane = TimelineConfiguratorActions.SelectLane;
+import SetConfigLaneOptions = TimelineConfiguratorActions.SetLaneOptions;
 
 @Component({
   selector: 'app-main',
@@ -60,7 +65,8 @@ import ShowExceptionModal = AppActions.ShowExceptionModal;
     MetadataOffcanvasComponent,
     MetadataExplorerComponent,
     VuMeterComponent,
-    TelemetryComponent
+    TelemetryComponent,
+    ChartLegendComponent
   ]
 })
 export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -76,6 +82,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
   showMetadata$ = new BehaviorSubject<boolean>(false);
   showPlayer$ = new BehaviorSubject<boolean>(false);
+  timelineLoaded$ = new BehaviorSubject<boolean>(false);
 
   private _omakasePlayerApi: OmakasePlayerApi | undefined;
 
@@ -455,6 +462,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       // this.omakasePlayerApi?.video.getHls().removeAllListeners();
     })
 
+    this.timelineLoaded$.next(false);
+
     // videoPlayerReady$.subscribe({
     //   next: () => {
     //     console.log('videoPlayerReady$')
@@ -496,6 +505,17 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     //     console.log('timelinePopulated$')
     //   }
     // })
+
+    timelinePopulated$.subscribe({
+      next: () => {
+        const laneOptions = this.timelineService.getGroupingLanes()?.map((lane: any) => ({
+          label:  `${lane.description.split(' ')[0]} - ${lane._videoMediaTrack?.name ?? lane._audioMediaTrack?.name ?? lane._textMediaTrack?.name}`,
+          value: lane.id
+        })) ?? [];
+        this.store.dispatch(new SetConfigLaneOptions(laneOptions));
+        this.timelineLoaded$.next(true);
+      }
+    })
 
     videoPlayerReady$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
       next: () => {
@@ -750,6 +770,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       },
     })
 
+    this.addGroupingLaneConfigButtonListener(lane);
+
     return lane;
   }
 
@@ -761,6 +783,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       text: audioMediaTrack.name,
       audioMediaTrack: audioMediaTrack,
     })
+
+    this.addGroupingLaneConfigButtonListener(lane);
 
     this._onHlsMediaPlaylistsLoaded$.pipe(takeUntil(this._manifestLoadBreaker$), take(1)).subscribe({
       next: (event) => {
@@ -783,6 +807,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       textMediaTrack: textMediaTrack,
       subtitlesVttTrack: subtitlesVttTrack,
     }, this._omakasePlayerApi!.subtitles)
+
+    this.addGroupingLaneConfigButtonListener(lane);
 
     return lane;
   }
@@ -942,6 +968,15 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         this._omakasePlayerApi!.subtitles.showTrack(nextActiveTrack.id);
       }
     }
+  }
+
+  private addGroupingLaneConfigButtonListener(lane: BaseGroupingLane<any>) {
+    lane.onConfigClick$.pipe(takeUntil(this._destroyed$)).subscribe({
+      next: (event) => {
+        const selectedLaneId = this.store.selectSnapshot(TimelineConfiguratorState.selectedLaneId);
+        this.store.dispatch(new SelectConfigLane(selectedLaneId === lane.id ? undefined : lane.id));
+      }
+    });
   }
 
   @HostListener('document:keydown', ['$event'])

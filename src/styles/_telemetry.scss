@@ -67,24 +67,6 @@
         }
       }
 
-      @keyframes fadeIn {
-        0% {
-          opacity: 0
-        }
-        100% {
-          opacity: 1
-        }
-      }
-
-      @keyframes fadeOut {
-        0% {
-          opacity: 1
-        }
-        100% {
-          opacity: 0
-        }
-      }
-
       .telemetry-cue-header {
         background-color: $color-9;
         height: 25px;

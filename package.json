@@ -1,6 +1,6 @@
 {
   "name": "omakase-reference-player",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -18,7 +18,7 @@
     "@angular/platform-browser": "^17.2.0",
     "@angular/platform-browser-dynamic": "^17.2.0",
     "@angular/router": "^17.2.0",
-    "@byomakase/omakase-player": "0.9.2-SNAPSHOT.1725549990",
+    "@byomakase/omakase-player": "0.10.1",
     "@ng-bootstrap/ng-bootstrap": "^16.0.0",
     "@ngxs/store": "^3.8.2",
     "@popperjs/core": "^2.11.8",

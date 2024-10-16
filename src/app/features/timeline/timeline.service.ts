@@ -18,6 +18,9 @@ import {TelemetryOgChartLane} from '../../shared/components/omakase-player/omaka
 import {TelemetryBarChartLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/telemetry-bar-chart-lane';
 import {TelemetryLineChartLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/telemetry-line-chart-lane';
 import {TelemetryMarkerLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/telemetry-marker-lane';
+import {BaseGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/base-grouping-lane';
+import {VideoGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/video-grouping-lane';
+import {AudioGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/audio-grouping-lane';
 import {TextTrackGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/text-track-grouping-lane';
 import {Injectable} from '@angular/core';
 import {LineChartLaneStyle, MarkerLane, MarkerLaneStyle, MarkerVttCue, MomentMarker, OmakasePlayerApi, OmakaseVttFile, PeriodMarker, SubtitlesVttTrack, ThumbnailLane, TimelineLaneApi} from '@byomakase/omakase-player';
@@ -27,11 +30,13 @@ import {ColorUtil} from '../../util/color-util';
 import {CustomSubtitlesLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/custom-subtitles-lane';
 import {Store} from '@ngxs/store';
 import {TelemetryActions} from '../main/telemetry/telemetry.actions';
+import {ChartLegendActions} from '../main/chart-legend/chart-legend.actions';
 import {VideoControllerApi} from '@byomakase/omakase-player/dist/video/video-controller-api';
 import {TelemetryState} from '../main/telemetry/telemetry.state';
 import {Observable} from 'rxjs';
-
 import SelectLane = TelemetryActions.SelectLane;
+import ShowLegend = ChartLegendActions.Show;
+import HideLegend = ChartLegendActions.Hide;
 
 export type TelemetryLane = TelemetryLineChartLane | TelemetryBarChartLane | TelemetryOgChartLane | TelemetryMarkerLane;
 
@@ -148,6 +153,7 @@ export class TimelineService {
 
   createLineChartLane(analysis: Analysis): TelemetryLineChartLane {
     let chartAnalysis = analysis as ChartAnalysis;
+    let singleLineChartStyle = this.resolveLineChartLaneStyle(analysis);
 
     let lane = new TelemetryLineChartLane({
       vttUrl: analysis.url,
@@ -155,7 +161,18 @@ export class TimelineService {
       yMax: chartAnalysis.y_max,
       yMin: chartAnalysis.y_min,
       style: {
-        ...this.resolveLineChartLaneStyle(analysis)
+        ...Constants.LINE_CHART_LANE_STYLE,
+      },
+      lineStyleFn: (index, count) => {
+        if (count > 1) {
+          return {
+            ...this.resolveMultiLineChartLaneStyle(analysis, index)
+          }
+        } else {
+          return {
+            ...singleLineChartStyle
+          }
+        }
       }
     });
 
@@ -194,6 +211,10 @@ export class TimelineService {
     return this._omakasePlayerApi?.timeline?.getTimelineLane(id);
   }
 
+  getGroupingLanes(): BaseGroupingLane<any>[] | undefined {
+    return this._omakasePlayerApi?.timeline?.getTimelineLanes()?.filter(lane => lane instanceof VideoGroupingLane || lane instanceof AudioGroupingLane || lane instanceof TextTrackGroupingLane) as BaseGroupingLane<any>[];
+  }
+
   getTextGroupingLanes(): TextTrackGroupingLane[] | undefined {
     return this._omakasePlayerApi?.timeline?.getTimelineLanes()?.filter(lane => lane instanceof TextTrackGroupingLane) as TextTrackGroupingLane[];
   }
@@ -203,10 +224,14 @@ export class TimelineService {
   }
 
   isTelemetryLane(lane: TimelineLaneApi): boolean {
-    if (!(lane instanceof TelemetryLineChartLane) && !(lane instanceof TelemetryBarChartLane) && !(lane instanceof TelemetryOgChartLane) && !(lane instanceof TelemetryMarkerLane)) {
+    if (!this.isAnalyticsLane(lane)) {
       return false;
     }
-    return !!lane.vttFile?.extensionVersion;
+    return !!(lane as TelemetryLane).vttFile?.extensionVersion;
+  }
+  
+  isAnalyticsLane(lane: TimelineLaneApi): boolean {
+    return lane instanceof TelemetryLineChartLane || lane instanceof TelemetryBarChartLane || lane instanceof TelemetryOgChartLane || lane instanceof TelemetryMarkerLane;
   }
 
   isTelemetryComponentShown(): boolean {
@@ -252,6 +277,19 @@ export class TimelineService {
     } else {
       this._lineChartLaneStyleByName.set(analysis.name, style);
     }
+
+    return style;
+  }
+
+  private resolveMultiLineChartLaneStyle(analysis: Analysis, index: number): Partial<LineChartLaneStyle> {
+
+    const color = Constants.VARIABLES.lineColors[index % Constants.VARIABLES.lineColors.length];
+
+    let style: Partial<LineChartLaneStyle> = {
+      ...Constants.LINE_CHART_LANE_STYLE,
+      fill: color,
+      pointFill: ColorUtil.changeShade(color, 30),
+    };
 
     return style;
   }
@@ -339,6 +377,31 @@ export class TimelineService {
             this.store.dispatch(new SelectLane(selectedLaneId === lane.id ? undefined : lane.id));
           }
         });
+        if (lane instanceof TelemetryLineChartLane) {
+          lane.telemetryButton!.onMouseEnter$.subscribe({
+            next: () => {
+              const firstCue = lane.vttFile?.cues[0];
+              const rows = firstCue?.extension?.rows;
+              if (!rows) {
+                return;
+              }
+              let colors: string[] | string = lane.style.fill;
+              if (!Array.isArray(colors)) {
+                colors = [colors];
+              }
+              const legendItems = rows.map((row, index) => ({
+                label: row.measurement ?? '',
+                color: (lane as any)._lineStyleFn ? (lane as any)._lineStyleFn(index, rows.length).fill : colors[index % colors.length]
+              }))
+              this.store.dispatch(new ShowLegend(legendItems));
+            }
+          });
+          lane.telemetryButton!.onMouseLeave$.subscribe({
+            next: () => {
+              this.store.dispatch(new HideLegend());
+            }
+          });
+        }
       }
     });
   }

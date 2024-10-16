@@ -19,6 +19,7 @@
 @import "variables";
 @import "variables-dark";
 @import "utilities";
+@import "animations";
 
 @import "type";
 @import "buttons";
@@ -26,11 +27,15 @@
 @import "placeholders";
 @import "offcanvas";
 @import "icons";
+@import "dropdown";
+@import "checkbox";
 
 @import "player-controls";
 @import "timeline-controls";
 @import "vu-meter";
 @import "telemetry";
+@import "chart-legend";
+@import "timeline-config";
 
 html, body {
   height: 100%;

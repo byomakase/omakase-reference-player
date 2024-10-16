@@ -56,6 +56,11 @@ export class Constants {
       src: `${Constants.IMAGES_ROOT}/icon-telemetry-disabled.svg`,
       width: 20,
       height: 20
+    },
+    config: {
+      src: `${Constants.IMAGES_ROOT}/icon-gear.svg`,
+      width: 20,
+      height: 20
     }
   }
 
@@ -67,6 +72,8 @@ export class Constants {
     },
 
     entitiesColors: ['#989BFF', '#43F4FF', '#B2BAD6', '#D69D9D', '#FFE790', '#9ED78D', '#A3D7E2', '#C993F3', '#FF8E9C', '#FFD1C2', '#F58428', '#D3D3D3', '#F1FFBB'],
+
+    lineColors: ['#C306E2', '#1079DA', '#37E03E', '#F54A4A', '#F9D726', '#CECECE'],
 
     timelineLaneMarginBottom: 1,
 

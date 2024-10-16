@@ -29,6 +29,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {CustomErrorHandler} from './shared/handlers/custom-error-handler';
 import {VuMeterState} from './features/main/vu-meter/vu-meter.state';
 import {TelemetryState} from './features/main/telemetry/telemetry.state';
+import {ChartLegendState} from './features/main/chart-legend/chart-legend.state';
 
 function initializeApp(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -51,7 +52,7 @@ export const appConfig: ApplicationConfig = {
     },
     // https://angular.io/guide/standalone-components
     importProvidersFrom([
-      NgxsModule.forRoot([AppState, TimelineConfiguratorState, VuMeterState, TelemetryState], {
+      NgxsModule.forRoot([AppState, TimelineConfiguratorState, VuMeterState, TelemetryState, ChartLegendState], {
         developmentMode: true
       }),
       NgxsReduxDevtoolsPluginModule.forRoot(),

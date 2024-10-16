@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { DropdownOption } from '../../../shared/components/dropdown/dropdown.component'
+
 export namespace TimelineConfiguratorActions {
 
   export class Minimize {
@@ -30,5 +32,15 @@ export namespace TimelineConfiguratorActions {
 
   export class AnimationEventTriggered {
     static readonly type = '[Timeline configurator] Animation Event Triggered'
+  }
+
+  export class SelectLane {
+    static readonly type = '[Timeline configurator] Select Lane'
+    constructor(public selectedLaneId: string | undefined) {}
+  }
+
+  export class SetLaneOptions {
+    static readonly type = '[Timeline configurator] Set Lane Options'
+    constructor(public options: DropdownOption<string>[]) {}
   }
 }

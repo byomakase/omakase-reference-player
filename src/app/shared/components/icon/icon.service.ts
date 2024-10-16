@@ -34,6 +34,10 @@ import {IconTelemetry} from './svg/icon-telemetry';
 import {IconWarning} from './svg/icon-warning';
 import {IconInfo} from './svg/icon-info';
 import {IconClose} from './svg/icon-close';
+import {IconSafezoneOn} from './svg/icon-safezone-on';
+import {IconSafezoneOff} from './svg/icon-safezone-off';
+import {IconCheckboxChecked} from './svg/icon-checkbox-checked';
+import {IconCheckboxUnchecked} from './svg/icon-checkbox-unchecked';
 
 export type IconName =
   'arrow-down'
@@ -58,6 +62,11 @@ export type IconName =
   | 'warning'
   | 'info'
   | 'close'
+
+  | 'safezone-on'
+  | 'safezone-off'
+  | 'checkbox-checked'
+  | 'checkbox-unchecked'
 
   ;
 
@@ -89,7 +98,12 @@ export class IconService {
     'telemetry': IconTelemetry,
     'warning': IconWarning,
     'info': IconInfo,
-    'close': IconClose
+    'close': IconClose,
+
+    'safezone-on': IconSafezoneOn,
+    'safezone-off': IconSafezoneOff,
+    'checkbox-checked': IconCheckboxChecked,
+    'checkbox-unchecked': IconCheckboxUnchecked
 
   }
 

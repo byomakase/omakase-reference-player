@@ -14,41 +14,43 @@
  * limitations under the License.
  */
 
-import {ConfigWithOptionalStyle, ImageButton, LineChartLane, LineChartLaneConfig} from '@byomakase/omakase-player';
-import {Constants} from '../../../../constants/constants';
+import {ConfigWithOptionalStyle, LineChartLane, LineChartLaneConfig} from '@byomakase/omakase-player';
+import {TelemetryAdapter} from './telemetry-adapter';
+import {TelemetryApi} from './telemetry-api';
 
-export class TelemetryLineChartLane extends LineChartLane {
-  private _telemetryButton?: ImageButton;
+export class TelemetryLineChartLane extends LineChartLane implements TelemetryApi {
+
+  private _adapter: TelemetryAdapter = new TelemetryAdapter(this);
 
   constructor(config: ConfigWithOptionalStyle<LineChartLaneConfig>) {
     super(config);
   }
 
   get telemetryButton() {
-    return this._telemetryButton;
+    return this._adapter.telemetryButton;
+  }
+
+  get isHidden() {
+    return this._adapter.isHidden;
+  }
+
+  override get description() {
+    return this._description ?? '';
   }
 
   activateTelemetryIcon() {
-    this._telemetryButton?.setImage(Constants.IMAGE_BUTTONS.telemetryActive).subscribe();
+    this._adapter.activateTelemetryIcon();
   }
 
   deactivateTelemetryIcon() {
-    this._telemetryButton?.setImage(Constants.IMAGE_BUTTONS.telemetryInactive).subscribe();
+    this._adapter.deactivateTelemetryIcon();
   }
 
   addTelemetryButton(listening: boolean) {
-    const icon = listening ? Constants.IMAGE_BUTTONS.telemetryInactive : Constants.IMAGE_BUTTONS.telemetryDisabled;
-    this._telemetryButton = new ImageButton({
-      ...icon,
-      listening,
-    });
+    this._adapter.addTelemetryButton(listening);
+  }
 
-    this.addTimelineNode({
-      timelineNode: this._telemetryButton,
-      width: this._telemetryButton.config.width!,
-      height: this._telemetryButton.config.height!,
-      justify: 'start',
-      margin: [0, 5, 0, 0],
-    });
+  toggleHidden() {
+    this._adapter.toggleHidden();
   }
 }

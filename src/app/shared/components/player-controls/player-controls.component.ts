@@ -106,6 +106,9 @@ interface PlayerControlsFormGroup {
         </div>
       }
       <div class="btn-group" role="group">
+        <button type="button" class="btn btn-safezone" (click)="buttonClickSafezone()" [disabled]="isDisabled">
+          <i [appIcon]="safeZoneIsOn ? 'safezone-on' : 'safezone-off'"></i>
+        </button>
         <button type="button" class="btn btn-fullscreen" (click)="buttonClickFullscreen()" [disabled]="isDisabled">
           <i appIcon="corners"></i>
         </button>
@@ -132,6 +135,8 @@ export class PlayerControlsComponent {
   playerControlsFormGroup: FormGroup<PlayerControlsFormGroup> = new FormGroup<PlayerControlsFormGroup>({
     volume: new FormControl<number>(100, {nonNullable: true})
   })
+
+  safeZoneIsOn = false;
 
   private _masterManifests?: MasterManifest[];
   private _currentMasterManifest?: MasterManifest;
@@ -225,6 +230,20 @@ export class PlayerControlsComponent {
 
   buttonClickFullscreen() {
     this._videoApi?.toggleFullscreen()
+  }
+
+  buttonClickSafezone() {
+    this.safeZoneIsOn = !this.safeZoneIsOn;
+    if (this.safeZoneIsOn) {
+      this._videoApi!.addSafeZone({
+        topRightBottomLeftPercent: [10, 10, 10, 10]
+      });
+      this._videoApi!.addSafeZone({
+        topRightBottomLeftPercent: [5, 5, 5, 5]
+      });
+    } else {
+      this._videoApi!.clearSafeZones();
+    }
   }
 
   buttonClickFfPreviousFrame() {

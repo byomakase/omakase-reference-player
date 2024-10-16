@@ -1,0 +1,31 @@
+.chart-legend-container {
+    position: fixed;
+    height: auto;
+    z-index: 1000;
+    padding: 10px 20px;
+    background-color: $color-15;
+    border: 1px solid $color-16;
+    border-radius: 3px;
+    pointer-events: none;
+    font-size: 13px;
+    font-weight: 700;
+
+    .chart-legend-item {
+        display: flex;
+
+        .chart-legend-color {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            margin-top: 4px;
+        }
+
+        .chart-legend-label {
+            display: inline-block;
+            line-height: 29px;
+            margin-left: 10px;
+            text-transform: capitalize;
+        }
+    }
+}
