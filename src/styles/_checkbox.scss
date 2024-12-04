@@ -1,25 +1,24 @@
 .app-checkbox {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 24px;
+  margin-bottom: 10px;
 
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 24px;
-    margin-bottom: 10px;
+  i {
+    margin-right: 10px;
+  }
+
+  &.disabled {
+    color: $color-12;
+  }
+
+  &:not(.disabled) {
+    cursor: pointer;
 
     i {
-        margin-right: 10px;
+      &.icon-checked {
+        color: $color-13;
+      }
     }
-
-    &.disabled {
-        color: $color-12;
-    }
-
-    &:not(.disabled) {
-        cursor: pointer;
-        i {  
-            &.icon-checked {
-                color: $color-13;
-            }
-        }
-    }
-
+  }
 }

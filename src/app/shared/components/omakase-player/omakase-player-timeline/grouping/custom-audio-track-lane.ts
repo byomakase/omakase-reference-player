@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import {AudioTrackLane, AudioTrackLaneConfig, ConfigWithOptionalStyle, Timeline} from '@byomakase/omakase-player';
+import {AudioTrackLane, AudioTrackLaneConfig, ConfigWithOptionalStyle, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
 import {AudioMediaTrack, VisualReference} from '../../../../../model/domain.model';
-import {VideoControllerApi} from '@byomakase/omakase-player/dist/video/video-controller-api';
 
 export interface CustomAudioTrackLaneConfig extends AudioTrackLaneConfig {
   audioMediaTrack: AudioMediaTrack;
 }
 
 export class CustomAudioTrackLane extends AudioTrackLane {
-  private _audioMediaTrack: AudioMediaTrack
+  private _audioMediaTrack: AudioMediaTrack;
   private _waveformVisualReference?: VisualReference;
 
   constructor(config: ConfigWithOptionalStyle<CustomAudioTrackLaneConfig>) {
@@ -31,7 +30,7 @@ export class CustomAudioTrackLane extends AudioTrackLane {
 
     this._audioMediaTrack = config.audioMediaTrack;
 
-    this._waveformVisualReference = this._audioMediaTrack.visual_reference ? this._audioMediaTrack.visual_reference.find(p => p.type === 'waveform') : void 0;
+    this._waveformVisualReference = this._audioMediaTrack.visual_reference ? this._audioMediaTrack.visual_reference.find((p) => p.type === 'waveform') : void 0;
 
     this.vttUrl = this._waveformVisualReference?.url;
   }
@@ -39,10 +38,8 @@ export class CustomAudioTrackLane extends AudioTrackLane {
   override prepareForTimeline(timeline: Timeline, videoController: VideoControllerApi) {
     super.prepareForTimeline(timeline, videoController);
 
-    this.updateStyles()
+    this.updateStyles();
   }
 
-  private updateStyles() {
-
-  }
+  private updateStyles() {}
 }

@@ -14,135 +14,109 @@
  * limitations under the License.
  */
 
-import {AudioTrackLane, AudioTrackLaneConfig, ClickEvent, ConfigWithOptionalStyle, TextLabel, Timeline} from '@byomakase/omakase-player';
-import {Channel, VisualReference} from '../../../../../model/domain.model';
+import {AudioTrackLane, AudioTrackLaneConfig, ClickEvent, ConfigWithOptionalStyle, OmakaseAudioTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
+import {AudioMediaTrack, Channel, VisualReference} from '../../../../../model/domain.model';
 import {StringUtil} from '../../../../../util/string-util';
 import {Constants} from '../../../../constants/constants';
-import {MediaPlaylist} from 'hls.js';
-import {forkJoin, Subject, take, takeUntil} from 'rxjs';
+import {merge, switchMap, takeUntil} from 'rxjs';
 import {SoundControlTextButton} from './sound-control/sound-control-text-button';
-import {VideoControllerApi} from '@byomakase/omakase-player/dist/video/video-controller-api';
-import {completeSub} from '../../../../../util/rx-util';
 
 export interface AudioChannelLaneConfig extends AudioTrackLaneConfig {
+  audioMediaTrack: AudioMediaTrack;
   channel: Channel;
-  channelIndex: number,
-  channelsCount: number
+  channelIndex: number;
+  channelsCount: number;
 }
 
 export class AudioChannelLane extends AudioTrackLane {
-  private _mediaPlaylistAudioTrack?: MediaPlaylist;
-  private _onMediaPlaylistAudioTrack$: Subject<void> = new Subject<void>();
+  private _audioTrack?: OmakaseAudioTrack;
+  private _channelAudioTrack?: OmakaseAudioTrack;
 
-  private _channelMediaPlaylistAudioTrack?: MediaPlaylist;
-  private _onChannelMediaPlaylistAudioTrack$: Subject<void> = new Subject<void>();
-
+  private _audioMediaTrack: AudioMediaTrack;
   private _channel: Channel;
   private _waveformVisualReference?: VisualReference;
   private _channelOrderLabel?: TextLabel | undefined;
   private _soundControlSolo?: SoundControlTextButton;
 
-  // private _soundControlM: SoundControlTextButton;
-
   constructor(config: ConfigWithOptionalStyle<AudioChannelLaneConfig>) {
     super(config);
 
+    this._audioMediaTrack = config.audioMediaTrack;
     this._channel = config.channel;
 
-    this._waveformVisualReference  = this._channel.visual_reference ? this._channel.visual_reference.find(p => p.type === 'waveform') : void 0;
+    this._waveformVisualReference = this._channel.visual_reference ? this._channel.visual_reference.find((p) => p.type === 'waveform') : void 0;
 
     if (this._waveformVisualReference) {
-      this.loadVtt(this._waveformVisualReference.url).subscribe()
+      this.loadVtt(this._waveformVisualReference.url).subscribe();
     }
   }
 
   override prepareForTimeline(timeline: Timeline, videoController: VideoControllerApi) {
     super.prepareForTimeline(timeline, videoController);
 
-    forkJoin([this._onMediaPlaylistAudioTrack$, this._onChannelMediaPlaylistAudioTrack$]).pipe(take(1)).subscribe({
-      next: (event) => {
+    if ((this._config as AudioChannelLaneConfig).channelsCount > 1) {
+      this._soundControlSolo = new SoundControlTextButton({
+        text: 'S',
+        state: 'disabled',
+        width: 22,
+        height: 20,
+      });
 
-        if ((this._config as AudioChannelLaneConfig).channelsCount > 1) {
-          this._soundControlSolo = new SoundControlTextButton({
-            text: 'S',
-            disabled: this.isDisabled,
-            width: 22,
-            height: 20,
-          })
+      this.addTimelineNode({
+        timelineNode: this._soundControlSolo.timelineNode,
+        width: this._soundControlSolo.dimension.width,
+        height: this._soundControlSolo.dimension.height,
+        justify: 'end',
+        margin: [0, 5, 0, 0],
+      });
 
-          this.addTimelineNode({
-            timelineNode: this._soundControlSolo.timelineNode,
-            width: this._soundControlSolo.dimension.width,
-            height: this._soundControlSolo.dimension.height,
-            justify: 'end',
-            margin: [0, 5, 0, 0]
-          });
+      let channelOrderText = StringUtil.isNonEmpty(this._channel?.channel_order) ? this._channel!.channel_order!.toUpperCase() : `C${(this._config as AudioChannelLaneConfig).channelIndex + 1}`;
+      this._channelOrderLabel = new TextLabel({
+        text: channelOrderText,
+        style: {
+          ...Constants.TEXT_LABEL_STYLE,
+          align: 'right',
+        },
+      });
 
-          let channelOrderText = StringUtil.isNonEmpty(this._channel?.channel_order) ? this._channel!.channel_order!.toUpperCase() : `C${(this._config as AudioChannelLaneConfig).channelIndex + 1}`;
-          this._channelOrderLabel = new TextLabel({
-            text: channelOrderText,
-            style: {
-              ...Constants.TEXT_LABEL_STYLE,
-              align: 'right'
-            }
-          })
+      this.addTimelineNode({
+        timelineNode: this._channelOrderLabel,
+        width: 22,
+        height: 20,
+        justify: 'end',
+        margin: [0, 10, 0, 0],
+      });
+    }
 
-          this.addTimelineNode({
-            timelineNode: this._channelOrderLabel,
-            width: 22,
-            height: 20,
-            justify: 'end',
-            margin: [0, 10, 0, 0]
-          });
-        }
+    merge(this._videoController!.onAudioLoaded$, this._videoController!.onAudioSwitched$, this._videoController!.onVolumeChange$)
+      .pipe(switchMap((value) => [value])) // // each new emission switches to latest, racing observables
+      .pipe(takeUntil(this._destroyed$))
+      .subscribe({
+        next: (event) => {
+          this.updateStyles();
+        },
+      });
 
-        if (!this.isDisabled) {
-          this._videoController!.onVideoLoaded$.pipe(takeUntil(this._destroyed$)).subscribe({
-            next: (event) => {
-              this.updateStyles();
-            }
-          })
-
-          this._videoController!.onAudioSwitched$.pipe(takeUntil(this._destroyed$)).subscribe({
-            next: (event) => {
-              this.updateStyles();
-            }
-          })
-
-          this._videoController!.onVolumeChange$.pipe(takeUntil(this._destroyed$)).subscribe({
-            next: (event) => {
-              this.updateStyles();
-            }
-          })
-
-          this._soundControlSolo?.timelineNode.onClick$.pipe(takeUntil(this._destroyed$)).subscribe({
-            next: (event: ClickEvent) => {
-              this.setAudioTrack();
-            }
-          })
-        }
-
-        this.updateStyles()
-
-      }
-    })
+    this._soundControlSolo?.timelineNode.onClick$.pipe(takeUntil(this._destroyed$)).subscribe({
+      next: (event: ClickEvent) => {
+        this.setAsActiveAudioTrack();
+      },
+    });
   }
 
-  setAudioTrack(toggleMuteIfActive = true) {
-    if (!this.isDisabled) {
-      if (this.isActive) {
-        // switch to main audio track
-        if (this._mediaPlaylistAudioTrack) {
-          this._videoController!.setAudioTrack(this._mediaPlaylistAudioTrack!.id);
-          this._videoController!.unmute();
-        }
-      } else {
-        // select
-        this._videoController!.setAudioTrack(this._channelMediaPlaylistAudioTrack!.id);
+  setAsActiveAudioTrack(toggleMuteIfActive = true) {
+    if (this.isActive) {
+      // switch to main audio track
+      if (this._audioTrack) {
+        this._videoController!.setActiveAudioTrack(this._audioTrack.id);
         this._videoController!.unmute();
       }
-      this.updateStyles();
+    } else if (this._channelAudioTrack) {
+      // select
+      this._videoController!.setActiveAudioTrack(this._channelAudioTrack.id);
+      this._videoController!.unmute();
     }
+    this.updateStyles();
   }
 
   private updateStyles() {
@@ -160,33 +134,41 @@ export class AudioChannelLane extends AudioTrackLane {
   }
 
   get isDisabled(): boolean {
-    return !this._channelMediaPlaylistAudioTrack;
+    return !this._channelAudioTrack;
   }
 
   get isActive(): boolean {
-    let currentAudioTrack: MediaPlaylist | undefined = this._videoController!.getCurrentAudioTrack();
-    return !!currentAudioTrack && (this._channelMediaPlaylistAudioTrack === currentAudioTrack);
+    let currentAudioTrack = this._videoController!.getActiveAudioTrack();
+    return !!currentAudioTrack && !!this._channelAudioTrack && this._channelAudioTrack.id === currentAudioTrack.id;
   }
 
-  get channelMediaPlaylistAudioTrack(): MediaPlaylist | undefined {
-    return this._channelMediaPlaylistAudioTrack;
+  get channelAudioTrack(): OmakaseAudioTrack | undefined {
+    return this._channelAudioTrack;
   }
 
-  get mediaPlaylistAudioTrack(): MediaPlaylist | undefined {
-    return this._mediaPlaylistAudioTrack;
+  get audioMediaTrack(): AudioMediaTrack {
+    return this._audioMediaTrack;
+  }
+
+  get channel(): Channel {
+    return this._channel;
+  }
+
+  get audioTrack(): OmakaseAudioTrack | undefined {
+    return this._audioTrack;
   }
 
   get name(): string {
     return this._channel.program_name;
   }
 
-  set mediaPlaylistAudioTrack(value: MediaPlaylist | undefined) {
-    this._mediaPlaylistAudioTrack = value;
-    completeSub(this._onMediaPlaylistAudioTrack$);
+  set audioTrack(value: OmakaseAudioTrack | undefined) {
+    this._audioTrack = value;
+    this.updateStyles();
   }
 
-  set channelMediaPlaylistAudioTrack(value: MediaPlaylist | undefined) {
-    this._channelMediaPlaylistAudioTrack = value;
-    completeSub(this._onChannelMediaPlaylistAudioTrack$);
+  set channelAudioTrack(value: OmakaseAudioTrack | undefined) {
+    this._channelAudioTrack = value;
+    this.updateStyles();
   }
 }

@@ -20,16 +20,8 @@ import {LayoutComponent} from './layout.component';
 import {NotFoundComponent} from './not-found/not-found.component';
 
 @NgModule({
-  declarations: [
-    LayoutComponent,
-    NotFoundComponent
-  ],
-  exports: [
-    LayoutComponent
-  ],
-  imports: [
-    SharedModule
-  ]
+  declarations: [LayoutComponent, NotFoundComponent],
+  exports: [LayoutComponent],
+  imports: [SharedModule],
 })
-export class LayoutModule {
-}
+export class LayoutModule {}

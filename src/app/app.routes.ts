@@ -20,10 +20,10 @@ import {NotFoundComponent} from './core/layout/not-found/not-found.component';
 export const routes: Routes = [
   {
     path: '',
-    loadChildren: () => import('./features/features.module').then(m => m.FeaturesModule)
+    loadChildren: () => import('./features/features.module').then((m) => m.FeaturesModule),
   },
   {
     path: '**',
-    component: NotFoundComponent
-  }
+    component: NotFoundComponent,
+  },
 ];

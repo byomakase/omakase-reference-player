@@ -18,20 +18,13 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {OmakasePlayerVideoComponent} from './omakase-player-video/omakase-player-video.component';
 import {OmakasePlayerTimelineComponent} from './omakase-player-timeline/omakase-player-timeline.component';
+import {OmakasePlayerVideoDetachedComponent} from './omakase-player-video-detached/omakase-player-video-detached.component';
 
-const MODULES: any[] = [
-  OmakasePlayerVideoComponent,
-  OmakasePlayerTimelineComponent
-]
+const MODULES: any[] = [OmakasePlayerVideoComponent, OmakasePlayerVideoDetachedComponent, OmakasePlayerTimelineComponent];
 
 @NgModule({
   declarations: [],
-  imports: [
-    CommonModule,
-    ...MODULES
-  ],
-  exports: [
-    ...MODULES
-  ]
+  imports: [CommonModule, ...MODULES],
+  exports: [...MODULES],
 })
-export class OmakasePlayerModule { }
+export class OmakasePlayerModule {}

@@ -16,6 +16,6 @@
 
 export interface Environment {
   envName: string;
-  apiUrl: string,
-  useProxy: boolean
+  apiUrl: string;
+  useProxy: boolean;
 }

@@ -17,7 +17,6 @@
 import {AudioMediaTrack, Channel, MasterManifest, TextMediaTrack, VideoMediaTrack} from '../model/domain.model';
 
 export class DomainUtil {
-
   static resolveFrameRate(masterManifest: MasterManifest, videoMediaTracks: VideoMediaTrack[] | undefined): number | string {
     if (masterManifest.frame_rate) {
       return masterManifest.frame_rate;
@@ -41,7 +40,7 @@ export class DomainUtil {
           text = '1.0';
           break;
         case 'stereo':
-          text = '2.0'
+          text = '2.0';
           break;
         default:
           break;
@@ -58,9 +57,9 @@ export class DomainUtil {
         case 'subtitles':
           return 'SUB';
         case 'fn_subtitles':
-          return 'FN'
+          return 'FN';
         case 'captions':
-          return 'CC'
+          return 'CC';
         default:
           return void 0;
       }
@@ -73,9 +72,9 @@ export class DomainUtil {
     let channelsInOrder: Channel[] | undefined = void 0;
     if (audioMediaTrack.channels) {
       let channelLayoutOrders = audioMediaTrack.channel_layout ? audioMediaTrack.channel_layout.split(' ') : void 0;
-      if (channelLayoutOrders && channelLayoutOrders.length > 0 && audioMediaTrack.channels && (channelLayoutOrders.length === audioMediaTrack.channels.length)) {
+      if (channelLayoutOrders && channelLayoutOrders.length > 0 && audioMediaTrack.channels && channelLayoutOrders.length === audioMediaTrack.channels.length) {
         for (const channelLayoutOrder of channelLayoutOrders) {
-          if (audioMediaTrack.channels!.findIndex(p => p.channel_order === channelLayoutOrder) < 0) {
+          if (audioMediaTrack.channels!.findIndex((p) => p.channel_order === channelLayoutOrder) < 0) {
             channelLayoutOrders = void 0;
             break;
           }
@@ -85,7 +84,7 @@ export class DomainUtil {
       }
 
       if (channelLayoutOrders) {
-        channelsInOrder = channelLayoutOrders.map(channelLayoutOrder => audioMediaTrack.channels!.find(p => p.channel_order === channelLayoutOrder)!)
+        channelsInOrder = channelLayoutOrders.map((channelLayoutOrder) => audioMediaTrack.channels!.find((p) => p.channel_order === channelLayoutOrder)!);
       } else {
         channelsInOrder = audioMediaTrack.channels;
       }
@@ -93,5 +92,4 @@ export class DomainUtil {
 
     return channelsInOrder;
   }
-
 }

@@ -15,7 +15,6 @@
  */
 
 export class FileUtil {
-
   static extractFilename(path: string): string | undefined {
     const parts = path.split('/');
     return parts[parts.length - 1];
@@ -28,6 +27,4 @@ export class FileUtil {
     }
     return void 0;
   }
-
-
 }

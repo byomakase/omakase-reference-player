@@ -15,22 +15,20 @@
  */
 
 export class CanvasUtil {
-
   static createCrossedRectClipFunc(width: number, height: number, thickness: number) {
     return (ctx: CanvasRenderingContext2D) => {
       // top left triangle
       ctx.beginPath();
-      ctx.moveTo(0, 0)
-      ctx.lineTo(width - thickness, 0)
-      ctx.lineTo(0, height)
+      ctx.moveTo(0, 0);
+      ctx.lineTo(width - thickness, 0);
+      ctx.lineTo(0, height);
       ctx.closePath();
 
       // bottom right triangle
-      ctx.moveTo(thickness, height)
-      ctx.lineTo(width, 0)
-      ctx.lineTo(width, height)
+      ctx.moveTo(thickness, height);
+      ctx.lineTo(width, 0);
+      ctx.lineTo(width, height);
       ctx.closePath();
-    }
+    };
   }
-
 }

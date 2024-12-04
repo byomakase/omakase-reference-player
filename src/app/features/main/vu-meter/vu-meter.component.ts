@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, HostBinding, Input, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostBinding, OnInit, ViewChild} from '@angular/core';
 import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
 import {animate, AnimationEvent, state, style, transition, trigger} from '@angular/animations';
 import {Select, Store} from '@ngxs/store';
-import {map, Observable, Subject, take, takeUntil} from 'rxjs';
+import {filter, map, Observable, Subject, take} from 'rxjs';
 import {VuMeterState, VuMeterStateModel} from './vu-meter.state';
 import {VuMeterActions} from './vu-meter.actions';
 import {WebAudioPeakMeter} from 'web-audio-peak-meter';
-import {VideoApi} from '@byomakase/omakase-player';
+import {OmpApiService} from '../../../shared/components/omakase-player/omp-api.service';
+import {AudioMeterStandard} from '@byomakase/omakase-player/dist/video/model';
 import Minimize = VuMeterActions.Minimize;
 import Maximize = VuMeterActions.Maximize;
 
-const animateDurationMs = 300
+const animateDurationMs = 300;
 const animateTimings = `${animateDurationMs}ms ease-in-out`;
 
 const vuMeterSingleBarWidth = 25;
@@ -36,30 +37,36 @@ const viMeterScaleWidth = 30;
 @Component({
   selector: 'div[appVuMeter]',
   standalone: true,
-  imports: [
-    CoreModule,
-    SharedModule
-  ],
+  imports: [CoreModule, SharedModule],
   template: `
-    <div class="vu-meter-frame d-flex flex-column h-100"
-         [class.minimized]="(animationState|async) === 'minimized'"
-         [class.maximized]="(animationState|async) === 'maximized'"
-         [@toggleMinimizeMaximize]="{value: (animationState|async), params: {minimizedWidth: minimizedWidth, maximizedWidth: maximizedWidth}}"
-         (@toggleMinimizeMaximize.start)="onAnimationEventStart($event)"
-         (@toggleMinimizeMaximize.done)="onAnimationEventDone($event)"
+    <div
+      class="vu-meter-frame d-flex flex-column h-100"
+      [class.minimized]="(animationState | async) === 'minimized'"
+      [class.maximized]="(animationState | async) === 'maximized'"
+      [@toggleMinimizeMaximize]="{
+        value: (animationState | async),
+        params: {minimizedWidth: minimizedWidth, maximizedWidth: maximizedWidth},
+      }"
+      (@toggleMinimizeMaximize.start)="onAnimationEventStart($event)"
+      (@toggleMinimizeMaximize.done)="onAnimationEventDone($event)"
     >
       <div class="vu-meter-header">
         <div class="d-flex h-100">
           <div class="btn-group" role="group">
-            <button type="button" class="btn" [class.btn-maximize]="(animationState|async) === 'minimized'" [class.btn-minimize]="(animationState|async) === 'maximized'" (click)="toggleMinimizeMaximize()"></button>
+            <button
+              type="button"
+              class="btn"
+              [class.btn-maximize]="(animationState | async) === 'minimized'"
+              [class.btn-minimize]="(animationState | async) === 'maximized'"
+              (click)="toggleMinimizeMaximize()"
+            ></button>
           </div>
         </div>
       </div>
 
       <div class="vu-meter-eq flex-grow-1">
         <div class="d-flex flex-column justify-content-end h-100">
-          <div class="web-audio-peak-meter flex-grow-1" #webAudioPeakMeter>
-          </div>
+          <div class="web-audio-peak-meter flex-grow-1" #webAudioPeakMeter></div>
           <div class="channel-labels d-flex justify-content-end">
             <div>L</div>
             <div>R</div>
@@ -70,37 +77,56 @@ const viMeterScaleWidth = 30;
   `,
   animations: [
     trigger('toggleMinimizeMaximize', [
-      state('minimized', style({
-        width: `{{minimizedWidth}}px`
-      }), {params: {minimizedWidth: 0}}),
-      state('maximized', style({
-        width: `{{maximizedWidth}}px`,
-      }), {params: {maximizedWidth: 0}}),
-      transition('* => *', [
-        animate(animateTimings),
-      ])
+      state(
+        'minimized',
+        style({
+          width: `{{minimizedWidth}}px`,
+        }),
+        {params: {minimizedWidth: 0}}
+      ),
+      state(
+        'maximized',
+        style({
+          width: `{{maximizedWidth}}px`,
+        }),
+        {params: {maximizedWidth: 0}}
+      ),
+      transition('* => *', [animate(animateTimings)]),
     ]),
-  ]
+  ],
 })
-export class VuMeterComponent {
+export class VuMeterComponent implements OnInit, AfterViewInit {
   @ViewChild('webAudioPeakMeter') webAudioPeakMeterElementRef!: ElementRef;
 
   @Select(VuMeterState) state$!: Observable<VuMeterStateModel>;
 
-  private _videoApi?: VideoApi;
-  private _mediaElement?: HTMLMediaElement;
-
-  private _audioContext?: AudioContext;
-  private _audioSource?: MediaElementAudioSourceNode;
   private _webAudioPeakMeter?: WebAudioPeakMeter;
 
   private _minimizedWidth: number = vuMeterSingleBarWidth * 2;
   private _maximizedWidth: number = this._minimizedWidth;
 
-  private _onDestroy$ = new Subject<void>();
+  private _destroyed$ = new Subject<void>();
 
-  constructor(protected store: Store) {
+  constructor(
+    protected store: Store,
+    protected ompApiService: OmpApiService
+  ) {}
 
+  ngOnInit(): void {}
+
+  ngAfterViewInit(): void {
+    this.ompApiService.onCreate$
+      .pipe(
+        filter((p) => !!p),
+        take(1)
+      )
+      .subscribe({
+        next: () => {
+          setTimeout(() => {
+            this.tryCreateWebAudioPeakMeter();
+          });
+        },
+      });
   }
 
   @HostBinding('id')
@@ -108,45 +134,17 @@ export class VuMeterComponent {
     return 'vu-meter';
   }
 
-  get mediaElement(): HTMLMediaElement | undefined {
-    return this._mediaElement;
-  }
-
-  @Input()
-  set mediaElement(value: HTMLMediaElement | undefined) {
-    this._mediaElement = value;
-    this.tryCreateWebAudioPeakMeter();
-  }
-
-  get videoApi(): VideoApi | undefined {
-    return this._videoApi;
-  }
-
   private tryCreateWebAudioPeakMeter() {
-    if (this._mediaElement) {
+    let channelCount = 2;
 
-      if (this._webAudioPeakMeter) {
-        console.debug('Cannot connect new WebAudioPeakMeter, WebAudioPeakMeter already connected', this._webAudioPeakMeter);
-        // TODO what if video element changes ?
-      } else {
-        // TODO db ranges adjust
+    this.minimizedWidth = channelCount * vuMeterSingleBarWidth;
+    this.maximizedWidth = this.minimizedWidth + viMeterScaleWidth + 14;
 
-        this._audioContext = new AudioContext();
-        this._audioSource = this._audioContext.createMediaElementSource(this._mediaElement);
-        this._audioSource.channelCountMode = 'max';
-
-        let channelCount = 2;
-        this._audioSource.channelCount = channelCount;
-        this._audioContext.destination.channelCount = this._audioContext.destination.maxChannelCount >= channelCount ? channelCount : this._audioContext.destination.maxChannelCount;
-
-        this.minimizedWidth = channelCount * vuMeterSingleBarWidth;
-        this.maximizedWidth = this.minimizedWidth + viMeterScaleWidth + 14;
-
-        this._audioSource.connect(this._audioContext.destination);
-
+    this.ompApiService.api!.audio.createAudioRouter(channelCount).subscribe({
+      next: () => {
         let peakMeterConfig = {
           maskTransition: '0.1s',
-          audioMeterStandard: 'peak-sample',
+          audioMeterStandard: 'peak-sample' as AudioMeterStandard,
           peakHoldDuration: 0,
 
           vertical: true,
@@ -160,25 +158,36 @@ export class VuMeterComponent {
           fontSize: 12,
           dbRangeMin: -60,
           dbRangeMax: 0,
+        };
 
-        }
+        this._webAudioPeakMeter = new WebAudioPeakMeter(this.ompApiService.api!.audio.getMediaElementAudioSourceNode()!, this.webAudioPeakMeterElementRef.nativeElement, peakMeterConfig);
 
-        this._webAudioPeakMeter = new WebAudioPeakMeter(this._audioSource, this.webAudioPeakMeterElementRef.nativeElement, peakMeterConfig);
+        this.ompApiService.api!.video.onVideoWindowPlaybackStateChange$.subscribe({
+          next: (event) => {
+            if (event.videoWindowPlaybackState !== 'attached') {
+              this._webAudioPeakMeter!.node!.port.onmessage = (event) => {}; // stop processing metrics received from VU meter's AudioWorkletNode
+            } else {
+              this._webAudioPeakMeter!.node!.port.onmessage = (event) => {
+                this._webAudioPeakMeter!.handleNodePortMessage(event);
+              }; // resume processing metrics received from VU meter's AudioWorkletNode
+            }
+          },
+        });
 
-        this._videoApi?.onPlay$.pipe(takeUntil(this._onDestroy$), take(1)).subscribe(() => {
-          this._audioContext!.resume().then(() => {
-            console.debug('AudioContext resumed');
-          })
-        })
-      }
-    } else {
-      console.debug('Cannot create WebAudioPeakMeter, mediaElement is undefined');
-    }
-  }
-
-  @Input()
-  set videoApi(value: VideoApi | undefined) {
-    this._videoApi = value;
+        this.ompApiService.api!.audio.createAudioPeakProcessorWorkletNode(peakMeterConfig.audioMeterStandard).subscribe({
+          next: (event) => {
+            this.ompApiService.api!.audio.onAudioPeakProcessorWorkletNodeMessage$.subscribe({
+              next: (event) => {
+                if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached') {
+                  // @ts-ignore
+                  this._webAudioPeakMeter!.handleNodePortMessage(event);
+                }
+              },
+            });
+          },
+        });
+      },
+    });
   }
 
   toggleMinimizeMaximize() {
@@ -190,25 +199,23 @@ export class VuMeterComponent {
   }
 
   minimize() {
-    this.store.dispatch(new Minimize())
+    this.store.dispatch(new Minimize());
   }
 
   maximize() {
-    this.store.dispatch(new Maximize())
+    this.store.dispatch(new Maximize());
   }
 
-  onAnimationEventStart(event: AnimationEvent) {
+  onAnimationEventStart(event: AnimationEvent) {}
 
-  }
-
-  onAnimationEventDone(event: AnimationEvent) {
-
-  }
+  onAnimationEventDone(event: AnimationEvent) {}
 
   get animationState(): Observable<string> {
-    return this.state$.pipe(take(1), map(p => p.visibility));
+    return this.state$.pipe(
+      take(1),
+      map((p) => p.visibility)
+    );
   }
-
 
   get minimizedWidth(): number {
     return this._minimizedWidth;

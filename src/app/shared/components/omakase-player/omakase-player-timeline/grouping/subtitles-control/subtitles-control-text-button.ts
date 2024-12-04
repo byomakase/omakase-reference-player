@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {TextLabel} from '@byomakase/omakase-player';
+import {Dimension, TextLabel, TimelineNode} from '@byomakase/omakase-player';
 import {SubtitlesControl, SubtitlesControlState} from './subtitles-control';
 import {Constants} from '../../../../../constants/constants';
-import {TimelineNode} from '@byomakase/omakase-player/dist/timeline/timeline-component';
-import {Dimension} from '@byomakase/omakase-player/dist/common/measurement';
 
 export interface SubtitlesControlTextButtonConfig {
   text: string;
@@ -40,7 +38,7 @@ export class SubtitlesControlTextButton implements SubtitlesControl {
       listening: !this._config.disabled,
       style: {
         ...(this._config.disabled ? Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE : Constants.TEXT_LABEL_BUTTON_STYLE),
-      }
+      },
     });
   }
 
@@ -50,18 +48,18 @@ export class SubtitlesControlTextButton implements SubtitlesControl {
     switch (this._state) {
       case 'default':
         this._textLabel.style = {
-          ...Constants.TEXT_LABEL_BUTTON_STYLE
-        }
+          ...Constants.TEXT_LABEL_BUTTON_STYLE,
+        };
         break;
       case 'active':
         this._textLabel.style = {
-          ...Constants.TEXT_LABEL_BUTTON_ACTIVE_STYLE
-        }
+          ...Constants.TEXT_LABEL_BUTTON_ACTIVE_STYLE,
+        };
         break;
       case 'disabled':
         this._textLabel.style = {
-          ...Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE
-        }
+          ...Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE,
+        };
         break;
     }
   }
@@ -73,7 +71,7 @@ export class SubtitlesControlTextButton implements SubtitlesControl {
   get dimension(): Dimension {
     return {
       width: this._config.width,
-      height: this._config.height
-    }
+      height: this._config.height,
+    };
   }
 }

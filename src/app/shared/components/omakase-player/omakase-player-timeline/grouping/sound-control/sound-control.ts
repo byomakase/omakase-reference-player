@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {TimelineNode} from '@byomakase/omakase-player/dist/timeline/timeline-component';
+import {TimelineNode} from '@byomakase/omakase-player';
 
 export type SoundControlState = 'default' | 'active' | 'muted' | 'disabled';
 

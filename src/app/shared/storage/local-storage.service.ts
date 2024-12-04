@@ -20,14 +20,11 @@ const KEY_NAMESPACE = 'app';
 
 const composeKey = (key: string) => {
   return `${KEY_NAMESPACE}.${key}`;
-}
+};
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LocalStorageService {
-
-  constructor() {
-
-  }
+  constructor() {}
 }

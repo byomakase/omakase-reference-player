@@ -17,10 +17,9 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'filename'
+  name: 'filename',
 })
 export class FilenamePipe implements PipeTransform {
-
   transform(value: string, ...args: unknown[]): unknown {
     if (!value) return '';
 
@@ -31,5 +30,4 @@ export class FilenamePipe implements PipeTransform {
     // Extract the last part of the path (the filename)
     return parts[parts.length - 1];
   }
-
 }

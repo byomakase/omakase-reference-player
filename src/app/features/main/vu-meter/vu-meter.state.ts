@@ -22,18 +22,17 @@ import Maximize = VuMeterActions.Maximize;
 import ToggleMinimizeMaximize = VuMeterActions.ToggleMinimizeMaximize;
 
 export interface VuMeterStateModel {
-  visibility: 'minimized' | 'maximized'
+  visibility: 'minimized' | 'maximized';
 }
 
 @State<VuMeterStateModel>({
   name: 'vuMeter',
   defaults: {
-    visibility: 'minimized'
-  }
+    visibility: 'minimized',
+  },
 })
 @Injectable()
 export class VuMeterState {
-
   @Selector()
   static visibility(state: VuMeterStateModel) {
     return state.visibility;
@@ -44,7 +43,7 @@ export class VuMeterState {
     const state = ctx.getState();
     ctx.patchState({
       visibility: 'minimized',
-    })
+    });
   }
 
   @Action(Maximize)
@@ -52,7 +51,7 @@ export class VuMeterState {
     const state = ctx.getState();
     ctx.patchState({
       visibility: 'maximized',
-    })
+    });
   }
 
   @Action(ToggleMinimizeMaximize)
@@ -60,7 +59,6 @@ export class VuMeterState {
     const state = ctx.getState();
     ctx.patchState({
       visibility: state.visibility === 'minimized' ? 'maximized' : 'minimized',
-    })
+    });
   }
-
 }

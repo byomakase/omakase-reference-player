@@ -29,7 +29,7 @@ export class DoublyLinkedListNode<T> {
     return JSON.stringify({
       data: `${this.data}`,
       next: `${this.next?.data}`,
-      prev: `${this.prev?.data}`
+      prev: `${this.prev?.data}`,
     });
   }
 }
@@ -168,7 +168,6 @@ export class DoublyLinkedList<T> {
       values.push(`${current}`);
       current = current.next;
     }
-    return `[${values.join(', ')}]`
+    return `[${values.join(', ')}]`;
   }
-
 }

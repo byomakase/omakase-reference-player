@@ -26,8 +26,7 @@ export abstract class BaseOffcanvas implements OnDestroy {
    */
   protected onDestroy$ = new Subject<void>();
 
-  protected constructor(public activeOffcanvas: NgbActiveOffcanvas) {
-  }
+  protected constructor(public activeOffcanvas: NgbActiveOffcanvas) {}
 
   ngOnDestroy() {
     this.onDestroy$.next();

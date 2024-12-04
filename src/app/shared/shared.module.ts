@@ -28,47 +28,16 @@ import {JoinPipe} from './pipes/join.pipe';
 import {MixedCasePipe} from './pipes/mixed-case.pipe';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 
-const NGB = [
-  NgbModalModule,
-  NgbDropdownModule,
-  NgbNavModule,
-  NgbAccordionModule,
-  NgbOffcanvasModule,
-]
+const NGB = [NgbModalModule, NgbDropdownModule, NgbNavModule, NgbAccordionModule, NgbOffcanvasModule];
 
-const MODULES = [
-  CommonModule,
-  FormsModule,
-  RouterModule,
-  ReactiveFormsModule,
-  ComponentsModule,
-  DirectivesModule,
-  AppFormsModule,
-  ...NGB,
-  NgxJsonViewerModule
-]
+const MODULES = [CommonModule, FormsModule, RouterModule, ReactiveFormsModule, ComponentsModule, DirectivesModule, AppFormsModule, ...NGB, NgxJsonViewerModule];
 
-const PIPES = [
-  FilenamePipe,
-  FilesizePipe,
-  JoinPipe,
-  MixedCasePipe
-]
+const PIPES = [FilenamePipe, FilesizePipe, JoinPipe, MixedCasePipe];
 
 @NgModule({
-  declarations: [
-    ...PIPES,
-  ],
-  imports: [
-    ...MODULES
-  ],
-  exports: [
-    ...MODULES,
-    ...PIPES
-  ],
-  providers: [
-    ...PIPES
-  ]
+  declarations: [...PIPES],
+  imports: [...MODULES],
+  exports: [...MODULES, ...PIPES],
+  providers: [...PIPES],
 })
-export class SharedModule {
-}
+export class SharedModule {}

@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import {Component, HostBinding, HostListener, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostBinding, HostListener, OnDestroy, OnInit} from '@angular/core';
 import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
 import {animate, AnimationEvent, state, style, transition, trigger} from '@angular/animations';
 import {Select, Store} from '@ngxs/store';
 import {TelemetryCue, TelemetryState, TelemetryStateModel} from './telemetry.state';
 import {filter, map, Observable, sampleTime, Subject, Subscription, switchMap, take, takeUntil} from 'rxjs';
-import {OmakaseVttCue, OmakaseVttCueEvent, VideoApi} from '@byomakase/omakase-player';
+import {OmakaseVttCue, OmakaseVttCueEvent} from '@byomakase/omakase-player';
 import {TelemetryLane, TimelineService} from '../../timeline/timeline.service';
 import {TelemetryActions} from './telemetry.actions';
+import {OmpApiService} from '../../../shared/components/omakase-player/omp-api.service';
 import Minimize = TelemetryActions.Minimize;
 import Maximize = TelemetryActions.Maximize;
 import SetCues = TelemetryActions.SetCues;
@@ -44,7 +45,10 @@ const sampleTimeSyncVideoMetadata: number = 100;
       class="telemetry-frame d-flex flex-column h-100"
       [class.minimized]="(animationState | async) === 'minimized'"
       [class.maximized]="(animationState | async) === 'maximized'"
-      [@toggleMinimizeMaximize]="{ value: (animationState | async), params: { minimizedWidth: minimizedWidth, maximizedWidth: maximizedWidth } }"
+      [@toggleMinimizeMaximize]="{
+        value: (animationState | async),
+        params: {minimizedWidth: minimizedWidth, maximizedWidth: maximizedWidth},
+      }"
       (@toggleMinimizeMaximize.start)="onAnimationEventStart($event)"
       (@toggleMinimizeMaximize.done)="onAnimationEventDone($event)"
     >
@@ -62,22 +66,22 @@ const sampleTimeSyncVideoMetadata: number = 100;
       </div>
 
       <div class="telemetry-content flex-grow-1">
-        @for (cue of (cues | async); track cue.id) {
-        <div class="telemetry-cue" [ngClass]="{ 'fade-out': cue.fadeOut }">
-          <!-- <div class="telemetry-cue-header">
-            <i appIcon="telemetry" [ngStyle]="{ color: cue.color }"></i>
-            <div class="telemetry-cue-title">{{ cue.title }}</div>
-          </div> -->
-          <div class="telemetry-cue-footer">
-            <div class="telemetry-start-time">IN: {{ cue.startTimecode }}</div>
-            <div class="telemetry-end-time">OUT: {{ cue.endTimecode }}</div>
+        @for (cue of cues | async; track cue.id) {
+          <div class="telemetry-cue" [ngClass]="{'fade-out': cue.fadeOut}">
+            <!-- <div class="telemetry-cue-header">
+              <i appIcon="telemetry" [ngStyle]="{ color: cue.color }"></i>
+              <div class="telemetry-cue-title">{{ cue.title }}</div>
+            </div> -->
+            <div class="telemetry-cue-footer">
+              <div class="telemetry-start-time">IN: {{ cue.startTimecode }}</div>
+              <div class="telemetry-end-time">OUT: {{ cue.endTimecode }}</div>
+            </div>
+            <div class="telemetry-cue-text">
+              @for (line of cue.lines; track $index) {
+                <div>{{ line }}</div>
+              }
+            </div>
           </div>
-          <div class="telemetry-cue-text">
-            @for(line of cue.lines; track $index) {
-            <div>{{ line }}</div>
-            }
-          </div>
-        </div>
         }
       </div>
       <div class="telemetry-placeholder flex-grow-1">TELEMETRY</div>
@@ -90,14 +94,14 @@ const sampleTimeSyncVideoMetadata: number = 100;
         style({
           width: `{{minimizedWidth}}px`,
         }),
-        { params: { minimizedWidth: 0 } }
+        {params: {minimizedWidth: 0}}
       ),
       state(
         'maximized',
         style({
           width: `{{maximizedWidth}}px`,
         }),
-        { params: { maximizedWidth: 0 } }
+        {params: {maximizedWidth: 0}}
       ),
       transition('* => *', [animate(animateTimings)]),
     ]),
@@ -120,10 +124,14 @@ export class TelemetryComponent implements OnInit, OnDestroy {
 
   private _lastSelectedLane?: TelemetryLane;
   private _selectedLaneTitle?: string;
-  private _videoApi?: VideoApi;
+
   private _destroyed$ = new Subject<void>();
 
-  constructor(protected store: Store, private timelineService: TimelineService) {}
+  constructor(
+    protected store: Store,
+    protected ompApiService: OmpApiService,
+    protected timelineService: TimelineService
+  ) {}
 
   @HostBinding('id')
   get hostElementId(): string | undefined {
@@ -169,7 +177,7 @@ export class TelemetryComponent implements OnInit, OnDestroy {
               this.store.dispatch(new Minimize());
               return;
             }
-            const cues = this.getCuesUntilTime(this.timelineService.getVideoController().getCurrentTime());
+            const cues = this.getCuesUntilTime(this.ompApiService.api!.video.getCurrentTime());
             this.store.dispatch(new SetCues(cues));
             this._selectedLaneTitle = this.getSelectedLaneTitle(selectedLane);
             selectedLane.activateTelemetryIcon();
@@ -249,11 +257,6 @@ export class TelemetryComponent implements OnInit, OnDestroy {
     this._maximizedWidth = value;
   }
 
-  @Input()
-  set videoApi(value: VideoApi | undefined) {
-    this._videoApi = value;
-  }
-
   ngOnDestroy() {
     this._destroyed$.next();
   }
@@ -273,8 +276,7 @@ export class TelemetryComponent implements OnInit, OnDestroy {
   }
 
   private getVideoProgressSubscription(): Subscription {
-    const videoController = this.timelineService.getVideoController();
-    return videoController.onVideoTimeChange$.pipe(sampleTime(sampleTimeSyncVideoMetadata), takeUntil(this._destroyed$)).subscribe((time) => {
+    return this.ompApiService.api!.video.onVideoTimeChange$.pipe(sampleTime(sampleTimeSyncVideoMetadata), takeUntil(this._destroyed$)).subscribe((time) => {
       const cues = this.getClonedCues();
       const expiredCues = cues.filter((cue) => !cue.fadeOut && time.currentTime - cue.endTime > this._removeDelay);
       if (expiredCues.length) {
@@ -287,22 +289,14 @@ export class TelemetryComponent implements OnInit, OnDestroy {
   }
 
   private getVideoSeekSubscription(): Subscription {
-    const videoController = this.timelineService.getVideoController();
-    return videoController.onSeeked$.pipe(takeUntil(this._destroyed$)).subscribe((seekEvent) => {
+    return this.ompApiService.api!.video.onSeeked$.pipe(takeUntil(this._destroyed$)).subscribe((seekEvent) => {
       const cues = this.getCuesUntilTime(seekEvent.currentTime);
       this.store.dispatch(new SetCues(cues));
     });
   }
 
   private getVideoReplaySubscription(): Subscription {
-    const videoController = this.timelineService.getVideoController();
-    return videoController.onEnded$.pipe(
-      switchMap(() => 
-        videoController.onPlay$.pipe(
-          takeUntil(videoController.onSeeked$)
-        )
-      )
-    ).subscribe(() => {
+    return this.ompApiService.api!.video.onEnded$.pipe(switchMap(() => this.ompApiService.api!.video.onPlay$.pipe(takeUntil(this.ompApiService.api!.video.onSeeked$)))).subscribe(() => {
       this.store.dispatch(new SetCues([]));
     });
   }
@@ -345,15 +339,18 @@ export class TelemetryComponent implements OnInit, OnDestroy {
     const selectedLane = this.timelineService.getTimelineLaneById(selectedLaneId!) as TelemetryLane;
     const startTime = Math.max(time - this._seekDelay, 0);
     const endTime = time + this._seekDelay;
-    const cues: OmakaseVttCue[] = selectedLane.vttFile?.findCues(startTime, endTime).filter(cue => cue.startTime <= endTime && cue.endTime >= startTime) ?? [];
+    const cues: OmakaseVttCue[] = selectedLane.vttFile?.findCues(startTime, endTime).filter((cue) => cue.startTime <= endTime && cue.endTime >= startTime) ?? [];
     return this.findNearestCues(cues, time);
   }
 
   private findNearestCues(cues: OmakaseVttCue[], time: number): TelemetryCue[] {
-    const telemetryCues = cues.filter(cue => this.isTelemetryCue(cue));
+    const telemetryCues = cues.filter((cue) => this.isTelemetryCue(cue));
     const sortedCues = telemetryCues.sort((c1, c2) => this.getCueDistance(c1, time) - this.getCueDistance(c2, time));
-    const nearestCues = telemetryCues.filter(cue => this.getCueDistance(cue, time) === this.getCueDistance(sortedCues[0], time));
-    return nearestCues.map(cue => this.transformCue(cue)).reverse().slice(-this._maxCount);
+    const nearestCues = telemetryCues.filter((cue) => this.getCueDistance(cue, time) === this.getCueDistance(sortedCues[0], time));
+    return nearestCues
+      .map((cue) => this.transformCue(cue))
+      .reverse()
+      .slice(-this._maxCount);
   }
 
   private getCueDistance(cue: OmakaseVttCue, time: number) {
@@ -373,14 +370,14 @@ export class TelemetryComponent implements OnInit, OnDestroy {
       index: cue.index,
       startTime: cue.startTime,
       endTime: cue.endTime,
-      startTimecode: this._videoApi!.formatToTimecode(cue.startTime),
-      endTimecode: this._videoApi!.formatToTimecode(cue.endTime),
+      startTimecode: this.ompApiService.api!.video.formatToTimecode(cue.startTime),
+      endTimecode: this.ompApiService.api!.video!.formatToTimecode(cue.endTime),
       lines: this.getCueLines(cue),
-    }
+    };
   }
 
   private isTelemetryCue(cue: OmakaseVttCue): boolean {
-    return !!cue.extension?.rows?.find(row => row.measurement || row.comment);
+    return !!cue.extension?.rows?.find((row) => row.measurement || row.comment);
   }
 
   private getCueLines(cue: OmakaseVttCue): string[] {
@@ -401,6 +398,6 @@ export class TelemetryComponent implements OnInit, OnDestroy {
 
   private getSelectedLaneTitle(selectedLane: any): string {
     const parentLane = selectedLane._timeline._timelineLanes.find((lane: any) => lane._childLanes?.includes(selectedLane));
-    return `${ parentLane._description } / ${ selectedLane._description }`;
+    return `${parentLane._description} / ${selectedLane._description}`;
   }
 }

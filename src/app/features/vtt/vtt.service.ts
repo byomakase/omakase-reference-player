@@ -20,23 +20,24 @@ import {map, Observable} from 'rxjs';
 import {ChartVttFile, MarkerVttFile} from './vtt-file';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class VttService {
-
-  constructor(protected http: HttpClient) {
-
-  }
+  constructor(protected http: HttpClient) {}
 
   fetchMarkerVtt(url: string): Observable<MarkerVttFile> {
-    return this.http.get(url, { responseType: 'text'}).pipe(map((vttFileText) => {
-      return new MarkerVttFile(vttFileText);
-    }));
+    return this.http.get(url, {responseType: 'text'}).pipe(
+      map((vttFileText) => {
+        return new MarkerVttFile(vttFileText);
+      })
+    );
   }
 
   fetchChartVtt(url: string): Observable<ChartVttFile> {
-    return this.http.get(url, { responseType: 'text'}).pipe(map((vttFileText) => {
-      return new ChartVttFile(vttFileText);
-    }));
+    return this.http.get(url, {responseType: 'text'}).pipe(
+      map((vttFileText) => {
+        return new ChartVttFile(vttFileText);
+      })
+    );
   }
 }

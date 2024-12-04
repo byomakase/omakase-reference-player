@@ -17,16 +17,15 @@
 import {ImageButton} from '@byomakase/omakase-player';
 
 export interface TelemetryApi {
-  
-    get telemetryButton(): ImageButton | undefined
-  
-    get isHidden(): boolean
-  
-    activateTelemetryIcon(): void
-  
-    deactivateTelemetryIcon(): void
-  
-    addTelemetryButton(listening: boolean): void
-  
-    toggleHidden(): void
+  get telemetryButton(): ImageButton | undefined;
+
+  get isHidden(): boolean;
+
+  activateTelemetryIcon(): void;
+
+  deactivateTelemetryIcon(): void;
+
+  addTelemetryButton(listening: boolean): void;
+
+  toggleHidden(): void;
 }

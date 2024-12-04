@@ -21,7 +21,7 @@ import Stats from 'stats.js';
   selector: 'app-debug-stats',
   standalone: true,
   imports: [],
-  template: ``
+  template: ``,
 })
 export class DebugStatsComponent implements OnInit {
   stats: Stats;
@@ -36,7 +36,7 @@ export class DebugStatsComponent implements OnInit {
     let that = this;
     requestAnimationFrame(function loop() {
       that.stats.update();
-      requestAnimationFrame(loop)
-    })
+      requestAnimationFrame(loop);
+    });
   }
 }

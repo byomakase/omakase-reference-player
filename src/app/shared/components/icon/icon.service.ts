@@ -38,46 +38,81 @@ import {IconSafezoneOn} from './svg/icon-safezone-on';
 import {IconSafezoneOff} from './svg/icon-safezone-off';
 import {IconCheckboxChecked} from './svg/icon-checkbox-checked';
 import {IconCheckboxUnchecked} from './svg/icon-checkbox-unchecked';
+import {IconDetach} from './svg/icon-detach';
+import {IconAttach} from './svg/icon-attach';
+import {IconPlayForward3} from './svg/icon-fw';
+import {IconPlayBack3} from './svg/icon-back';
+import {IconAdd} from './svg/icon-add';
+import {IconMarkerStart} from './svg/icon-marker-start';
+import {IconMarkerEnd} from './svg/icon-marker-end';
+import {IconPoint} from './svg/icon-point';
+import {IconMarkerDelete} from './svg/icon-marker-delete';
+import {IconBracketDoubleLeft} from './svg/icon-bracket-double-left';
+import {IconBracketDoubleRight} from './svg/icon-bracket-double-right';
+import {IconBracketRight} from './svg/icon-bracket-right';
+import {IconBracketLeft} from './svg/icon-bracket-left';
+import {IconArrowLeft} from './svg/icon-arrow-left';
+import {IconArrowRight} from './svg/icon-arrow-right';
+import {IconArrowUp} from './svg/icon-arrow-up';
+import {IconArrowDownLight} from './svg/icon-arrow-down-light';
+import {IconStatus} from './svg/icon-status';
+import {IconMarkerSplit} from './svg/icon-marker-split';
+import {IconConfirm} from './svg/icon-confirm';
+import {IconReject} from './svg/icon-reject';
 
 export type IconName =
-  'arrow-down'
+  | 'arrow-down'
+  | 'arrow-up'
   | 'chevron-down'
   | 'chevron-right'
   | 'code'
   | 'corners'
-
   | 'volume'
   | 'volume-zero'
   | 'volume-low'
   | 'volume-muted'
-
   | 'play'
   | 'pause'
   | 'rewind'
   | 'fast-rewind'
   | 'forward'
   | 'fast-forward'
-
+  | 'detach'
+  | 'attach'
+  | 'add'
   | 'telemetry'
   | 'warning'
   | 'info'
   | 'close'
-
   | 'safezone-on'
   | 'safezone-off'
   | 'checkbox-checked'
   | 'checkbox-unchecked'
-
-  ;
-
+  | 'play-forward-3'
+  | 'play-back-3'
+  | 'arrow-left'
+  | 'arrow-right'
+  | 'arrow-down-light'
+  | 'status'
+  | 'marker-start'
+  | 'marker-end'
+  | 'marker-delete'
+  | 'marker-split'
+  | 'point'
+  | 'bracket-double-right'
+  | 'bracket-double-left'
+  | 'bracket-right'
+  | 'bracket-left'
+  | 'confirm'
+  | 'reject';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class IconService {
-
   private _icons: Record<IconName, string> = {
     'arrow-down': IconArrowDown,
+    'arrow-up': IconArrowUp,
     'chevron-down': IconChevronDown,
     'chevron-right': IconChevronRight,
     'code': IconCode,
@@ -94,6 +129,11 @@ export class IconService {
     'fast-rewind': IconFastRewind,
     'forward': IconForward,
     'fast-forward': IconFastForward,
+    'detach': IconDetach,
+    'attach': IconAttach,
+    'play-forward-3': IconPlayForward3,
+    'play-back-3': IconPlayBack3,
+    'add': IconAdd,
 
     'telemetry': IconTelemetry,
     'warning': IconWarning,
@@ -103,12 +143,26 @@ export class IconService {
     'safezone-on': IconSafezoneOn,
     'safezone-off': IconSafezoneOff,
     'checkbox-checked': IconCheckboxChecked,
-    'checkbox-unchecked': IconCheckboxUnchecked
+    'checkbox-unchecked': IconCheckboxUnchecked,
 
-  }
+    'marker-start': IconMarkerStart,
+    'marker-end': IconMarkerEnd,
+    'marker-delete': IconMarkerDelete,
+    'marker-split': IconMarkerSplit,
+    'point': IconPoint,
+    'bracket-double-left': IconBracketDoubleLeft,
+    'bracket-double-right': IconBracketDoubleRight,
+    'bracket-right': IconBracketRight,
+    'bracket-left': IconBracketLeft,
+    'arrow-left': IconArrowLeft,
+    'arrow-right': IconArrowRight,
+    'arrow-down-light': IconArrowDownLight,
+    'status': IconStatus,
+    'confirm': IconConfirm,
+    'reject': IconReject,
+  };
 
-  constructor() {
-  }
+  constructor() {}
 
   getIconHtml(name: IconName): string {
     return this._icons[name];

@@ -1,0 +1,107 @@
+.modal-dialog {
+  width: 450px;
+
+  .modal-content {
+    border: 0;
+  }
+
+  .custom-modal {
+    border-radius: 5px;
+    border: 1px solid #656b7e;
+    background-color: #454853;
+    filter: drop-shadow(0 4px 5px #000);
+
+    .modal-header {
+      padding: 22px 20px 0px 35px;
+
+      span {
+        font-size: 15px;
+        line-height: 18px;
+        font-weight: 700;
+        color: $color-2;
+      }
+    }
+
+    .modal-body {
+      padding: 16px 20px 0 35px !important;
+      display: flex;
+      justify-content: left;
+
+      p {
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 18px;
+        text-align: left;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+      }
+
+      .input-body {
+        justify-content: left;
+        align-items: center;
+        gap: 30px;
+
+        label {
+          font-size: 13px;
+          font-weight: 700;
+          color: #ffff;
+          line-height: 18px;
+        }
+
+        input {
+          width: 200px;
+          height: 40px;
+          border: 1px solid #655372;
+          border-radius: 5px;
+          padding: 8px 30px 8px 20px;
+          background-color: $color-6;
+          font-weight: 400;
+          font-size: 13px;
+          line-height: 18px;
+
+          &:focus {
+            outline: 0;
+          }
+        }
+      }
+    }
+
+    .modal-footer {
+      padding: 30px 20px 30px 35px;
+
+      .btn-group {
+        gap: 30px;
+        margin: 0;
+
+        .btn {
+          height: 40px;
+          font-size: 13px;
+          line-height: 18px;
+          font-weight: 700;
+          border-radius: 5px;
+          padding: 0 20px 0 20px;
+          border: 0;
+          border-bottom: 1px solid #3e44fe;
+        }
+
+        .action-button {
+          background-color: #4e5996;
+          color: #ffff;
+
+          &:hover {
+            background-color: darken($color: #4e5996, $amount: 5);
+          }
+        }
+
+        .close-button {
+          background-color: $color-2;
+          color: #13141b;
+
+          &:hover {
+            background-color: darken($color: $color-2, $amount: 5);
+          }
+        }
+      }
+    }
+  }
+}

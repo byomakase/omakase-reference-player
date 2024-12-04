@@ -1,70 +1,67 @@
 #timeline-configurator {
+  background-color: $color-7;
+  height: 100%;
+  border-left: 1px solid #000;
+  border-radius: 5px 0 0 0;
 
-    background-color: $color-7;
-    height: 100%;
-    border-left: 1px solid #000;
-    border-radius: 5px 0 0 0;
+  .timeline-config-header {
+    padding: 0 20px;
+    border-bottom: 1px solid #000;
 
-    .timeline-config-header {
-        padding: 0 20px;
-        border-bottom: 1px solid #000;
-
-        &:not(:first-child) {
-            border-top: 1px solid #000;
-        }
-
-        .close-icon {
-            line-height: 40px;
-            cursor: pointer;
-        }
+    &:not(:first-child) {
+      border-top: 1px solid #000;
     }
 
-    .timeline-config-title {
-        line-height: 45px;
-        font-size: 13px;
-        font-weight: 700;
+    .close-icon {
+      line-height: 40px;
+      cursor: pointer;
     }
+  }
 
-    .timeline-config-selector {
-        border-bottom: 1px solid #000;
+  .timeline-config-title {
+    line-height: 45px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .timeline-config-selector {
+    border-bottom: 1px solid #000;
+  }
+
+  .timeline-config-body {
+    padding: 10px 20px;
+
+    .timeline-config-suboptions {
+      padding: 0 30px;
+
+      app-checkbox {
+        animation: fadeIn 1s;
+      }
     }
+  }
 
-    .timeline-config-body {
-        padding: 10px 20px;
+  .timeline-config-customization {
+    padding-top: 20px;
+  }
 
-        .timeline-config-suboptions {
-            padding: 0 30px;
+  .timeline-config-row {
+    margin-bottom: 24px;
+  }
 
-            app-checkbox {
-                animation: fadeIn 1s;
-            }
-        }
-        
+  .timeline-config-label {
+    display: inline-block;
+    width: 85px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 24px;
+  }
+
+  .timeline-config-dropdown {
+    display: inline-block;
+    width: 164px;
+
+    .dropdown-toggle {
+      border: 1px solid #000;
     }
-
-    .timeline-config-customization {
-        padding-top: 20px;
-    }
-
-    .timeline-config-row {
-        margin-bottom: 24px;
-    }
-
-    .timeline-config-label {
-        display: inline-block;
-        width: 85px;
-        font-size: 13px;
-        font-weight: 700;
-        line-height: 24px;
-    }
-
-    .timeline-config-dropdown {
-        display: inline-block;
-        width: 164px;
-        
-        .dropdown-toggle {
-            border: 1px solid #000;
-        }
-    }
-
+  }
 }

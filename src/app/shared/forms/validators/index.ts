@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export {FormValidators} from './form-validators'
+export {FormValidators} from './form-validators';

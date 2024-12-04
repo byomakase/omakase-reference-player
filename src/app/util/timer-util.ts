@@ -52,20 +52,12 @@ export class TimeoutTimer {
     this.stop();
     if (this._timeoutDuration && this._refreshPeriod) {
       this._startTime = Date.now();
-      interval(this._refreshPeriod).pipe(takeUntil(this._onDestroy$), takeUntil(this._loopBreaker$)).subscribe((numRefreshes) => {
-        if (this._timeoutDuration && this._refreshPeriod && this._startTime) {
-          this._elapsedTime = Date.now() - this._startTime;
-          this.onRefresh$.next({
-            timeoutDuration: this._timeoutDuration,
-            refreshPeriod: this._refreshPeriod,
-            numTimeouts: this._numTimeouts,
-            numRefreshes: numRefreshes,
-            startTime: this._startTime,
-            elapsedTime: this._elapsedTime
-          });
-          if (this._elapsedTime >= this._timeoutDuration) {
-            this._numTimeouts++;
-            this.onTimeout$.next({
+      interval(this._refreshPeriod)
+        .pipe(takeUntil(this._onDestroy$), takeUntil(this._loopBreaker$))
+        .subscribe((numRefreshes) => {
+          if (this._timeoutDuration && this._refreshPeriod && this._startTime) {
+            this._elapsedTime = Date.now() - this._startTime;
+            this.onRefresh$.next({
               timeoutDuration: this._timeoutDuration,
               refreshPeriod: this._refreshPeriod,
               numTimeouts: this._numTimeouts,
@@ -73,10 +65,20 @@ export class TimeoutTimer {
               startTime: this._startTime,
               elapsedTime: this._elapsedTime,
             });
-            this._startTime = Date.now();
+            if (this._elapsedTime >= this._timeoutDuration) {
+              this._numTimeouts++;
+              this.onTimeout$.next({
+                timeoutDuration: this._timeoutDuration,
+                refreshPeriod: this._refreshPeriod,
+                numTimeouts: this._numTimeouts,
+                numRefreshes: numRefreshes,
+                startTime: this._startTime,
+                elapsedTime: this._elapsedTime,
+              });
+              this._startTime = Date.now();
+            }
           }
-        }
-      });
+        });
     }
   }
 

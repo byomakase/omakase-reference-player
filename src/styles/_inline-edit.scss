@@ -1,0 +1,25 @@
+app-inline-edit {
+  position: relative;
+
+  .inline-edit-input {
+    height: 20px;
+    padding: 0 5px;
+  }
+
+  .inline-edit-text {
+    cursor: pointer;
+  }
+
+  .inline-edit-actions {
+    position: absolute;
+    right: 0;
+
+    span {
+      cursor: pointer;
+
+      i {
+        font-size: 10pt !important;
+      }
+    }
+  }
+}

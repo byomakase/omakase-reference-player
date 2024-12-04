@@ -1,0 +1,134 @@
+#status {
+  .status-btn-group {
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+    border: 0;
+    background-color: #525979;
+    width: 170px;
+    padding: 8px 20px 8px 20px;
+    justify-content: space-between;
+    height: 40px;
+
+    .btn-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      background-color: #525979;
+      padding: 0;
+
+      &:focus-visible {
+        box-shadow: none;
+      }
+
+      &:disabled {
+        background-color: #525979;
+        color: #fff;
+        opacity: 1;
+      }
+
+      .status {
+        gap: 8px;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 800;
+        color: #fff;
+      }
+
+      .white {
+        svg {
+          color: #fff;
+        }
+      }
+
+      .green {
+        svg {
+          color: #62c0a4;
+        }
+      }
+
+      .red {
+        svg {
+          color: #f54a4a;
+        }
+      }
+
+      .yellow {
+        svg {
+          color: #ffe790;
+        }
+      }
+
+      .blue {
+        svg {
+          color: #00a3e9;
+        }
+      }
+
+      &:after {
+        display: none;
+      }
+    }
+
+    .status-menu {
+      width: 170px;
+      background-color: #4c526a;
+      border: 0;
+      border-radius: 0px 0px 5px 5px;
+      padding: 0;
+      transform: translate(0px, 40px) !important;
+
+      .status-item {
+        align-items: center;
+        width: 100%;
+        border-radius: 0;
+        border: 0;
+        border-top: 2px solid $color-6;
+        padding: 8px 16px 8px 20px;
+        height: 38px;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 800;
+      }
+
+      .confirm-window {
+        background-color: $color-6;
+        padding: 20px 70px 18px 20px;
+
+        .confirm-btn {
+          width: 80px;
+          height: 30px;
+          background-color: #2a2c34;
+          border-radius: 3px;
+          font-size: 13px;
+          border: 0;
+          padding: 6px 10px 6px 10px;
+        }
+
+        &:last-child {
+          border-radius: 0px 0px 5px 5px;
+        }
+      }
+    }
+
+    .icon {
+      svg {
+        height: 24px;
+        width: 24px;
+      }
+    }
+
+    .rotate {
+      svg {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .read-only {
+    width: 146px;
+  }
+}

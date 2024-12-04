@@ -25,32 +25,32 @@ abstract class FilterOperator implements UriExpression {
   static EQUAL: FilterOperator = {
     getUriExpression(): string {
       return 'eq';
-    }
-  }
+    },
+  };
 
   static CONTAINS: FilterOperator = {
     getUriExpression(): string {
       return 'contains';
-    }
-  }
+    },
+  };
 
   static LESS_THAN: FilterOperator = {
     getUriExpression(): string {
       return 'lt';
-    }
-  }
+    },
+  };
 
   static GREATER_THAN: FilterOperator = {
     getUriExpression(): string {
       return 'gt';
-    }
-  }
+    },
+  };
 
   static BETWEEN: FilterOperator = {
     getUriExpression(): string {
       return 'btw';
-    }
-  }
+    },
+  };
 
   abstract getUriExpression(): string;
 }
@@ -139,7 +139,7 @@ export class FilterBuilder implements HttpParamsConvertable {
     } else if (to) {
       this.append(FilterPredicate.lessThan(name, to));
     } else {
-      throw new Error('filter predicate could not be set, both "from" and "to" are not set')
+      throw new Error('filter predicate could not be set, both "from" and "to" are not set');
     }
     return this;
   }
@@ -151,9 +151,9 @@ export class FilterBuilder implements HttpParamsConvertable {
 
   toHttpParams(): HttpParams {
     let httpParams = new HttpParams();
-    this._predicates.forEach(predicate => {
+    this._predicates.forEach((predicate) => {
       httpParams = httpParams.append(predicate.getHttpParamName(), predicate.getHttpParamValue());
-    })
+    });
     return httpParams;
   }
 }

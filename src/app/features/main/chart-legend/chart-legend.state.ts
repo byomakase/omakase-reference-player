@@ -21,8 +21,8 @@ import Show = ChartLegendActions.Show;
 import Hide = ChartLegendActions.Hide;
 
 export interface ChartLegendItem {
-    color: string;
-    label: string;
+  color: string;
+  label: string;
 }
 
 export interface ChartLegendStateModel {
@@ -32,31 +32,29 @@ export interface ChartLegendStateModel {
 @State<ChartLegendStateModel>({
   name: 'chartLegend',
   defaults: {
-    items: undefined
-  }
+    items: undefined,
+  },
 })
 @Injectable()
 export class ChartLegendState {
-
   @Selector()
   static items(state: ChartLegendStateModel) {
     return state.items;
   }
 
   @Action(Show)
-  show(ctx: StateContext<ChartLegendStateModel>, { items }: Show) {
+  show(ctx: StateContext<ChartLegendStateModel>, {items}: Show) {
     const state = ctx.getState();
     ctx.patchState({
       items,
-    })
+    });
   }
 
   @Action(Hide)
   maximize(ctx: StateContext<ChartLegendStateModel>) {
     const state = ctx.getState();
     ctx.patchState({
-      items: undefined
-    })
+      items: undefined,
+    });
   }
-
 }

@@ -15,26 +15,88 @@
  */
 
 #timeline-controls {
+  height: 42px;
+
+  @media (min-width: 650px) and (max-width: 1000px), (min-width: 1900px) {
+    height: 45px;
+  }
+
+  .limit-group {
+    margin-left: 10px;
+  }
+
   .btn-group {
     height: 100%;
 
     .btn {
-      border-radius: 0 2px 0 0;
+      border-radius: 0 5px 0 0;
       border: 0;
+      width: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-minimize {
       width: 40px;
       background-size: 30px 30px;
-      background: $color-7 url("/assets/images/timeline/icon-double-chevron-down.svg") no-repeat center;
+      background: $color-7 url("/assets/images/timeline/icon-double-chevron-up.svg") no-repeat center;
       border-right: 1px solid $body-bg-dark;
+      margin-right: 10px;
     }
 
     .btn-maximize {
       width: 40px;
       background-size: 30px 30px;
-      background: $color-7 url("/assets/images/timeline/icon-double-chevron-up.svg") no-repeat center;
+      background: $color-7 url("/assets/images/timeline/icon-double-chevron-down.svg") no-repeat center;
       border-right: 1px solid $body-bg-dark;
+      margin-right: 10px;
+    }
+
+    .btn-dropdown {
+      background: $color-6;
+      border-top: 0px;
+      border-bottom: 0px;
+      border-left: 1px;
+      border-right: 1px;
+      border-style: solid;
+      border-color: $color-12;
+
+      padding-left: 1.5em;
+      padding-right: 1.5em;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 150px;
+
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .dropdown-toggle::after {
+      display: none;
+    }
+
+    .dropdown-menu {
+      background: $color-7;
+      border-radius: 0 0 5px 5px;
+      margin-top: -2px !important;
+    }
+
+    .dropdown-menu.show {
+      background: $color-7;
+      border-radius: 0 0 5px 5px;
+      max-width: 400px;
+    }
+
+    .group-dropdown-active {
+      background: rgba(0, 233, 163, 0.3);
+      color: rgba(0, 233, 163, 1);
+    }
+
+    .form-check {
+      padding-left: 1em;
     }
   }
 }

@@ -92,7 +92,7 @@ export class TelemetryState {
   }
 
   @Action(SetCues)
-  setCues(ctx: StateContext<TelemetryStateModel>, { cues }: SetCues) {
+  setCues(ctx: StateContext<TelemetryStateModel>, {cues}: SetCues) {
     const state = ctx.getState();
     ctx.patchState({
       cues,
@@ -100,7 +100,7 @@ export class TelemetryState {
   }
 
   @Action(SelectLane)
-  selectLane(ctx: StateContext<TelemetryStateModel>, { selectedLaneId }: SelectLane) {
+  selectLane(ctx: StateContext<TelemetryStateModel>, {selectedLaneId}: SelectLane) {
     const state = ctx.getState();
     ctx.patchState({
       selectedLaneId,

@@ -26,5 +26,19 @@
   .offcanvas-header {
     background-color: $color-3;
     border-bottom: 1px solid $color-4;
+
+    .offcanvas-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #tech-metadata {
+      overflow: visible;
+    }
+
+    .text-reset {
+      padding-right: 16px;
+    }
   }
 }

@@ -21,22 +21,11 @@ import {TimelineControlsComponent} from './timeline-controls/timeline-controls.c
 import {IconModule} from './icon/icon.module';
 import {DebugStatsComponent} from './debug-stats/debug-stats.component';
 
-const MODULES: any[] = [
-  IconModule,
-  OmakasePlayerModule,
-  PlayerControlsComponent,
-  TimelineControlsComponent,
-  DebugStatsComponent
-]
+const MODULES: any[] = [IconModule, OmakasePlayerModule, PlayerControlsComponent, TimelineControlsComponent, DebugStatsComponent];
 
 @NgModule({
   declarations: [],
-  imports: [
-    ...MODULES
-  ],
-  exports: [
-    ...MODULES
-  ]
+  imports: [...MODULES],
+  exports: [...MODULES],
 })
-export class ComponentsModule {
-}
+export class ComponentsModule {}

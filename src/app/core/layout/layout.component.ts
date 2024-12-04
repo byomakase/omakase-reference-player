@@ -15,20 +15,30 @@
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject, takeUntil} from 'rxjs';
+import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 import {StringUtil} from '../../util/string-util';
+import {LayoutService} from './layout.service';
 
 @Component({
   selector: 'app-layout',
   template: `
     <header>
       <nav class="navbar bg-dark border-body">
-        <div class="container-fluid h-100 justify-content-between">
-          <div id="header-nav" class="h-100 d-flex align-items-end"></div>
+        <div class="container-fluid h-100">
           <a class="navbar-brand p-0 m-0" href="#" (click)="buttonLogoClick($event)">
             <img [src]="'assets/images/omp.svg'" />
           </a>
+          <div id="header-nav" class="h-100 d-flex" [class.d-none]="!(showTabs$ | async)">
+            <ul ngbNav class="nav-tabs" (activeIdChange)="onNavChange($event)">
+              <li [ngbNavItem]="'qc'">
+                <button ngbNavLink>QC</button>
+              </li>
+              <li [ngbNavItem]="'segmentation'">
+                <button ngbNavLink>SEGMENTATION</button>
+              </li>
+            </ul>
+          </div>
         </div>
       </nav>
     </header>
@@ -38,21 +48,34 @@ import {StringUtil} from '../../util/string-util';
     @if (debugMode) {
       <app-debug-stats></app-debug-stats>
     }
-  `
+  `,
 })
 export class LayoutComponent implements OnInit, OnDestroy {
   debugMode = false;
 
   private _destroyed$ = new Subject<void>();
+  showTabs$ = new BehaviorSubject<boolean>(false);
 
-  constructor(protected route: ActivatedRoute) {
-    this.route.queryParams.pipe(takeUntil(this._destroyed$)).subscribe(queryParams => {
+  constructor(
+    protected route: ActivatedRoute,
+    protected layoutService: LayoutService
+  ) {
+    this.route.queryParams.pipe(takeUntil(this._destroyed$)).subscribe((queryParams) => {
       this.debugMode = StringUtil.isNonEmpty(queryParams['debug'] || queryParams['DEBUG']);
-    })
+    });
+
+    this.layoutService.showTabs$.pipe(takeUntil(this._destroyed$)).subscribe({
+      next: (value) => {
+        if (value) {
+          this.showTabs$.next(true);
+        } else {
+          this.showTabs$.next(false);
+        }
+      },
+    });
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   ngOnDestroy() {
     this._destroyed$.next();
@@ -61,5 +84,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   buttonLogoClick(event: Event) {
     event.preventDefault();
+  }
+
+  onNavChange(activeId: string) {
+    this.layoutService.activeTab = activeId;
   }
 }

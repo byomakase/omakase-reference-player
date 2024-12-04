@@ -25,8 +25,8 @@ import SelectLane = TimelineConfiguratorActions.SelectLane;
 import SetLaneOptions = TimelineConfiguratorActions.SetLaneOptions;
 
 export interface TimelineConfiguratorStateModel {
-  visibility: 'minimized' | 'maximized',
-  selectedLaneId: string | undefined,
+  visibility: 'minimized' | 'maximized';
+  selectedLaneId: string | undefined;
   laneOptions: DropdownOption<string>[];
 }
 
@@ -35,12 +35,11 @@ export interface TimelineConfiguratorStateModel {
   defaults: {
     visibility: 'minimized',
     selectedLaneId: undefined,
-    laneOptions: []
-  }
+    laneOptions: [],
+  },
 })
 @Injectable()
 export class TimelineConfiguratorState {
-
   @Selector()
   static visibility(state: TimelineConfiguratorStateModel) {
     return state.visibility;
@@ -61,7 +60,7 @@ export class TimelineConfiguratorState {
     const state = ctx.getState();
     ctx.patchState({
       visibility: 'minimized',
-    })
+    });
   }
 
   @Action(Maximize)
@@ -69,7 +68,7 @@ export class TimelineConfiguratorState {
     const state = ctx.getState();
     ctx.patchState({
       visibility: 'maximized',
-    })
+    });
   }
 
   @Action(ToggleMinimizeMaximize)
@@ -77,11 +76,11 @@ export class TimelineConfiguratorState {
     const state = ctx.getState();
     ctx.patchState({
       visibility: state.visibility === 'minimized' ? 'maximized' : 'minimized',
-    })
+    });
   }
 
   @Action(SelectLane)
-  selectLane(ctx: StateContext<TimelineConfiguratorStateModel>, { selectedLaneId }: SelectLane) {
+  selectLane(ctx: StateContext<TimelineConfiguratorStateModel>, {selectedLaneId}: SelectLane) {
     const state = ctx.getState();
     ctx.patchState({
       selectedLaneId,
@@ -89,11 +88,10 @@ export class TimelineConfiguratorState {
   }
 
   @Action(SetLaneOptions)
-  setLaneOptions(ctx: StateContext<TimelineConfiguratorStateModel>, { options }: SetLaneOptions) {
+  setLaneOptions(ctx: StateContext<TimelineConfiguratorStateModel>, {options}: SetLaneOptions) {
     const state = ctx.getState();
     ctx.patchState({
       laneOptions: options,
     });
   }
-
 }

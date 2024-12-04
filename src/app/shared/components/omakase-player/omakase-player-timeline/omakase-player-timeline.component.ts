@@ -15,52 +15,51 @@
  */
 
 import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, OnDestroy, Output} from '@angular/core';
-import {ConfigWithOptionalStyle, OmakasePlayerApi, SubtitlesLoadedEvent, TimelineApi, TimelineConfig} from '@byomakase/omakase-player';
-import {combineLatest, Subject, takeUntil} from 'rxjs';
-import {UuidUtil} from '../../../../util/uuid-util';
+import {ConfigWithOptionalStyle, TimelineApi, TimelineConfig} from '@byomakase/omakase-player';
+import {Subject, take, takeUntil} from 'rxjs';
+import {CryptoUtil} from '../../../../util/crypto-util';
+import {OmpApiService} from '../omp-api.service';
 
 @Component({
   selector: 'div[appOmakasePlayerTimeline]',
   standalone: true,
   imports: [],
-  template: `<ng-content></ng-content>`,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  template: ` <ng-content></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OmakasePlayerTimelineComponent implements OnDestroy {
   @Output()
   readonly onReady: EventEmitter<TimelineApi> = new EventEmitter<TimelineApi>();
 
-  @Output()
-  readonly onSubtitlesLoaded: EventEmitter<SubtitlesLoadedEvent> = new EventEmitter<SubtitlesLoadedEvent>();
-
   private _config: Partial<ConfigWithOptionalStyle<TimelineConfig>> | undefined;
   private _presetConfig: Partial<ConfigWithOptionalStyle<TimelineConfig>>;
 
-  private _omakasePlayerApi: OmakasePlayerApi | undefined;
-
-  private _omakasePlayerReady$ = new Subject<void>();
-
   private _onDestroy$ = new Subject<void>();
 
-  constructor() {
+  constructor(protected ompApiService: OmpApiService) {
     this._presetConfig = {
-      timelineHTMLElementId: UuidUtil.uuid()
-    }
+      timelineHTMLElementId: CryptoUtil.uuid(),
+    };
 
     this._config = this._presetConfig;
 
-    combineLatest([this._omakasePlayerReady$]).pipe(takeUntil(this._onDestroy$)).subscribe({
-      next: () => {
-        this.createTimeline()
+    this.ompApiService.onCreate$.pipe(takeUntil(this._onDestroy$)).subscribe({
+      next: (omakasePlayerApi) => {
+        if (omakasePlayerApi) {
+          this.createTimeline();
+        } else {
+          // this.destroyTimeline()
+        }
       },
-      error: err => {
-
-      }
-    })
+      error: (err) => {},
+    });
   }
 
   ngOnDestroy() {
-    this.destroyTimeline();
+    // this.destroyTimeline();
+    if (this.ompApiService.api?.timeline) {
+      this.ompApiService.api.timeline.destroy();
+    }
   }
 
   @HostBinding('id')
@@ -74,37 +73,32 @@ export class OmakasePlayerTimelineComponent implements OnDestroy {
   }
 
   private createTimeline() {
-    this.destroyTimeline();
+    // this.destroyTimeline();
 
-    if (this._omakasePlayerApi && this.config) {
-      this._omakasePlayerApi.createTimeline(this.config).subscribe(timelineApi => {
-        this.onReady.emit(timelineApi);
-      })
-      this._omakasePlayerApi.subtitles.onSubtitlesLoaded$.subscribe(event => {
-        this.onSubtitlesLoaded.emit(event);
-      })
+    if (this.config) {
+      this.ompApiService.api!.createTimeline(this.config).subscribe({
+        next: (timeline) => {
+          timeline.onReady$.pipe(take(1)).subscribe({
+            next: () => {
+              this.onReady.emit(timeline);
+            },
+          });
+        },
+      });
     }
   }
 
-  private destroyTimeline() {
-    if (this._omakasePlayerApi?.timeline) {
-      this._omakasePlayerApi.timeline.destroy();
-    }
-  }
-
-  @Input()
-  set omakasePlayerApi(value: OmakasePlayerApi | undefined) {
-    this._omakasePlayerApi = value;
-    if (this._omakasePlayerApi) {
-      this._omakasePlayerReady$.next();
-    }
-  }
+  // private destroyTimeline() {
+  //   if (this.ompApiService.api?.timeline) {
+  //     this.ompApiService.api.timeline.destroy();
+  //   }
+  // }
 
   @Input('config')
   set config(value: Partial<ConfigWithOptionalStyle<TimelineConfig>> | undefined) {
     this._config = {
       ...this._presetConfig,
-      ...value
+      ...value,
     };
   }
 

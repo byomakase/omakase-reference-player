@@ -27,24 +27,19 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./main/main.component').then(m => m.MainComponent)
+        loadComponent: () => import('./main/main.component').then((m) => m.MainComponent),
       },
-    ]
-  }
-]
+      {
+        path: 'detached',
+        loadComponent: () => import('./detached/detached.component').then((m) => m.DetachedComponent),
+      },
+    ],
+  },
+];
 
 @NgModule({
-  providers: [
-    provideRouter(routes),
-  ],
-  declarations: [
-    FeaturesComponent
-  ],
-  imports: [
-    CoreModule,
-    SharedModule,
-    RouterOutlet
-  ]
+  providers: [provideRouter(routes)],
+  declarations: [FeaturesComponent],
+  imports: [CoreModule, SharedModule, RouterOutlet],
 })
-export class FeaturesModule {
-}
+export class FeaturesModule {}

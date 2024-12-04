@@ -22,7 +22,7 @@ export interface AppVttFile<T extends AppVttCue> {
 
   findCue(time: number): T | undefined;
 
-  findCues(startTime: number, endTime: number): T[]
+  findCues(startTime: number, endTime: number): T[];
 }
 
 export abstract class BaseAppVttFile<T extends AppVttCue> implements AppVttFile<T> {
@@ -31,13 +31,13 @@ export abstract class BaseAppVttFile<T extends AppVttCue> implements AppVttFile<
 
   protected constructor(vttFileText: string) {
     try {
-      let vttFileParsed: VttFileParsed = VttUtil.parse(vttFileText)
+      let vttFileParsed: VttFileParsed = VttUtil.parse(vttFileText);
 
-      vttFileParsed.cues.forEach(parsedCue => {
+      vttFileParsed.cues.forEach((parsedCue) => {
         let cue = this.mapCue(parsedCue);
         this._cues.set(cue.startTime, cue);
         this._cuesKeysSorted.push(cue.startTime);
-      })
+      });
     } catch (e) {
       console.error(e);
     }
@@ -72,9 +72,10 @@ export abstract class BaseAppVttFile<T extends AppVttCue> implements AppVttFile<
     if (endIndex === -1) {
       return [];
     }
-    return (this._cuesKeysSorted.slice(startIndex, endIndex + 1)
-      .map(startTime => this._cues.get(startTime))
-      .filter(p => p !== undefined)) as T[];
+    return this._cuesKeysSorted
+      .slice(startIndex, endIndex + 1)
+      .map((startTime) => this._cues.get(startTime))
+      .filter((p) => p !== undefined) as T[];
   }
 
   protected findCueIndex(time: number): number {
@@ -98,7 +99,6 @@ export abstract class BaseAppVttFile<T extends AppVttCue> implements AppVttFile<
 }
 
 export class MarkerVttFile extends BaseAppVttFile<AppMarkerVttCue> {
-
   constructor(vttFileText: string) {
     super(vttFileText);
   }
@@ -108,16 +108,14 @@ export class MarkerVttFile extends BaseAppVttFile<AppMarkerVttCue> {
       id: vttCueParsed.identifier,
       startTime: vttCueParsed.start,
       endTime: vttCueParsed.end,
-      text: vttCueParsed.text
-    }
+      text: vttCueParsed.text,
+    };
 
     return cue;
   }
-
 }
 
 export class ChartVttFile extends BaseAppVttFile<AppChartVttCue> {
-
   constructor(vttFileText: string) {
     super(vttFileText);
   }
@@ -127,10 +125,9 @@ export class ChartVttFile extends BaseAppVttFile<AppChartVttCue> {
       id: vttCueParsed.identifier,
       startTime: vttCueParsed.start,
       endTime: vttCueParsed.end,
-      text: vttCueParsed.text
-    }
+      text: vttCueParsed.text,
+    };
 
     return cue;
   }
-
 }

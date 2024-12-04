@@ -22,18 +22,12 @@ import {Title} from '@angular/platform-browser';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    HttpClientModule,
-    RouterOutlet,
-
-  ],
+  imports: [HttpClientModule, RouterOutlet],
   providers: [],
-  template: `
-    <router-outlet></router-outlet>`
+  template: ` <router-outlet></router-outlet>`,
 })
 export class AppComponent {
-
   constructor(private title: Title) {
-    this.title.setTitle(`Omakase Reference Player`)
+    this.title.setTitle(`Omakase Reference Player`);
   }
 }

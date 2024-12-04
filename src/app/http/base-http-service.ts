@@ -19,7 +19,10 @@ import {HttpClient} from '@angular/common/http';
 export class BaseHttpService {
   protected readonly rootUrl;
 
-  protected constructor(protected http: HttpClient, rootUrl: string) {
+  protected constructor(
+    protected http: HttpClient,
+    rootUrl: string
+  ) {
     this.rootUrl = rootUrl;
   }
 

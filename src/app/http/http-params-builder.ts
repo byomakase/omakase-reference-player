@@ -29,8 +29,7 @@ export interface HttpParamConvertable {
 export class HttpParamsBuilder {
   protected httpParams = new HttpParams();
 
-  protected constructor() {
-  }
+  protected constructor() {}
 
   public static create(): HttpParamsBuilder {
     return new HttpParamsBuilder();
@@ -53,5 +52,4 @@ export class HttpParamsBuilder {
   public build(): HttpParams {
     return this.httpParams;
   }
-
 }

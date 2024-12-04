@@ -23,77 +23,94 @@ import {VideoGroupingLane} from '../../shared/components/omakase-player/omakase-
 import {AudioGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/audio-grouping-lane';
 import {TextTrackGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/text-track-grouping-lane';
 import {Injectable} from '@angular/core';
-import {LineChartLaneStyle, MarkerLane, MarkerLaneStyle, MarkerVttCue, MomentMarker, OmakasePlayerApi, OmakaseVttFile, PeriodMarker, SubtitlesVttTrack, ThumbnailLane, TimelineLaneApi} from '@byomakase/omakase-player';
-import {Analysis, ChartAnalysis, VisualReference} from '../../model/domain.model';
+import {
+  LineChartLane,
+  LineChartLaneStyle,
+  MarkerLane,
+  MarkerLaneStyle,
+  MarkerVttCue,
+  MomentMarker,
+  OmakaseVttFile,
+  PeriodMarker,
+  SubtitlesVttTrack,
+  ThumbnailLane,
+  TimelineLaneApi,
+} from '@byomakase/omakase-player';
+import {Analysis, ChartAnalysis, TimelineLaneWithOptionalGroup, VisualReference} from '../../model/domain.model';
 import {Constants} from '../../shared/constants/constants';
 import {ColorUtil} from '../../util/color-util';
 import {CustomSubtitlesLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/custom-subtitles-lane';
 import {Store} from '@ngxs/store';
 import {TelemetryActions} from '../main/telemetry/telemetry.actions';
 import {ChartLegendActions} from '../main/chart-legend/chart-legend.actions';
-import {VideoControllerApi} from '@byomakase/omakase-player/dist/video/video-controller-api';
 import {TelemetryState} from '../main/telemetry/telemetry.state';
 import {Observable} from 'rxjs';
+import {OmpApiService} from '../../shared/components/omakase-player/omp-api.service';
 import SelectLane = TelemetryActions.SelectLane;
 import ShowLegend = ChartLegendActions.Show;
 import HideLegend = ChartLegendActions.Hide;
+import {AudioChannelLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/audio-channel-lane';
 
 export type TelemetryLane = TelemetryLineChartLane | TelemetryBarChartLane | TelemetryOgChartLane | TelemetryMarkerLane;
 
 const telemetryHideResolution = 1300;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TimelineService {
-
-  private _omakasePlayerApi?: OmakasePlayerApi;
-
   private _coloredLaneColorByIndex: Map<number, string> = new Map<number, string>();
   private _markerLaneStyleByName: Map<string, Partial<MarkerLaneStyle>> = new Map<string, Partial<MarkerLaneStyle>>();
   private _lineChartLaneStyleByName: Map<string, Partial<LineChartLaneStyle>> = new Map<string, Partial<LineChartLaneStyle>>();
 
   constructor(
-    protected store: Store
-  ) {
-  }
+    protected store: Store,
+    protected ompApiService: OmpApiService
+  ) {}
 
   createLaneByVisualReference(visualReference: VisualReference): TimelineLaneApi {
     switch (visualReference.type) {
       case 'thumbnails':
         return this.createThumbnailLane(visualReference);
       default:
-        throw new Error(`Visual reference type not recognized: ${visualReference.type}`)
+        throw new Error(`Visual reference type not recognized: ${visualReference.type}`);
     }
   }
 
-  createAnalysisLanes(analysis: Analysis[]): TimelineLaneApi[] {
-    let lanes: TimelineLaneApi[] = [];
-    analysis.filter(p => p.type === 'events' || p.type === 'event').forEach(analysis => {
-      let lane = this.createMarkerLane(analysis);
-      lanes.push(lane);
-    })
+  createAnalysisLanes(analysis: Analysis[]): TimelineLaneWithOptionalGroup<TimelineLaneApi>[] {
+    let lanes: TimelineLaneWithOptionalGroup<TimelineLaneApi>[] = [];
 
-    analysis.filter(p => p.type === 'chart').forEach(analysis => {
-      let lane: TelemetryLineChartLane | TelemetryOgChartLane | TelemetryBarChartLane;
-
-      if (analysis.visualization === 'line') {
-        lane = this.createLineChartLane(analysis);
+    analysis
+      .filter((p) => p.type === 'events' || p.type === 'event')
+      .forEach((analysis) => {
+        let lane = this.createMarkerLane(analysis) as TimelineLaneWithOptionalGroup<TelemetryMarkerLane>;
+        lane.group = analysis.group;
         lanes.push(lane);
-      }
+      });
 
-      if (analysis.visualization === 'bar') {
-        lane = this.createBarChartLane(analysis);
-        lanes.push(lane);
-      }
+    analysis
+      .filter((p) => p.type === 'chart')
+      .forEach((analysis) => {
+        let lane: TimelineLaneWithOptionalGroup<TelemetryLineChartLane | TelemetryBarChartLane | TelemetryOgChartLane>;
 
-      if (analysis.visualization === 'led') {
-        lane = this.createLedChartLane(analysis);
-        lanes.push(lane);
-      }
+        if (analysis.visualization === 'line') {
+          lane = this.createLineChartLane(analysis);
+          lanes.push(lane);
+        }
 
-      this.addTelemetryButton(lane!);
-    })
+        if (analysis.visualization === 'bar') {
+          lane = this.createBarChartLane(analysis);
+          lanes.push(lane);
+        }
+
+        if (analysis.visualization === 'led') {
+          lane = this.createLedChartLane(analysis);
+          lanes.push(lane);
+        }
+
+        lane!.group = analysis.group;
+        this.addTelemetryButton(lane!);
+      });
 
     return lanes;
   }
@@ -109,42 +126,42 @@ export class TimelineService {
           return new PeriodMarker({
             timeObservation: {
               start: cue.startTime,
-              end: cue.endTime
+              end: cue.endTime,
             },
             text: cue.text,
             editable: false,
             style: {
               ...style.markerStyle,
               ...Constants.PERIOD_MARKER_STYLE,
-            }
-          })
+            },
+          });
         } else if (analysis.visualization === 'point') {
           return new MomentMarker({
             timeObservation: {
-              time: cue.startTime
+              time: cue.startTime,
             },
             text: cue.text,
             editable: false,
             style: {
               ...style.markerStyle,
               ...Constants.MOMENT_MARKER_STYLE,
-            }
-          })
+            },
+          });
         } else {
-          throw new Error(`Unrecognized analysis visualization: ${analysis.visualization}`)
+          throw new Error(`Unrecognized analysis visualization: ${analysis.visualization}`);
         }
       },
       markerProcessFn: (marker, index) => {
         marker.onClick$.subscribe({
           next: (event) => {
-            console.debug(`Clicked on marker ${marker.id} : ${marker.text}`)
-          }
-        })
+            console.debug(`Clicked on marker ${marker.id} : ${marker.text}`);
+          },
+        });
       },
       style: {
         ...style,
-      }
-    })
+      },
+    });
 
     this.addTelemetryButton(lane);
 
@@ -166,14 +183,14 @@ export class TimelineService {
       lineStyleFn: (index, count) => {
         if (count > 1) {
           return {
-            ...this.resolveMultiLineChartLaneStyle(analysis, index)
-          }
+            ...this.resolveMultiLineChartLaneStyle(analysis, index),
+          };
         } else {
           return {
-            ...singleLineChartStyle
-          }
+            ...singleLineChartStyle,
+          };
         }
-      }
+      },
     });
 
     return lane;
@@ -188,39 +205,68 @@ export class TimelineService {
   }
 
   createSubtitlesLane(subtitlesVttTrack: SubtitlesVttTrack): CustomSubtitlesLane {
-    let lane = new CustomSubtitlesLane({
-      subtitlesVttTrack: subtitlesVttTrack,
-      description: ``,
-      style: {
-        ...Constants.SUBTITLES_LANE_STYLE
-      }
-    }, this._omakasePlayerApi!.subtitles);
+    let lane = new CustomSubtitlesLane(
+      {
+        subtitlesVttTrack: subtitlesVttTrack,
+        description: ``,
+        style: {
+          ...Constants.SUBTITLES_LANE_STYLE,
+        },
+      },
+      this.ompApiService.api!.subtitles
+    );
 
     return lane;
   }
 
-  getVideoController(): VideoControllerApi {
-    return (this._omakasePlayerApi as any)._videoController;
-  }
-
   getFirstTelemetryLane(): TimelineLaneApi | undefined {
-    return this._omakasePlayerApi?.timeline?.getTimelineLanes().find(lane => this.isTelemetryLane(lane));
+    return this.ompApiService.api?.timeline?.getTimelineLanes().find((lane) => this.isTelemetryLane(lane));
   }
 
   getTimelineLaneById(id: string): TimelineLaneApi | undefined {
-    return this._omakasePlayerApi?.timeline?.getTimelineLane(id);
+    return this.ompApiService.api?.timeline?.getTimelineLane(id);
   }
 
   getGroupingLanes(): BaseGroupingLane<any>[] | undefined {
-    return this._omakasePlayerApi?.timeline?.getTimelineLanes()?.filter(lane => lane instanceof VideoGroupingLane || lane instanceof AudioGroupingLane || lane instanceof TextTrackGroupingLane) as BaseGroupingLane<any>[];
+    return this.ompApiService.api?.timeline
+      ?.getTimelineLanes()
+      ?.filter((lane) => lane instanceof VideoGroupingLane || lane instanceof AudioGroupingLane || lane instanceof TextTrackGroupingLane) as BaseGroupingLane<any>[];
   }
 
   getTextGroupingLanes(): TextTrackGroupingLane[] | undefined {
-    return this._omakasePlayerApi?.timeline?.getTimelineLanes()?.filter(lane => lane instanceof TextTrackGroupingLane) as TextTrackGroupingLane[];
+    return this.ompApiService.api?.timeline?.getTimelineLanes()?.filter((lane) => lane instanceof TextTrackGroupingLane) as TextTrackGroupingLane[];
   }
 
   getSubtitleLaneForGroupingLane(lane: TextTrackGroupingLane): CustomSubtitlesLane | undefined {
-    return this._omakasePlayerApi?.timeline?.getTimelineLanes()?.find(l => l instanceof CustomSubtitlesLane && l.subtitlesVttTrack.label === lane.subtitlesVttTrack?.label) as CustomSubtitlesLane;
+    return this.ompApiService.api?.timeline?.getTimelineLanes()?.find((l) => l instanceof CustomSubtitlesLane && l.subtitlesVttTrack.label === lane.subtitlesVttTrack?.label) as CustomSubtitlesLane;
+  }
+
+  getAudioGroupingLanes(): AudioGroupingLane[] | undefined {
+    return this.ompApiService.api?.timeline?.getTimelineLanes()?.filter((lane) => lane instanceof AudioGroupingLane) as AudioGroupingLane[];
+  }
+
+  getAudioChannelLanes(): AudioChannelLane[] | undefined {
+    return this.ompApiService.api?.timeline?.getTimelineLanes()?.filter((lane) => lane instanceof AudioChannelLane) as AudioChannelLane[];
+  }
+
+  getThumbnailLane(): ThumbnailLane | undefined {
+    return this.ompApiService.api?.timeline?.getTimelineLanes()?.find((l) => l instanceof ThumbnailLane) as ThumbnailLane;
+  }
+
+  addTimelineLaneAtIndex(lane: TimelineLaneApi, index: number) {
+    this.ompApiService.api!.timeline!.addTimelineLaneAtIndex(lane, index);
+  }
+
+  removeTimelineLane(id: string) {
+    this.ompApiService.api!.timeline!.removeTimelineLane(id);
+  }
+
+  minimize(lane: TimelineLaneApi[]) {
+    this.ompApiService.api!.timeline!.minimizeTimelineLanes(lane);
+  }
+
+  maximize(lane: TimelineLaneApi[]) {
+    this.ompApiService.api!.timeline!.maximizeTimelineLanes(lane);
   }
 
   isTelemetryLane(lane: TimelineLaneApi): boolean {
@@ -229,7 +275,7 @@ export class TimelineService {
     }
     return !!(lane as TelemetryLane).vttFile?.extensionVersion;
   }
-  
+
   isAnalyticsLane(lane: TimelineLaneApi): boolean {
     return lane instanceof TelemetryLineChartLane || lane instanceof TelemetryBarChartLane || lane instanceof TelemetryOgChartLane || lane instanceof TelemetryMarkerLane;
   }
@@ -243,8 +289,8 @@ export class TimelineService {
       style: {
         ...Constants.THUMBNAIL_LANE_STYLE,
       },
-      vttUrl: visualReference.url
-    })
+      vttUrl: visualReference.url,
+    });
 
     // timelineLane.onClick$.subscribe((event) => {
     //   if (event.thumbnail.cue) {
@@ -252,6 +298,8 @@ export class TimelineService {
     //     })
     //   }
     // })
+
+    this.ompApiService.api!.setThumbnailVttUrl(visualReference.url);
 
     return timelineLane;
   }
@@ -282,7 +330,6 @@ export class TimelineService {
   }
 
   private resolveMultiLineChartLaneStyle(analysis: Analysis, index: number): Partial<LineChartLaneStyle> {
-
     const color = Constants.VARIABLES.lineColors[index % Constants.VARIABLES.lineColors.length];
 
     let style: Partial<LineChartLaneStyle> = {
@@ -300,8 +347,8 @@ export class TimelineService {
     let style: Partial<MarkerLaneStyle> = {
       ...Constants.MARKER_LANE_STYLE,
       markerStyle: {
-        color: color
-      }
+        color: color,
+      },
     };
 
     if (this._markerLaneStyleByName.has(analysis.name)) {
@@ -311,10 +358,6 @@ export class TimelineService {
     }
 
     return style;
-  }
-
-  set omakasePlayerApi(value: OmakasePlayerApi) {
-    this._omakasePlayerApi = value;
   }
 
   private resolveHeuristicColor(index: number): string {
@@ -329,17 +372,17 @@ export class TimelineService {
     let valueTransformFn: ((value: number) => number) | undefined;
 
     if (chartAnalysis.y_min !== void 0 && chartAnalysis.y_max !== void 0) {
-      if (chartAnalysis.y_min >= 0 && (chartAnalysis.y_max > chartAnalysis.y_min)) {
+      if (chartAnalysis.y_min >= 0 && chartAnalysis.y_max > chartAnalysis.y_min) {
         valueMax = chartAnalysis.y_max;
         valueMin = chartAnalysis.y_min;
-      } else if (chartAnalysis.y_min < 0 && chartAnalysis.y_max <= 0 && (chartAnalysis.y_min < chartAnalysis.y_max)) {
+      } else if (chartAnalysis.y_min < 0 && chartAnalysis.y_max <= 0 && chartAnalysis.y_min < chartAnalysis.y_max) {
         valueMax = Math.abs(chartAnalysis.y_min) - Math.abs(chartAnalysis.y_max);
         valueMin = Math.abs(chartAnalysis.y_max);
-        valueTransformFn =  (value: number) => {
+        valueTransformFn = (value: number) => {
           return valueMax! - Math.abs(value);
-        }
+        };
       } else if (chartAnalysis.y_min > chartAnalysis.y_max) {
-        throw new Error(`${type === 'bar' ? 'BarChartLane' : 'OgChartLane'} data with y_min: ${chartAnalysis.y_min} and y_max: ${chartAnalysis.y_max} not supported`)
+        throw new Error(`${type === 'bar' ? 'BarChartLane' : 'OgChartLane'} data with y_min: ${chartAnalysis.y_min} and y_max: ${chartAnalysis.y_max} not supported`);
       }
     }
 
@@ -352,9 +395,9 @@ export class TimelineService {
       valueTransformFn: valueTransformFn,
       valueInterpolationStrategy: 'max',
       style: {
-        ...style
-      }
-    }
+        ...style,
+      },
+    };
 
     let lane = type === 'bar' ? new TelemetryBarChartLane(config) : new TelemetryOgChartLane(config);
     return lane;
@@ -375,7 +418,7 @@ export class TimelineService {
             }
             const selectedLaneId = this.store.selectSnapshot(TelemetryState.selectedLaneId);
             this.store.dispatch(new SelectLane(selectedLaneId === lane.id ? undefined : lane.id));
-          }
+          },
         });
         if (lane instanceof TelemetryLineChartLane) {
           lane.telemetryButton!.onMouseEnter$.subscribe({
@@ -391,18 +434,18 @@ export class TimelineService {
               }
               const legendItems = rows.map((row, index) => ({
                 label: row.measurement ?? '',
-                color: (lane as any)._lineStyleFn ? (lane as any)._lineStyleFn(index, rows.length).fill : colors[index % colors.length]
-              }))
+                color: (lane as any)._lineStyleFn ? (lane as any)._lineStyleFn(index, rows.length).fill : colors[index % colors.length],
+              }));
               this.store.dispatch(new ShowLegend(legendItems));
-            }
+            },
           });
           lane.telemetryButton!.onMouseLeave$.subscribe({
             next: () => {
               this.store.dispatch(new HideLegend());
-            }
+            },
           });
         }
-      }
+      },
     });
   }
 }

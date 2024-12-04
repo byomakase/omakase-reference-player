@@ -29,6 +29,8 @@
 @import "icons";
 @import "dropdown";
 @import "checkbox";
+@import "color-picker";
+@import "inline-edit";
 
 @import "player-controls";
 @import "timeline-controls";
@@ -36,8 +38,16 @@
 @import "telemetry";
 @import "chart-legend";
 @import "timeline-config";
+@import "segmentation-list";
+@import "segmentation";
+@import "metadata-nav";
+@import "session-navigation";
+@import "status";
 
-html, body {
+@import "modal";
+
+html,
+body {
   height: 100%;
 }
 
@@ -47,32 +57,51 @@ header {
     height: 70px;
     padding: 0;
 
-    .navbar-brand {
-      img {
-        height: 36px;
+    .container-fluid {
+      padding: 0px 0px 0px 20px;
+      justify-content: unset;
+
+      .navbar-brand {
+        img {
+          height: 36px;
+        }
       }
-    }
 
-    #header-nav {
-      font-weight: 700;
-      font-size: 14px;
-      line-height: 20px;
+      #header-nav {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 20px;
 
-      ul.nav-tabs {
-        border: 0;
-
-        .nav-link {
-          color: $color-2;
-          min-width: 100px;
-          height: 43px;
+        ul.nav-tabs {
+          margin-top: auto;
           border: 0;
-          border-color: $black;
-          margin: 0;
 
-          &.active {
-            background-color: $color-6;
-            color: $white;
-            border-right: 1px solid $black;
+          .nav-item {
+            height: 34px;
+
+            &:first-child {
+              margin-left: 50px;
+            }
+          }
+
+          .nav-link {
+            display: flex;
+            align-items: center;
+            min-width: 80px;
+            border: 0;
+            font-weight: 400;
+            color: $color-2;
+            height: 100%;
+            border-color: $black;
+            padding: 8px 28px 6px 28px;
+            margin: 0;
+
+            &.active {
+              font-weight: 700;
+              background-color: $color-6;
+              color: $white;
+              border-right: 1px solid $black;
+            }
           }
         }
       }
@@ -85,76 +114,87 @@ main {
 }
 
 #north-pole {
-  border-bottom: 1px solid $color-5;
   background-color: $color-5;
 
-  #metadata-explorer-wrapper {
-    //overflow-y: scroll;
-    max-height: 0;
+  #left-section {
+    min-height: 0;
     min-width: 0;
 
-    @media (max-width: 1000px) { // down
-      display: none;
+    @media (max-width: 1000px) {
+      // down
+      display: none !important;
     }
 
-    #metadata-explorer {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
+    .left {
       border-right: 1px solid $color-5;
     }
 
-    #metadata-nav {
-      font-weight: 400;
-      font-size: 14px;
-      line-height: 20px;
-      background-color: $color-6;
-      padding-left: 30px;
+    #metadata-content-wrapper {
+      //overflow-y: scroll;
+      min-height: 0;
+      min-width: 0;
 
-      ul.nav-pills {
-        .nav-item {
-          height: 40px;
+      @media (max-width: 1000px) {
+        // down
+        display: none !important;
+      }
 
-          &:first-child {
-            .nav-link {
-              padding-left: 0;
-            }
-          }
-        }
+      #metadata-explorer {
+        display: flex;
+        flex-grow: 1;
+        height: 100%;
+        border-right: 1px solid $color-5;
+        overflow-y: auto;
+      }
 
-        .nav-link {
-          font-weight: 400;
-          color: $color-2;
-          background-color: $color-6;
+      #metadata-content {
+        display: flex;
+        flex-direction: column;
+        padding: 20px 30px;
+        flex-grow: 1;
+        overflow-x: auto;
+      }
 
-          border-radius: 0;
-          margin: 0;
-          height: 100%;
-          text-align: left;
-          padding-left: 20px;
-          padding-right: 20px;
+      #segmentation {
+        display: flex;
+        flex-grow: 1;
+        overflow-y: auto;
+        height: 100%;
+        border-right: 1px solid $color-5;
 
-          &.active {
-            font-weight: 800;
-            color: $white;
-            background-color: $color-6;
-          }
+        #segmentation-content {
+          flex-grow: 1;
+          padding: 30px;
         }
       }
     }
 
-    #metadata-content {
-      padding: 20px 30px;
-      flex-grow: 1;
-      overflow-y: auto;
-      overflow-x: auto;
+    #timeline-controls-wrapper-north {
+      @media (max-width: 1000px) {
+        // down
+        display: none;
+      }
+
+      #timeline-controls {
+        background-color: $color-6;
+        border-bottom: 1px solid $color-5;
+
+        @media (min-width: 1301px) {
+          // up
+          &.has-border {
+            border-right: 1px solid $color-5;
+          }
+        }
+      }
     }
   }
 
-  #vu-meter-wrapper, #telemetry-wrapper {
+  #vu-meter-wrapper,
+  #telemetry-wrapper {
+    border-bottom: 1px solid $color-5;
 
-
-    @media (max-width: 1300px) { // down
+    @media (max-width: 1300px) {
+      // down
       display: none;
     }
   }
@@ -163,24 +203,28 @@ main {
     min-height: 0;
     min-width: 600px;
 
-    @media (min-width: 2300px) { // up
+    @media (min-width: 2300px) {
+      // up
       //border: 1px solid yellow;
       min-width: 1000px;
       max-width: 1000px;
     }
 
-    @media (min-width: 1800px) and (max-width: 2300px) { // down
+    @media (min-width: 1800px) and (max-width: 2300px) {
+      // down
       //border: 1px solid red;
       min-width: 800px;
       max-width: 800px;
     }
 
-    @media (max-width: 1800px) { // down
+    @media (max-width: 1800px) {
+      // down
       //border: 1px solid green;
       width: 600px;
     }
 
-    @media (max-width: 1000px) { // down
+    @media (max-width: 1000px) {
+      // down
       //border: 1px solid blue;
       width: 100%;
     }
@@ -188,73 +232,107 @@ main {
     #player-controls {
       background-color: $color-1;
       border-left: 1px solid $color-5;
+      border-bottom: 1px solid $color-5;
     }
   }
 }
 
 #south-pole {
-  #timeline-controls {
-    height: 43px;
-    background-color: $color-6;
-    border-bottom: 1px solid $body-bg-dark;
+  #timeline-controls-wrapper-south {
+    @media (min-width: 1001px) {
+      // up
+      display: none;
+    }
+
+    #timeline-controls {
+      background-color: $color-6;
+      border-bottom: 1px solid $color-5;
+    }
   }
 
   #timeline {
     min-width: 500px;
+    width: 100%;
   }
 
   #timeline-configurator {
     overflow: hidden;
   }
+
+  #timeline-container {
+    position: relative;
+  }
+
+  #timeline-configurator-container {
+    position: absolute;
+    right: 0;
+    height: 100%;
+  }
 }
 
 .offcanvas {
-  @media (min-width: 1300px) { // up
+  @media (min-width: 1300px) {
+    // up
     --app-offcanvas-width: 50%;
   }
 
-  @media (max-width: 1300px) { // down
+  @media (max-width: 1300px) {
+    // down
     --app-offcanvas-width: 70%;
   }
 
-  @media (max-width: 1000px) { // down
+  @media (max-width: 1000px) {
+    // down
     --app-offcanvas-width: 100%;
   }
 }
 
-.modal-content {
-  --app-modal-bg: #454853;
-
-  .modal-header {
-    border: 0;
-    padding-bottom: 0;
-  }
-
-  .modal-body {
-    padding-top: 0;
-    text-align: center;
-
-    .robot-title {
-      text-align: center;
-      padding-top: 20px;
-      padding-bottom: 20px;
-
-      img {
-        padding-bottom: 35px;
-      }
-
-      h4 {
-        color: #FFE790;
-        border-bottom: 1px solid $color-7;
-        padding-bottom: 20px;
-        width: 100px;
-      }
+.modal-dialog {
+  &.info-modal {
+    h4 {
+      color: $color-2;
     }
   }
 
-  .modal-footer {
-    border: 0;
-    padding-top: 30px;
-    padding-bottom: 30px;
+  &.exception-modal {
+    h4 {
+      color: #ffe790;
+    }
+  }
+
+  .modal-content {
+    --app-modal-bg: #454853;
+
+    .modal-header {
+      border: 0;
+      padding-bottom: 0;
+    }
+
+    .modal-body {
+      padding-top: 0;
+      text-align: center;
+
+      .robot-title {
+        text-align: center;
+        padding-top: 20px;
+        padding-bottom: 20px;
+
+        img {
+          padding-bottom: 35px;
+        }
+
+        h4 {
+          border-bottom: 1px solid $color-7;
+          padding-bottom: 20px;
+          width: 100px;
+        }
+      }
+    }
+
+    .modal-footer {
+      border: 0;
+      padding-top: 30px;
+      padding-bottom: 30px;
+    }
   }
 }

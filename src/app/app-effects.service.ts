@@ -17,20 +17,57 @@
 import {Injectable} from '@angular/core';
 import {Actions, ofActionSuccessful} from '@ngxs/store';
 import {AppActions} from './shared/state/app.actions';
-import {ExceptionModalService} from './shared/components/exception-modal/exception-modal.service';
+import {ModalService} from './shared/components/modal/modal.service';
+import {OmpApiService} from './shared/components/omakase-player/omp-api.service';
+import {map, Observable, of, take, timeout} from 'rxjs';
 import ShowExceptionModal = AppActions.ShowExceptionModal;
+import ShowInfoModal = AppActions.ShowInfoModal;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AppEffectsService {
-
-  constructor(private actions$: Actions,
-              private errorModalService: ExceptionModalService) {
-
+  constructor(
+    private actions$: Actions,
+    private modalService: ModalService,
+    protected ompApiService: OmpApiService
+  ) {
     this.actions$.pipe(ofActionSuccessful(ShowExceptionModal)).subscribe((action) => {
-      this.errorModalService.open(action.exception);
-    })
+      this.modalService.exception(action.exception);
+    });
 
+    this.actions$.pipe(ofActionSuccessful(ShowInfoModal)).subscribe((action) => {
+      let modalRef = this.modalService.info(action.message);
+
+      if (action.autoclose) {
+        let closeOn$: Observable<boolean>;
+        switch (action.autoclose) {
+          case 'play':
+            closeOn$ = this.ompApiService.api!.video.onPlay$.pipe(map((p) => true));
+            break;
+          case 'fullscreen':
+            closeOn$ = this.ompApiService.api!.video.onFullscreenChange$.pipe(map((p) => true));
+            break;
+          default:
+            closeOn$ = of(true);
+            break;
+        }
+
+        closeOn$.pipe(take(1), timeout(60000)).subscribe({
+          next: () => {
+            if (modalRef) {
+              try {
+                modalRef.close();
+              } catch (e) {
+                // ignore
+              }
+            }
+          },
+          error: () => {
+            // ignore
+          },
+        });
+      }
+    });
   }
 }

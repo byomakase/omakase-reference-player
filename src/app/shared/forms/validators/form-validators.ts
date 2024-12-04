@@ -17,7 +17,6 @@
 import {AbstractControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 
 export class FormValidators {
-
   static VALID = null; // null marks validation as successful
 
   static alwaysValid(): ValidatorFn {
@@ -38,7 +37,6 @@ export class FormValidators {
       return positiveNegativeNumber.test(v) ? valid() : {number: true};
     };
   }
-
 }
 
 function valid(): null {

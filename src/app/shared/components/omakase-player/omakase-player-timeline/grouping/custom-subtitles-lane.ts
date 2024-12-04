@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {ConfigWithOptionalStyle, SubtitlesApi, SubtitlesLane, SubtitlesLaneConfig, SubtitlesVttTrack, Timeline} from '@byomakase/omakase-player';
-import {VideoControllerApi} from '@byomakase/omakase-player/dist/video/video-controller-api';
+import {ConfigWithOptionalStyle, SubtitlesApi, SubtitlesLane, SubtitlesLaneConfig, SubtitlesVttTrack, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
 
 export interface CustomSubtitlesLaneConfig extends SubtitlesLaneConfig {
   subtitlesVttTrack: SubtitlesVttTrack;
@@ -41,5 +40,4 @@ export class CustomSubtitlesLane extends SubtitlesLane {
   override prepareForTimeline(timeline: Timeline, videoController: VideoControllerApi) {
     super.prepareForTimeline(timeline, videoController);
   }
-
 }

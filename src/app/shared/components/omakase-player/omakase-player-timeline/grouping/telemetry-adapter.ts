@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ImageButton} from "@byomakase/omakase-player";
-import {Constants} from "../../../../constants/constants";
-import {TelemetryLane} from "../../../../../features/timeline/timeline.service";
+import {ImageButton} from '@byomakase/omakase-player';
+import {Constants} from '../../../../constants/constants';
+import {TelemetryLane} from '../../../../../features/timeline/timeline.service';
 import {TelemetryApi} from './telemetry-api';
 
 export class TelemetryAdapter implements TelemetryApi {
@@ -34,21 +34,15 @@ export class TelemetryAdapter implements TelemetryApi {
   }
 
   activateTelemetryIcon() {
-    this._telemetryButton
-      ?.setImage(Constants.IMAGE_BUTTONS.telemetryActive)
-      .subscribe();
+    this._telemetryButton?.setImage(Constants.IMAGE_BUTTONS.telemetryActive);
   }
 
   deactivateTelemetryIcon() {
-    this._telemetryButton
-      ?.setImage(Constants.IMAGE_BUTTONS.telemetryInactive)
-      .subscribe();
+    this._telemetryButton?.setImage(Constants.IMAGE_BUTTONS.telemetryInactive);
   }
 
   addTelemetryButton(listening: boolean) {
-    const icon = listening
-      ? Constants.IMAGE_BUTTONS.telemetryInactive
-      : Constants.IMAGE_BUTTONS.telemetryDisabled;
+    const icon = listening ? Constants.IMAGE_BUTTONS.telemetryInactive : Constants.IMAGE_BUTTONS.telemetryDisabled;
     this._telemetryButton = new ImageButton({
       ...icon,
       listening,
@@ -58,7 +52,7 @@ export class TelemetryAdapter implements TelemetryApi {
       timelineNode: this._telemetryButton,
       width: this._telemetryButton.config.width!,
       height: this._telemetryButton.config.height!,
-      justify: "start",
+      justify: 'start',
       margin: [0, 5, 0, 0],
     });
   }

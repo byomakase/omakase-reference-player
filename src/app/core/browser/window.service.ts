@@ -22,12 +22,10 @@ export type UserAgent = 'unknown' | 'android' | 'firefox' | 'edge' | 'chrome' | 
 export type UserAgentPlatform = 'unknown' | 'macos' | 'windows' | 'linux';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WindowService {
-
-  constructor(@Inject(WindowToken) private _window: Window) {
-  }
+  constructor(@Inject(WindowToken) private _window: Window) {}
 
   get window() {
     return this._window;
@@ -38,18 +36,18 @@ export class WindowService {
   }
 
   get userAgent(): UserAgent {
-    let userAgentText = this.navigator && this.navigator.userAgent || '';
-    if ((/Android/i).test(userAgentText)) {
+    let userAgentText = (this.navigator && this.navigator.userAgent) || '';
+    if (/Android/i.test(userAgentText)) {
       return 'android';
-    } else if ((/Firefox/i).test(userAgentText)) {
+    } else if (/Firefox/i.test(userAgentText)) {
       return 'firefox';
-    } else if ((/Edg/i).test(userAgentText)) {
+    } else if (/Edg/i.test(userAgentText)) {
       return 'edge';
-    } else if (((/Chrome/i).test(userAgentText) || (/CriOS/i).test(userAgentText)) && !(/Edg/i).test(userAgentText)) {
+    } else if ((/Chrome/i.test(userAgentText) || /CriOS/i.test(userAgentText)) && !/Edg/i.test(userAgentText)) {
       return 'chrome';
-    } else if ((/Chrome/i).test(userAgentText) || (/CriOS/i).test(userAgentText)) {
-      return 'chromium'
-    } else if ((/Safari/i).test(userAgentText)) {
+    } else if (/Chrome/i.test(userAgentText) || /CriOS/i.test(userAgentText)) {
+      return 'chromium';
+    } else if (/Safari/i.test(userAgentText)) {
       return 'safari';
     } else {
       return 'unknown';
@@ -60,11 +58,11 @@ export class WindowService {
     // @ts-ignore
     let platformText: string = this.navigator?.['userAgentData']?.platform || this.navigator?.platform;
     if (platformText?.toUpperCase().includes('MAC')) {
-      return 'macos'
+      return 'macos';
     } else if (platformText?.toUpperCase().includes('WIN')) {
-      return 'windows'
+      return 'windows';
     } else if (platformText?.toUpperCase().includes('LINUX')) {
-      return 'linux'
+      return 'linux';
     } else {
       return 'unknown';
     }
@@ -79,7 +77,6 @@ export class WindowService {
   }
 
   open(url: string, target: '_blank' | '_self' = '_blank') {
-    this.window.open(url, target)
+    this.window.open(url, target);
   }
-
 }

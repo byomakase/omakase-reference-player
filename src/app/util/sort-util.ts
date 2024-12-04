@@ -17,7 +17,7 @@
 /***
  * Modified version of https://github.com/studio-b12/natural-sort/blob/3540ff115ebb9b44b30429db459346aa3c2cd2bd/index.js
  */
-export function naturalSort<T>(options: { desc?: boolean, caseSensitive?: boolean } = {desc: false, caseSensitive: false}) {
+export function naturalSort<T>(options: {desc?: boolean; caseSensitive?: boolean} = {desc: false, caseSensitive: false}) {
   if (!options) {
     options = {};
   }
@@ -60,7 +60,7 @@ export function naturalSort<T>(options: { desc?: boolean, caseSensitive?: boolea
     // numeric, hex or date detection
 
     const xD = parseInt((x as any).match(hre), 16) || (xN.length !== 1 && Date.parse(x));
-    const yD = parseInt((y as any).match(hre), 16) || xD && y.match(dre) && Date.parse(y) || null;
+    const yD = parseInt((y as any).match(hre), 16) || (xD && y.match(dre) && Date.parse(y)) || null;
     let oFxNcL: any;
     let oFyNcL: any;
 
@@ -69,30 +69,29 @@ export function naturalSort<T>(options: { desc?: boolean, caseSensitive?: boolea
       // @ts-ignore
       if (xD < yD) {
         return smaller;
-      } else { // @ts-ignore
+      } else {
+        // @ts-ignore
         if (xD > yD) {
-                return greater;
-              } else {
-
-              }
+          return greater;
+        } else {
+        }
       }
     }
 
     // natural sorting through split numeric strings and default strings
     for (let cLoc = 0, numS = Math.max(xN.length, yN.length); cLoc < numS; cLoc++) {
-
       // find floats not starting with '0', string or 0 if not defined (Clint Priest)
-      oFxNcL = !(xN[cLoc] || '').match(ore) && parseFloat(xN[cLoc]) || xN[cLoc] || 0;
-      oFyNcL = !(yN[cLoc] || '').match(ore) && parseFloat(yN[cLoc]) || yN[cLoc] || 0;
+      oFxNcL = (!(xN[cLoc] || '').match(ore) && parseFloat(xN[cLoc])) || xN[cLoc] || 0;
+      oFyNcL = (!(yN[cLoc] || '').match(ore) && parseFloat(yN[cLoc])) || yN[cLoc] || 0;
 
       // handle numeric vs string comparison - number < string - (Kyle Adams)
       if (isNaN(oFxNcL) !== isNaN(oFyNcL)) {
-        return (isNaN(oFxNcL)) ? greater : smaller;
-      } else if (typeof oFxNcL !== typeof oFyNcL) { // rely on string comparison if different types - i.e. '02' < 2 != '02' < '2'
+        return isNaN(oFxNcL) ? greater : smaller;
+      } else if (typeof oFxNcL !== typeof oFyNcL) {
+        // rely on string comparison if different types - i.e. '02' < 2 != '02' < '2'
         oFxNcL += '';
         oFyNcL += '';
       } else {
-
       }
 
       if (oFxNcL < oFyNcL) {

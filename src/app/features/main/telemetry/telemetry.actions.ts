@@ -14,35 +14,34 @@
  * limitations under the License.
  */
 
-import {TelemetryCue} from './telemetry.state'
+import {TelemetryCue} from './telemetry.state';
 
 export namespace TelemetryActions {
-
-    export class Minimize {
-      static readonly type = '[Telemetry] Minimize'
-    }
-
-    export class Maximize {
-      static readonly type = '[Telemetry] Maximize'
-    }
-
-    export class ToggleMinimizeMaximize {
-      static readonly type = '[Telemetry] Toggle Minimize Maximize'
-    }
-
-    export class AnimationEventTriggered {
-      static readonly type = '[Telemetry] Animation Event Triggered'
-    }
-
-    export class SetCues {
-      static readonly type = '[Telemetry] Set Cues'
-
-      constructor(public cues: TelemetryCue[]) {}
-    }
-
-    export class SelectLane {
-      static readonly type = '[Telemetry] Select Lane'
-
-      constructor(public selectedLaneId: string | undefined) {}
-    }
+  export class Minimize {
+    static readonly type = '[Telemetry] Minimize';
   }
+
+  export class Maximize {
+    static readonly type = '[Telemetry] Maximize';
+  }
+
+  export class ToggleMinimizeMaximize {
+    static readonly type = '[Telemetry] Toggle Minimize Maximize';
+  }
+
+  export class AnimationEventTriggered {
+    static readonly type = '[Telemetry] Animation Event Triggered';
+  }
+
+  export class SetCues {
+    static readonly type = '[Telemetry] Set Cues';
+
+    constructor(public cues: TelemetryCue[]) {}
+  }
+
+  export class SelectLane {
+    static readonly type = '[Telemetry] Select Lane';
+
+    constructor(public selectedLaneId: string | undefined) {}
+  }
+}

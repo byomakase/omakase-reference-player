@@ -1,0 +1,27 @@
+#session-navigation {
+  background-color: $color-6;
+
+  .btn-group {
+    height: 40px;
+    padding-right: 10px;
+    gap: 10px;
+
+    .btn {
+      border-radius: 0 5px 0 0;
+      border: 0;
+      width: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0px 10px 0px 10px;
+
+      .icon {
+        svg {
+          path {
+            fill: none;
+          }
+        }
+      }
+    }
+  }
+}

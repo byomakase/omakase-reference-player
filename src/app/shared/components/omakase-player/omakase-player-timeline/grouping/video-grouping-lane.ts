@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {ConfigWithOptionalStyle, Timeline} from '@byomakase/omakase-player';
+import {ConfigWithOptionalStyle, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
 import {VideoMediaTrack} from '../../../../../model/domain.model';
 import {BaseGroupingLane, BaseGroupingLaneConfig} from './base-grouping-lane';
-import {VideoControllerApi} from '@byomakase/omakase-player/dist/video/video-controller-api';
 
 export interface VideoGroupingLaneConfig extends BaseGroupingLaneConfig {
   videoMediaTrack: VideoMediaTrack;
@@ -30,17 +29,17 @@ export class VideoGroupingLane extends BaseGroupingLane<VideoGroupingLaneConfig>
     super(config);
 
     this._videoMediaTrack = config.videoMediaTrack;
+  }
 
+  get mediaTrackId() {
+    return this._videoMediaTrack.id;
   }
 
   override prepareForTimeline(timeline: Timeline, videoController: VideoControllerApi) {
     super.prepareForTimeline(timeline, videoController);
 
-    this.updateStyles()
-
+    this.updateStyles();
   }
 
-  private updateStyles() {
-
-  }
+  private updateStyles() {}
 }

@@ -18,12 +18,10 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {StringUtil} from '../../util/string-util';
 
 @Pipe({
-  name: 'mixedCase'
+  name: 'mixedCase',
 })
 export class MixedCasePipe implements PipeTransform {
-
   transform(value: string): unknown {
     return StringUtil.toMixedCase(value);
   }
-
 }

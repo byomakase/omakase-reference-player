@@ -1,0 +1,87 @@
+.omakase-marker-list-wrapper {
+  height: 100%;
+  container-type: inline-size;
+}
+
+.omakase-marker-list-wrapper > div {
+  height: 100%;
+  flex-direction: column;
+  display: flex;
+}
+
+.omakase-marker-list-wrapper .header-cell {
+  font-size: 14px;
+  padding-bottom: 5px;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body {
+  font-size: 15px;
+  overflow-y: auto;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .flex-row {
+  background-color: rgba(104, 37, 153, 0.2);
+  border-bottom: 1px solid #655372;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .omakase-marker-list-row:first-child .flex-row {
+  border-top: 1px solid #655372;
+  border-radius: 0 5px 0 0;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .flex-row.bordered {
+  border-left: 1px solid #655372;
+  border-right: 1px solid #655372;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .active .flex-row {
+  background-color: rgba(0, 163, 233, 0.3);
+  border-bottom: 1px solid #00a3e9;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .active .flex-row.bordered {
+  border-left: 1px solid #00a3e9;
+  border-right: 1px solid #00a3e9;
+  border-top: 1px solid #00a3e9;
+  margin-top: -1px;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .omakase-marker-list-row.active:first-child .flex-row {
+  margin-top: 0;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .flex-cell {
+  height: 53px;
+  line-height: 53px;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .flex-cell-buttons {
+  text-align: right !important;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .active .icon-edit {
+  display: inline-block;
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .icon-edit {
+  display: none;
+  width: 14px;
+  height: 14px;
+  margin: 0 3px;
+  background-image: url(/assets/images/marker-list/edit.svg);
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .icon-delete {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 10px;
+  margin-left: 3px;
+  background-image: url(/assets/images/marker-list/delete.svg);
+}
+
+@container (max-width: 700px) {
+  .flex-hide {
+    display: none;
+  }
+}

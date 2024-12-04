@@ -18,11 +18,6 @@ import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-features',
-  template: `
-<app-layout>
-  <router-outlet></router-outlet>
-</app-layout>`,
+  template: `<router-outlet></router-outlet>`,
 })
-export class FeaturesComponent {
-
-}
+export class FeaturesComponent {}

@@ -21,7 +21,7 @@
   .segment {
     //padding-left: 0 !important;
     padding-top: 0 !important;
-    padding-bottom: 0  !important;
+    padding-bottom: 0 !important;
 
     //margin: 0 !important;
   }
@@ -29,14 +29,17 @@
   .segment-key {
     color: $color-2 !important;
   }
+
   .segment-type-boolean > .segment-main > .segment-value {
     color: lightskyblue !important;
   }
+
   .segment-type-string > .segment-main > .segment-value {
     color: lightgreen !important;
   }
+
   .segment-type-number > .segment-main > .segment-value {
-    color:  lightcoral !important;
+    color: lightcoral !important;
   }
 
   .segment-main {
@@ -50,5 +53,4 @@
       }
     }
   }
-
 }

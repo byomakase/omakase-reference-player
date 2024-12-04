@@ -14,63 +14,128 @@
   ~ limitations under the License.
   -->
 
-<main class="d-flex flex-column">
-  <div id="north-pole" class="d-flex" #northPole>
-    <div id="metadata-explorer-wrapper" class="flex-grow-1" #metadataExplorerWrapper>
-      @if (showMetadata$|async) {
-        <div appMetadataExplorer [sessionData]="sessionData"></div>
-      }
-    </div>
-    @if (hasTelemetryLane) {
-    <div id="telemetry-wrapper" #telemetryWrapper>
-      <div appTelemetry [videoApi]="omakasePlayerApi?.video" class="h-100" [ngClass]="{ 'has-vu-meter': isVuMeterSupported }"></div>
-    </div>
-   }
-    @if (isVuMeterSupported) {
-      <div id="vu-meter-wrapper">
-        <div appVuMeter [videoApi]="omakasePlayerApi?.video" class="h-100"></div>
+<app-layout>
+  <main class="d-flex flex-column" [ngSwitch]="activeTab">
+    @if (navBarAboveVideo) {
+      <div id="metadata-nav-wrapper" class="d-flex" #metadataExplorerNavWrapper>
+        @if (showMetadata$ | async) {
+          <div *ngSwitchCase="'qc'" class="d-flex flex-grow-1">
+            <div appMetadataExplorerNav [sessionData]="sessionData" (getNgbNav)="setNgbNav($event)"></div>
+            <div
+              appSessionNavigation
+              [sessionData]="sessionData"
+              [disableSessionButtons]="disableSessionButtons"
+              (onPreviousSession)="handleSessionChange($event)"
+              (onNextSession)="handleSessionChange($event)"></div>
+            <div appStatus [sessionData]="sessionData"></div>
+          </div>
+        }
+        <!-- this will be replaced with segmentation list -->
+        <div *ngSwitchCase="'segmentation'" class="d-flex flex-grow-1">
+          <div id="segmentation-list" appSegmentationList></div>
+          <div
+            appSessionNavigation
+            [sessionData]="sessionData"
+            [disableSessionButtons]="disableSessionButtons"
+            (onPreviousSession)="handleSessionChange($event)"
+            (onNextSession)="handleSessionChange($event)"></div>
+          <div appStatus [sessionData]="sessionData"></div>
+        </div>
       </div>
     }
-    <div id="player-wrapper" class="d-flex flex-column" #playerWrapper>
-      <div id="player-wrapper-inner" #playerWrapperInner>
-        @if (showPlayer$|async) {
-          <div appOmakasePlayerVideo (onReady)="onOmakasePlayerVideoReady($event)" [config]="OmakasePlayerConstants.OMAKASE_PLAYER_CONFIG"></div>
-          <div appPlayerControls [videoApi]="omakasePlayerApi?.video" [masterManifests]="masterManifests" [currentMasterManifest]="currentMasterManifest"
-               (onManifestChange)="handleManifestChange($event)"
-          ></div>
-        } @else {
-          <div class="placeholder placeholder-wave placeholder-player w-100"></div>
-          <div class="placeholder placeholder-wave placeholder-player-controls w-100"></div>
+    <div id="north-pole" class="d-flex" #northPole>
+      <div id="left-section" class="d-flex flex-column flex-grow-1" #leftSection>
+        @if (!navBarAboveVideo) {
+          <div id="metadata-nav-wrapper" class="d-flex left" #metadataExplorerNavWrapper>
+            @if (showMetadata$ | async) {
+              <div appMetadataExplorerNav *ngSwitchCase="'qc'" [sessionData]="sessionData" (getNgbNav)="setNgbNav($event)"></div>
+            }
+            <div *ngSwitchCase="'segmentation'" id="segmentation-list" appSegmentationList></div>
+          </div>
         }
+        <div id="metadata-content-wrapper" class="d-flex flex-grow-1" #metadataExplorerContentWrapper>
+          @if (showMetadata$ | async) {
+            @if (ngbNav) {
+              <div *ngSwitchCase="'qc'" appMetadataExplorerContent [ngbNav]="ngbNav"></div>
+            }
+          }
+          <div *ngSwitchCase="'segmentation'" id="segmentation">
+            <div id="segmentation-content" class="d-flex flex-column" appSegmentation></div>
+          </div>
+        </div>
+        <div id="timeline-controls-wrapper-north" #timelineControlsWrapperNorth>
+          <div
+            appTimelineControls
+            [timelineLanesAdded$]="timelineLanesAdded$"
+            [visibility]="groupingLanesVisibility"
+            [activeTab]="activeTab"
+            [disabled]="!groupingLanes"
+            [analysisGroups]="analysisGroups"
+            (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
+            (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
+            [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
+        </div>
+      </div>
+      @if (hasTelemetryLane) {
+        <div id="telemetry-wrapper" #telemetryWrapper>
+          <div appTelemetry class="h-100" [ngClass]="{'has-vu-meter': isVuMeterSupported}"></div>
+        </div>
+      }
+      @if (isVuMeterSupported) {
+        <div id="vu-meter-wrapper" #vuMeterWrapper>
+          <div appVuMeter class="h-100"></div>
+        </div>
+      }
+      <div id="player-wrapper" class="d-flex" #playerWrapper>
+        <div id="player-wrapper-inner" class="d-flex flex-column flex-grow-1" #playerWrapperInner>
+          @if (showPlayer$ | async) {
+            <div appOmakasePlayerVideo [config]="OmakasePlayerConstants.OMAKASE_PLAYER_CONFIG"></div>
+            <div
+              appPlayerControls
+              [masterManifests]="masterManifests"
+              [currentMasterManifest]="currentMasterManifest"
+              (onManifestChange)="handleManifestChange($event)"></div>
+          } @else {
+            <div class="placeholder placeholder-wave placeholder-player w-100"></div>
+            <div class="placeholder placeholder-wave placeholder-player-controls w-100"></div>
+          }
+        </div>
       </div>
     </div>
-  </div>
 
-  <div id="south-pole" class="flex-grow-1 d-flex flex-column">
-    <div class="d-flex">
-      <div id="timeline" class="flex-grow-1 d-flex flex-column">
-        <div class="flex-grow-1" appOmakasePlayerTimeline [omakasePlayerApi]="omakasePlayerApi" [config]="OmakasePlayerConstants.TIMELINE_CONFIG"
-             (onReady)="onOmakasePlayerTimelineReady($event)" (onSubtitlesLoaded)="onOmakasePlayerSubtitlesLoaded($event)">
-          <div class="h-100 d-flex flex-column">
-            <div class="flex-grow-1">
-              @for (index of [0, 1, 2]; track index) {
-                <div class="placeholder placeholder-wave placeholder-timeline-lane w-100 m"></div>
-                <div class="placeholder placeholder-wave placeholder-timeline-lane w-100 s"></div>
-                <div class="placeholder placeholder-wave placeholder-timeline-lane w-100 l"></div>
-              }
+    <div id="south-pole" class="flex-grow-1 d-flex flex-column">
+      <div id="timeline-controls-wrapper-south" #timelineControlsWrapperSouth>
+        <div
+          appTimelineControls
+          [timelineLanesAdded$]="timelineLanesAdded$"
+          [visibility]="groupingLanesVisibility"
+          [activeTab]="activeTab"
+          [disabled]="!groupingLanes"
+          [analysisGroups]="analysisGroups"
+          (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
+          (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
+          [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
+      </div>
+      <div id="timeline-container" class="d-flex">
+        <div id="timeline">
+          <div appOmakasePlayerTimeline [config]="OmakasePlayerConstants.TIMELINE_CONFIG" (onReady)="onOmakasePlayerTimelineReady($event)">
+            <div class="h-100 d-flex flex-column">
+              <div class="flex-grow-1">
+                @for (index of [0, 1, 2]; track index) {
+                  <div class="placeholder placeholder-wave placeholder-timeline-lane w-100 m"></div>
+                  <div class="placeholder placeholder-wave placeholder-timeline-lane w-100 s"></div>
+                  <div class="placeholder placeholder-wave placeholder-timeline-lane w-100 l"></div>
+                }
+              </div>
             </div>
           </div>
         </div>
+        @if (timelineLanesAdded$ | async) {
+          <div id="timeline-configurator-container" timelineConfigurator [visibility]="groupingLanesVisibility"></div>
+        }
       </div>
-      @if(timelineLoaded$ | async) {
-        <div timelineConfigurator [timelineApi]="omakasePlayerApi?.timeline"></div>
-      }
     </div>
 
-  </div>
-
-  <div appChartLegend></div>
-</main>
-
-
-
+    <div appChartLegend></div>
+  </main>
+</app-layout>

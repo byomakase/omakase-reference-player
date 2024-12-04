@@ -21,29 +21,19 @@ import {TimelineConfiguratorState} from '../../features/main/timeline-configurat
 import {VuMeterState} from '../../features/main/vu-meter/vu-meter.state';
 import {TelemetryState} from '../../features/main/telemetry/telemetry.state';
 
-export interface AppStateModel {
-
-}
+export interface AppStateModel {}
 
 @State<AppStateModel>({
   name: 'app',
-  defaults: {
-
-  },
-  children: [
-    TimelineConfiguratorState,
-    VuMeterState,
-    TelemetryState
-  ]
+  defaults: {},
+  children: [TimelineConfiguratorState, VuMeterState, TelemetryState],
 })
 @Injectable()
 export class AppState {
-
   @Select(AppState) state$!: Observable<AppStateModel>;
 
   @Selector()
   static APP(state: AppStateModel) {
     return state;
   }
-
 }

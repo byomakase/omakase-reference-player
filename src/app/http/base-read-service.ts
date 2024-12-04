@@ -17,12 +17,9 @@
 import {BaseHttpService} from './base-http-service';
 import {HttpClient, HttpParams} from '@angular/common/http';
 
-export interface ServiceFilter {
-
-}
+export interface ServiceFilter {}
 
 export abstract class BaseReadService<T, ID, F extends ServiceFilter> extends BaseHttpService {
-
   protected constructor(http: HttpClient, rootUrl: string) {
     super(http, rootUrl);
   }

@@ -120,7 +120,7 @@ export interface VisualReference {
   url: string;
 }
 
-export type VisualReferenceType = 'marker' | 'thumbnails' | 'waveform'
+export type VisualReferenceType = 'marker' | 'thumbnails' | 'waveform';
 
 export interface Analysis {
   id: string;
@@ -128,6 +128,7 @@ export interface Analysis {
   type: AnalysisType;
   visualization: AnalysisVisualization;
   url: string;
+  group?: string;
 }
 
 export interface ChartAnalysis extends Analysis {
@@ -136,8 +137,8 @@ export interface ChartAnalysis extends Analysis {
   scale: string;
 }
 
-export type AnalysisType = 'event' | 'events' | 'chart'
-export type AnalysisVisualization = 'marker' | 'point' | 'bar' | 'led' | 'line'
+export type AnalysisType = 'event' | 'events' | 'chart';
+export type AnalysisVisualization = 'marker' | 'point' | 'bar' | 'led' | 'line';
 
 export interface MediaTrack {
   id: string;
@@ -161,7 +162,7 @@ export interface AudioMediaTrack extends MediaTrack {
   visual_reference?: VisualReference[]; // can appear in media files without channels (ie. audio only files)
 }
 
-export type TextMediaTrackUsageType = 'subtitles' | 'fn_subtitles' | 'captions'
+export type TextMediaTrackUsageType = 'subtitles' | 'fn_subtitles' | 'captions';
 
 export interface TextMediaTrack extends MediaTrack {
   program_name: string;
@@ -194,6 +195,9 @@ export interface Layout {
   default_view: string;
   color_scheme: string;
   video_position: string;
+  qc?: boolean;
+  segmentation?: boolean;
+  approval?: boolean;
 }
 
 export interface Presentation {
@@ -212,6 +216,9 @@ export interface Presentation {
       channel_ids: number[];
       analysis_ids: number[];
     }[];
+    track_ordering?: string[];
+    visible_tracks?: string[];
+    visible_analysis_groups?: string[];
   };
 }
 
@@ -226,7 +233,7 @@ export interface BearerAuthenticationData {
   token: string;
 }
 
-export type AuthenticationType = 'none' | 'basic' | 'bearer'
+export type AuthenticationType = 'none' | 'basic' | 'bearer';
 
 export interface AuthenticationData {
   type: AuthenticationType;
@@ -248,6 +255,11 @@ export interface BearerAuthenticationData {
 
 export interface SessionData {
   authentication?: AuthenticationData;
+  session?: {
+    next?: string;
+    previous?: string;
+    status?: string;
+  };
   data: {
     source_info: SourceInfo[];
     media_info: MediaInfo[];
@@ -256,3 +268,5 @@ export interface SessionData {
     presentation: Presentation;
   };
 }
+
+export type TimelineLaneWithOptionalGroup<T> = T & {group?: string};

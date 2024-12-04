@@ -35,15 +35,22 @@ export class StringUtil {
   }
 
   public static toMixedCase(value: string): string {
-    return value.replace(/_/g, ' ').split(' ')
-      .map(word => {
-        return `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`
+    return value
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map((word) => {
+        return `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`;
       })
       .join(' ');
   }
 
   public static replaceWhitespace(searchValue: string, replaceValue: string): string {
-    return searchValue ? searchValue.trim().replace(/([\n ]*,[\n ]*|[\n ]+)/g, replaceValue).replace(new RegExp(`${replaceValue}$`), '') : searchValue;
+    return searchValue
+      ? searchValue
+          .trim()
+          .replace(/([\n ]*,[\n ]*|[\n ]+)/g, replaceValue)
+          .replace(new RegExp(`${replaceValue}$`), '')
+      : searchValue;
   }
 
   public static whitespacesToCommas(searchValue: string): string {
@@ -54,5 +61,3 @@ export class StringUtil {
     return value ? StringUtil.replaceWhitespace(value, ' ').split(' ') : void 0;
   }
 }
-
-

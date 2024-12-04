@@ -19,7 +19,6 @@ import {isNullOrUndefined} from '../../util/object-util';
 import {StringUtil} from '../../util/string-util';
 
 export class FormUtil {
-
   public static isFormControlNonEmptyAndValid(formControl: FormControl<string | null>): boolean {
     return !isNullOrUndefined(formControl) && formControl.valid && !StringUtil.isNullUndefinedOrWhitespace(formControl.value);
   }
@@ -50,13 +49,12 @@ export class FormUtil {
       .reduce((obj, [key, value]) => {
         return {
           ...obj,
-          [key]: value
+          [key]: value,
         };
-      }, {})
+      }, {});
   }
 
   public static isFormControlError(formControl: FormControl, errorName: string): boolean {
-    return formControl && !!formControl.errors && (formControl.errors[errorName] === true);
+    return formControl && !!formControl.errors && formControl.errors[errorName] === true;
   }
-
 }

@@ -33,13 +33,24 @@
     font-size: 13px;
   }
 
-  .btn-group-player-controls, .btn-group-speed {
-    height: 45px;
+  .btn-group-player-controls,
+  .btn-group-speed,
+  .btn-group-manifest {
+    height: 42px;
+
+    @media (min-width: 650px) and (max-width: 1000px), (min-width: 1900px) {
+      height: 45px;
+    }
   }
 
   .btn-group-player-controls {
     .btn {
       width: 35px;
+      height: 42px;
+
+      @media (min-width: 650px) and (max-width: 1000px), (min-width: 1900px) {
+        height: 45px;
+      }
 
       i {
         font-size: 11pt;
@@ -69,9 +80,24 @@
       border-radius: 0;
       margin-left: 8px;
     }
+  }
 
-    .btn-fullscreen {
-      width: 40px;
+  .btn-group {
+    .btn-fullscreen,
+    .btn-safezone,
+    .btn-detach {
+      height: 42px;
+      padding: 0;
+      width: 30px;
+
+      @media (min-width: 650px) and (max-width: 1000px), (min-width: 1900px) {
+        // down
+        //border: 1px solid red;
+        width: 40px;
+        height: 45px;
+      }
+
+      //background-color: red;
     }
   }
 
@@ -125,13 +151,12 @@
     }
   }
 
-
   $volume-control-width: 97px;
 
   $volume-control-track-width: 55px;
   $volume-control-track-color: #000000;
   $volume-control-track-disabled-color: #000000;
-  $volume-control-track-progress-color: #3E44FE;
+  $volume-control-track-progress-color: #3e44fe;
   $volume-control-track-disabled-progress-color: #464646;
 
   $volume-control-track-height: 5px;
@@ -177,7 +202,6 @@
     }
 
     &.muted {
-
     }
 
     // baseline, reset styles
@@ -197,9 +221,10 @@
       width: 0;
       //width: $volume-control-track-width;
       padding-right: 0;
-      transition: .2s ease;
+      transition: 0.2s ease;
 
-      &:hover, &:active {
+      &:hover,
+      &:active {
         width: $volume-control-track-width;
         //background-color: deeppink;
       }
@@ -236,9 +261,9 @@
 
       &::-webkit-slider-runnable-track {
         background-image: linear-gradient(
-            90deg,
-            var(--app-volume-control-track-progress-color) var(--app-volume-control-progress-percent),
-            var(--app-volume-control-track-color) var(--app-volume-control-progress-percent)
+          90deg,
+          var(--app-volume-control-track-progress-color) var(--app-volume-control-progress-percent),
+          var(--app-volume-control-track-color) var(--app-volume-control-progress-percent)
         );
       }
 
@@ -262,9 +287,9 @@
       // progress
       &::-moz-range-progress {
         background-image: linear-gradient(
-            90deg,
-            var(--app-volume-control-track-progress-color) var(--app-volume-control-progress-percent),
-            var(--app-volume-control-track-color) var(--app-volume-control-progress-percent)
+          90deg,
+          var(--app-volume-control-track-progress-color) var(--app-volume-control-progress-percent),
+          var(--app-volume-control-track-color) var(--app-volume-control-progress-percent)
         );
       }
     }

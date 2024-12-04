@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {ClickEvent, ConfigWithOptionalStyle, SubtitlesApi, SubtitlesVttTrack, TextLabel, Timeline} from '@byomakase/omakase-player';
+import {ClickEvent, ConfigWithOptionalStyle, SubtitlesApi, SubtitlesVttTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
 import {Constants} from '../../../../constants/constants';
 import {BaseGroupingLane, BaseGroupingLaneConfig} from './base-grouping-lane';
 import {TextMediaTrack} from '../../../../../model/domain.model';
 import {SubtitlesControlImageButton} from './subtitles-control/subtitles-control-image-button';
 import {takeUntil} from 'rxjs';
 import {StringUtil} from '../../../../../util/string-util';
-import {VideoControllerApi} from '@byomakase/omakase-player/dist/video/video-controller-api';
 
 export interface TextTrackGroupingLaneConfig extends BaseGroupingLaneConfig {
   textMediaTrack: TextMediaTrack;
@@ -42,8 +41,8 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
     super({
       ...config,
       style: {
-        ...Constants.LABEL_LANE_STYLE
-      }
+        ...Constants.LABEL_LANE_STYLE,
+      },
     });
 
     this._subtitlesApi = subtitlesApi;
@@ -57,18 +56,22 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
       srcActive: `${Constants.IMAGES_ROOT}/icon-chatbox-active.svg`,
       srcDisabled: `${Constants.IMAGES_ROOT}/icon-chatbox-disabled.svg`,
       width: 22,
-      height: 22
-    })
+      height: 22,
+    });
 
-    let languageLabel = StringUtil.isNonEmpty(this._textMediaTrack.language) ? this._textMediaTrack.language : (StringUtil.isNonEmpty(this._subtitlesVttTrack?.language) ? this._subtitlesVttTrack!.language : void 0);
+    let languageLabel = StringUtil.isNonEmpty(this._textMediaTrack.language)
+      ? this._textMediaTrack.language
+      : StringUtil.isNonEmpty(this._subtitlesVttTrack?.language)
+        ? this._subtitlesVttTrack!.language
+        : void 0;
     if (languageLabel) {
       this._languageLabel = new TextLabel({
         text: languageLabel.substring(0, 2).toUpperCase(),
         style: {
           ...Constants.TEXT_LABEL_STYLE_2,
-          align: 'left'
-        }
-      })
+          align: 'left',
+        },
+      });
     }
 
     this.addTimelineNode({
@@ -76,7 +79,7 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
       width: this._subtitlesControlButton.dimension.width,
       height: this._subtitlesControlButton.dimension.height,
       justify: 'start',
-      margin: [0, 8, 0, 0]
+      margin: [0, 8, 0, 0],
     });
 
     if (this._languageLabel) {
@@ -85,8 +88,8 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
         width: 30,
         height: 20,
         justify: 'start',
-        margin: [0, 5, 0, 0]
-      })
+        margin: [0, 5, 0, 0],
+      });
     }
   }
 
@@ -97,27 +100,27 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
       this._subtitlesApi.onShow$.pipe(takeUntil(this._destroyed$)).subscribe({
         next: (event) => {
           this.updateStyles();
-        }
-      })
+        },
+      });
 
       this._subtitlesApi.onHide$.pipe(takeUntil(this._destroyed$)).subscribe({
         next: (event) => {
           this.updateStyles();
-        }
-      })
+        },
+      });
 
       this._subtitlesControlButton.timelineNode.onClick$.pipe(takeUntil(this._destroyed$)).subscribe({
         next: (event: ClickEvent) => {
           this.setTextTrack();
-        }
-      })
+        },
+      });
 
       this._textLabel!.onClick$.pipe(takeUntil(this._destroyed$)).subscribe({
         next: (event: ClickEvent) => {
           event.cancelableEvent.cancelBubble = true;
           this.setTextTrack();
-        }
-      })
+        },
+      });
     }
 
     this.updateStyles();
@@ -126,21 +129,17 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
   private updateStyles() {
     if (!this.isDisabled) {
       if (this.isActive) {
-
         this.style = {
-          ...Constants.LABEL_LANE_STYLE_ACTIVE
-        }
+          ...Constants.LABEL_LANE_STYLE_ACTIVE,
+        };
         this._subtitlesControlButton.state = 'active';
-
       } else {
-
         this.style = {
-          ...Constants.LABEL_LANE_STYLE
-        }
+          ...Constants.LABEL_LANE_STYLE,
+        };
         this._subtitlesControlButton.state = 'default';
       }
     }
-
   }
 
   setTextTrack() {
@@ -155,8 +154,8 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
   }
 
   get isActive(): boolean {
-    let currentTrack = this._subtitlesApi.getCurrentTrack();
-    return !!currentTrack && !currentTrack.hidden && (this._subtitlesVttTrack!.id === currentTrack.id);
+    let currentTrack = this._subtitlesApi.getActiveTrack();
+    return !!currentTrack && !currentTrack.hidden && this._subtitlesVttTrack!.id === currentTrack.id;
   }
 
   get isDisabled(): boolean {
@@ -169,5 +168,9 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
 
   set subtitlesVttTrack(subtitlesVttTrack: SubtitlesVttTrack | undefined) {
     this._subtitlesVttTrack = subtitlesVttTrack;
+  }
+
+  get mediaTrackId() {
+    return this._textMediaTrack.id;
   }
 }

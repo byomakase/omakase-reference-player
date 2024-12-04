@@ -1,56 +1,58 @@
 .app-dropdown {
+  width: 100%;
+  background-color: $color-12;
+  border-radius: 0;
+  height: 35px;
 
-    width: 100%;
-    background-color: $color-12;
-    border-radius: 0;
-    height: 35px;
-
-    &.small {
-        height: 26px;
-
-        .dropdown-toggle {
-            padding: 0 12px;
-        }
-    }
+  &.small {
+    height: 26px;
 
     .dropdown-toggle {
-        border-radius: 0;
-        text-align: left;
-        font-size: 13px;
-        padding: 0.375rem 20px;
-        border: none;
+      padding: 0 12px;
+    }
+  }
 
-        .dropdown-toggle-text {
-            max-width: 310px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: inline-block;
-        }
+  .dropdown-toggle {
+    border-radius: 0;
+    text-align: left;
+    font-size: 13px;
+    padding: 0.375rem 20px;
+    border: none;
+    display: flex;
+    align-items: center;
 
-        &::after {
-            border: none !important;
-            background-image: url(/assets/images/timeline/icon-chevron-down.svg);
-            width: 18px;
-            height: 18px;
-            float: right;
-            background-size: 100%;
-            margin-right: 2px;
-        }
+    .dropdown-toggle-text {
+      max-width: 310px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+      height: 18px;
     }
 
-    .dropdown-menu {
-        width: 100%;
-        border-radius: 0;
-
-        .dropdown-item {
-            font-size: 13px;
-            padding: 0.375rem 20px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            &.active {
-                background-color: $color-11;
-            }
-        }
+    &::after {
+      border: none !important;
+      background-image: url(/assets/images/timeline/icon-chevron-down.svg);
+      width: 18px;
+      height: 18px;
+      float: right;
+      background-size: 100%;
+      margin-right: 2px;
     }
+  }
 
+  .dropdown-menu {
+    width: 100%;
+    border-radius: 0;
+
+    .dropdown-item {
+      font-size: 13px;
+      padding: 0.375rem 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.active {
+        background-color: $color-11;
+      }
+    }
+  }
 }

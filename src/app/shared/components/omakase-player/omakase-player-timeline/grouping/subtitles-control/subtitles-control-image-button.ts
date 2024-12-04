@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {ImageButton} from '@byomakase/omakase-player';
+import {Dimension, ImageButton, TimelineNode} from '@byomakase/omakase-player';
 import {SubtitlesControl, SubtitlesControlState} from './subtitles-control';
-import {TimelineNode} from '@byomakase/omakase-player/dist/timeline/timeline-component';
-import {Dimension} from '@byomakase/omakase-player/dist/common/measurement';
 
 export interface SubtitlesControlConfig {
   srcDefault: string;
@@ -40,7 +38,7 @@ export class SubtitlesControlImageButton implements SubtitlesControl {
       src: this._config.disabled ? this._config.srcDisabled : this._config.srcDefault,
       width: this._config.width,
       height: this._config.height,
-      listening: !this._config.disabled
+      listening: !this._config.disabled,
     });
   }
 
@@ -64,8 +62,8 @@ export class SubtitlesControlImageButton implements SubtitlesControl {
     this._button.setImage({
       src: newSrc,
       width: this._config.width,
-      height: this._config.height
-    }).subscribe()
+      height: this._config.height,
+    });
   }
 
   get timelineNode(): TimelineNode {
@@ -75,7 +73,7 @@ export class SubtitlesControlImageButton implements SubtitlesControl {
   get dimension(): Dimension {
     return {
       width: this._config.width,
-      height: this._config.height
-    }
+      height: this._config.height,
+    };
   }
 }

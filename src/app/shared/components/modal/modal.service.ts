@@ -18,32 +18,58 @@ import {Injectable} from '@angular/core';
 import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {ExceptionModalComponent} from './exception-modal.component';
 import {Exception} from '../../../core/exception/exception.model';
+import {InfoModalComponent} from './info-modal.component';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class ExceptionModalService {
-
+export class ModalService {
   private _modalRef?: NgbModalRef;
+  private _exceptionModalRef?: NgbModalRef;
 
-  constructor(private ngbModal: NgbModal) {
-  }
+  constructor(private ngbModal: NgbModal) {}
 
-  open(exception: Exception) {
+  open(modal: any): NgbModalRef | undefined {
     if (!this._modalRef) {
-      this._modalRef = this.ngbModal.open(ExceptionModalComponent, {
+      this._modalRef = this.ngbModal.open(modal, {
         fullscreen: 'md',
-        modalDialogClass: 'exception-modal',
       });
     }
 
     this._modalRef.dismissed.subscribe({
       next: () => {
         this._modalRef = undefined;
-      }
+      },
     });
 
-    (this._modalRef.componentInstance as ExceptionModalComponent).addException(exception);
+    return this._modalRef;
+  }
 
+  exception(exception: Exception) {
+    if (!this._exceptionModalRef) {
+      this._exceptionModalRef = this.ngbModal.open(ExceptionModalComponent, {
+        fullscreen: 'md',
+        modalDialogClass: 'exception-modal',
+      });
+    }
+
+    this._exceptionModalRef.dismissed.subscribe({
+      next: () => {
+        this._exceptionModalRef = undefined;
+      },
+    });
+
+    (this._exceptionModalRef.componentInstance as ExceptionModalComponent).addException(exception);
+  }
+
+  info(message: string): NgbModalRef {
+    let modalRef = this.ngbModal.open(InfoModalComponent, {
+      fullscreen: 'md',
+      modalDialogClass: 'info-modal',
+    });
+
+    (modalRef.componentInstance as InfoModalComponent).addMessage(message);
+
+    return modalRef;
   }
 }

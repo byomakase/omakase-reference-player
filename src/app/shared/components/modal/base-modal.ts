@@ -26,8 +26,7 @@ export abstract class BaseModal implements OnDestroy {
    */
   protected onDestroy$ = new Subject<void>();
 
-  protected constructor(public activeModal: NgbActiveModal) {
-  }
+  protected constructor(public activeModal: NgbActiveModal) {}
 
   ngOnDestroy() {
     this.onDestroy$.next();

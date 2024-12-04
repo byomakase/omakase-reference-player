@@ -19,7 +19,6 @@ import {TelemetryAdapter} from './telemetry-adapter';
 import {TelemetryApi} from './telemetry-api';
 
 export class TelemetryLineChartLane extends LineChartLane implements TelemetryApi {
-
   private _adapter: TelemetryAdapter = new TelemetryAdapter(this);
 
   constructor(config: ConfigWithOptionalStyle<LineChartLaneConfig>) {

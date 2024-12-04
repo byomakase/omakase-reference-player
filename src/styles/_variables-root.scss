@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
-@import 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap';
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap");
+@import "https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap";
 
 $font-family-nunito: "Nunito Sans", sans-serif;
-$font-family-open-sans: 'Open Sans', sans-serif;
+$font-family-open-sans: "Open Sans", sans-serif;
 
-$color-1: #353742; // TODO rename
-$color-2: #CACFEA;
+$color-1: #353742;
+$color-2: #cacfea;
 $color-3: #1c1628;
 $color-4: #655372;
-$color-5: #13141B;
-$color-6: #3A3D4B;
-$color-7: #292D43;
-$color-8: #FDF5AD;
+$color-5: #13141b;
+$color-6: #3a3d4b;
+$color-7: #292d43;
+$color-8: #fdf5ad;
 $color-9: #444964;
-$color-10: #494D5E;
-$color-11: #00A3E9;
+$color-10: #494d5e;
+$color-11: #00a3e9;
 $color-12: #525979;
 $color-13: #568349;
-$color-14: #464A5C;
-$color-15: #4C5273;
+$color-14: #464a5c;
+$color-15: #4c5273;
 $color-16: #717796;
+$color-17: #4c5273;
 
-$font-1: $font-family-open-sans; // TODO rename
+$font-1: $font-family-open-sans;

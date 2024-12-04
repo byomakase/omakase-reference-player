@@ -14,55 +14,68 @@
  * limitations under the License.
  */
 
-import {AudioTrackLaneStyle, BarChartLaneStyle, ConfigWithOptionalStyle, LabelLaneStyle, LineChartLaneStyle, OgChartLaneStyle, OmakasePlayerConfig, ScrubberLaneStyle, SubtitlesLaneStyle, TextLabelStyle, ThumbnailLaneStyle, TimelineConfig, TimelineLaneStyle} from '@byomakase/omakase-player';
-import {PeriodMarkerStyle} from '@byomakase/omakase-player/dist/timeline/marker/period-marker';
+import {
+  AudioTrackLaneStyle,
+  BarChartLaneStyle,
+  ConfigWithOptionalStyle,
+  LabelLaneStyle,
+  LineChartLaneStyle,
+  OgChartLaneStyle,
+  OmakasePlayerConfig,
+  PeriodMarkerStyle,
+  ScrubberLaneStyle,
+  SubtitlesLaneStyle,
+  TextLabelStyle,
+  ThumbnailLaneStyle,
+  TimelineConfig,
+  TimelineLaneStyle,
+} from '@byomakase/omakase-player';
 
 export class Constants {
-
   static IMAGES_ROOT = '/assets/images/timeline';
 
   static IMAGE_BUTTONS = {
     circleMinus: {
       src: `${Constants.IMAGES_ROOT}/icon-circle-minus.svg`,
       width: 42,
-      height: 42
+      height: 42,
     },
     circlePlus: {
       src: `${Constants.IMAGES_ROOT}/icon-circle-plus.svg`,
       width: 42,
-      height: 42
+      height: 42,
     },
     chevronDown: {
       src: `${Constants.IMAGES_ROOT}/icon-chevron-down.svg`,
       width: 20,
-      height: 20
+      height: 20,
     },
     chevronRight: {
       src: `${Constants.IMAGES_ROOT}/icon-chevron-right.svg`,
       width: 20,
-      height: 20
+      height: 20,
     },
     telemetryActive: {
       src: `${Constants.IMAGES_ROOT}/icon-telemetry-active.svg`,
       width: 20,
-      height: 20
+      height: 20,
     },
     telemetryInactive: {
       src: `${Constants.IMAGES_ROOT}/icon-telemetry-inactive.svg`,
       width: 20,
-      height: 20
+      height: 20,
     },
     telemetryDisabled: {
       src: `${Constants.IMAGES_ROOT}/icon-telemetry-disabled.svg`,
       width: 20,
-      height: 20
+      height: 20,
     },
     config: {
       src: `${Constants.IMAGES_ROOT}/icon-gear.svg`,
       width: 20,
-      height: 20
-    }
-  }
+      height: 20,
+    },
+  };
 
   static VARIABLES = {
     text: {
@@ -75,17 +88,19 @@ export class Constants {
 
     lineColors: ['#C306E2', '#1079DA', '#37E03E', '#F54A4A', '#F9D726', '#CECECE'],
 
+    segmentationColors: ['#CE9DD6', '#9DADD6', '#62C0A4', '#E5EAA2', '#FFBB79', '#F57F65', '#D69D9D', '#E335FF', '#316BFF', '#15EBAB', '#EEFF2F', '#FF8E21', '#FF3306', '#FF7272'],
+
     timelineLaneMarginBottom: 1,
 
     audioTrackLaneFillGradientColorStops: [0, '#747DAF', 0.33, '#8D8BB0', 0.5, '#A499B1', 0.59, '#C2AAB1', 0.78, '#D5B5B2', 0.93, '#E2BDB2', 1, '#F3C6B3'],
-  }
+  };
 
   static COLORS = {
     blue: '#00A3E9',
-    white: '#FFFFFF'
-  }
+    white: '#FFFFFF',
+  };
 
-  static OMAKASE_PLAYER_CONFIG: Partial<OmakasePlayerConfig> = {
+  static OMAKASE_PLAYER_COMMON_CONFIG: Partial<OmakasePlayerConfig> = {
     hls: {
       debug: false,
       fragLoadPolicy: {
@@ -95,18 +110,27 @@ export class Constants {
           timeoutRetry: {
             maxNumRetry: 4,
             retryDelayMs: 0,
-            maxRetryDelayMs: 0
+            maxRetryDelayMs: 0,
           },
           errorRetry: {
             maxNumRetry: 6,
             retryDelayMs: 3000,
-            maxRetryDelayMs: 8000
-          }
-        }
+            maxRetryDelayMs: 8000,
+          },
+        },
       },
-      // backBufferLength: 90
-      maxMaxBufferLength: 30
-    }
+      maxMaxBufferLength: 30,
+    },
+  };
+
+  static OMAKASE_PLAYER_CONFIG: Partial<OmakasePlayerConfig> = {
+    ...this.OMAKASE_PLAYER_COMMON_CONFIG,
+    detachedPlayerUrl: '/detached',
+  };
+
+  static OMAKASE_PLAYER_DETACHED_CONFIG: Partial<OmakasePlayerConfig> = {
+    ...this.OMAKASE_PLAYER_COMMON_CONFIG,
+    detachedPlayer: true,
   };
 
   static TIMELINE_CONFIG: Partial<ConfigWithOptionalStyle<TimelineConfig>> = {
@@ -154,7 +178,7 @@ export class Constants {
       playheadBackgroundFill: '#83899E',
       playheadBackgroundOpacity: 1,
       playheadTextYOffset: -14,
-      playheadTextFontSize: 12,
+      playheadTextFill: 'transparent',
 
       playheadLineWidth: 2,
       playheadSymbolHeight: 12,
@@ -171,7 +195,7 @@ export class Constants {
       scrubberTextFontSize: 12,
 
       scrubberMarginBottom: Constants.VARIABLES.timelineLaneMarginBottom,
-    }
+    },
   };
 
   static TIMELINE_LANE_STYLE: Partial<TimelineLaneStyle> = {
@@ -181,19 +205,19 @@ export class Constants {
     descriptionTextFill: Constants.VARIABLES.text.fill,
     marginBottom: Constants.VARIABLES.timelineLaneMarginBottom,
 
-    descriptionTextFontSize: 13
-  }
+    descriptionTextFontSize: 13,
+  };
 
   static THUMBNAIL_LANE_STYLE: Partial<ThumbnailLaneStyle> = {
     ...Constants.TIMELINE_LANE_STYLE,
     height: 69,
-    thumbnailHeight: 69
-  }
+    thumbnailHeight: 69,
+  };
 
   static MARKER_LANE_STYLE: Partial<TimelineLaneStyle> = {
     ...Constants.TIMELINE_LANE_STYLE,
-    height: 36
-  }
+    height: 36,
+  };
 
   static PERIOD_MARKER_STYLE: Partial<PeriodMarkerStyle> = {
     symbolType: 'none',
@@ -201,11 +225,13 @@ export class Constants {
     selectedAreaOpacity: 0,
     lineOpacity: 0,
     markerHandleAreaOpacity: 1,
-  }
+  };
 
   static MOMENT_MARKER_STYLE: Partial<PeriodMarkerStyle> = {
-    symbolType: 'circle'
-  }
+    symbolType: 'square',
+    symbolSize: 16,
+    lineOpacity: 0,
+  };
 
   static SCRUBBER_LANE_STYLE: Partial<ScrubberLaneStyle> = {
     backgroundFill: '#3A3D4B',
@@ -216,8 +242,8 @@ export class Constants {
 
     timecodeFill: Constants.VARIABLES.text.fill,
 
-    descriptionTextFill: Constants.VARIABLES.text.fill
-  }
+    descriptionTextFill: Constants.VARIABLES.text.fill,
+  };
 
   static LABEL_LANE_STYLE: Partial<LabelLaneStyle> = {
     ...Constants.TIMELINE_LANE_STYLE,
@@ -229,50 +255,50 @@ export class Constants {
     textAreaStretch: false, // we just want text as link, not entire label lane area
     descriptionTextYOffset: -2,
     height: 36,
-  }
+  };
 
   static LABEL_LANE_STYLE_ACTIVE: Partial<LabelLaneStyle> = {
     // rightBackgroundFill: '#4C6BD8',
     rightBackgroundFill: Constants.COLORS.blue,
     rightBackgroundOpacity: 1,
-  }
+  };
 
   static CUSTOM_AUDIO_TRACK_LANE_STYLE: Partial<AudioTrackLaneStyle> = {
     ...Constants.TIMELINE_LANE_STYLE,
     height: 40,
     maxSampleFillLinearGradientColorStops: Constants.VARIABLES.audioTrackLaneFillGradientColorStops,
-    minSampleFillLinearGradientColorStops: Constants.VARIABLES.audioTrackLaneFillGradientColorStops.map(p => (typeof p === 'number') ? (1 - p) : p)
-  }
+    minSampleFillLinearGradientColorStops: Constants.VARIABLES.audioTrackLaneFillGradientColorStops.map((p) => (typeof p === 'number' ? 1 - p : p)),
+  };
 
   static LINE_CHART_LANE_STYLE: Partial<LineChartLaneStyle> = {
     ...Constants.TIMELINE_LANE_STYLE,
     pointWidth: 5,
     lineStrokeWidth: 2,
-    paddingTop: 3,      // to ensure that related to lineStrokeWidth, min or max values are visible
-    paddingBottom: 3,   // to ensure that related to lineStrokeWidth, min or max values are visible
-    height: 100
-  }
+    paddingTop: 3, // to ensure that related to lineStrokeWidth, min or max values are visible
+    paddingBottom: 3, // to ensure that related to lineStrokeWidth, min or max values are visible
+    height: 100,
+  };
 
   static BAR_CHART_LANE_STYLE: Partial<BarChartLaneStyle> = {
     ...Constants.TIMELINE_LANE_STYLE,
-    paddingTop: 3,      // to ensure that related to lineStrokeWidth, min or max values are visible
-    paddingBottom: 3,   // to ensure that related to lineStrokeWidth, min or max values are visible
+    paddingTop: 3, // to ensure that related to lineStrokeWidth, min or max values are visible
+    paddingBottom: 3, // to ensure that related to lineStrokeWidth, min or max values are visible
     height: 100,
     interpolationWidth: 10,
     itemCornerRadius: 10,
     itemPadding: 4,
     // itemFillLinearGradientColorStops: Constants.VARIABLES.audioTrackLaneFillGradientColorStops.map(p => (typeof p === 'number') ? (1 - p) : p)
-  }
+  };
 
   static OG_CHART_LANE_STYLE: Partial<OgChartLaneStyle> = {
     ...Constants.TIMELINE_LANE_STYLE,
-    paddingTop: 3,      // to ensure that related to lineStrokeWidth, min or max values are visible
-    paddingBottom: 3,   // to ensure that related to lineStrokeWidth, min or max values are visible
+    paddingTop: 3, // to ensure that related to lineStrokeWidth, min or max values are visible
+    paddingBottom: 3, // to ensure that related to lineStrokeWidth, min or max values are visible
     height: 100,
     interpolationWidth: 10,
     itemPadding: 4,
     // itemFillLinearGradientColorStops: Constants.VARIABLES.audioTrackLaneFillGradientColorStops.map(p => (typeof p === 'number') ? (1 - p) : p)
-  }
+  };
 
   static SUBTITLES_LANE_STYLE: Partial<SubtitlesLaneStyle> = {
     ...Constants.TIMELINE_LANE_STYLE,
@@ -280,8 +306,8 @@ export class Constants {
     subtitlesLaneItemOpacity: 1,
     subtitlesLaneItemFill: '#F3C6B3',
     paddingTop: 7,
-    paddingBottom: 7
-  }
+    paddingBottom: 7,
+  };
 
   static TEXT_LABEL_STYLE: Partial<TextLabelStyle> = {
     fill: Constants.VARIABLES.text.fill,
@@ -289,13 +315,13 @@ export class Constants {
     fontSize: 13,
     align: 'left',
     verticalAlign: 'middle',
-    offsetY: -2
-  }
+    offsetY: -2,
+  };
 
   static TEXT_LABEL_STYLE_2: Partial<TextLabelStyle> = {
     ...Constants.TEXT_LABEL_STYLE,
-    fill: '#ffffff'
-  }
+    fill: '#ffffff',
+  };
 
   static TEXT_LABEL_BUTTON_STYLE: Partial<TextLabelStyle> = {
     fontFamily: Constants.VARIABLES.text.fontFamily,
@@ -306,28 +332,28 @@ export class Constants {
     backgroundFill: '#CACFEA',
     backgroundBorderRadius: 2,
     offsetY: -2,
-  }
+  };
 
   static SOUND_LABEL_BUTTON_STYLE: Partial<TextLabelStyle> = {
     ...Constants.TEXT_LABEL_BUTTON_STYLE,
-    backgroundBorderRadius: [0, 2, 2, 0]
-  }
+    backgroundBorderRadius: [0, 2, 2, 0],
+  };
 
   static TEXT_LABEL_BUTTON_ACTIVE_STYLE: Partial<TextLabelStyle> = {
     ...Constants.TEXT_LABEL_BUTTON_STYLE,
     fill: Constants.COLORS.white,
-    backgroundFill: Constants.COLORS.blue
-  }
+    backgroundFill: Constants.COLORS.blue,
+  };
 
   static SOUND_LABEL_BUTTON_ACTIVE_STYLE: Partial<TextLabelStyle> = {
     ...Constants.SOUND_LABEL_BUTTON_STYLE,
     fill: Constants.COLORS.white,
-    backgroundFill: Constants.COLORS.blue
-  }
+    backgroundFill: Constants.COLORS.blue,
+  };
 
   static TEXT_LABEL_BUTTON_DISABLED_STYLE: Partial<TextLabelStyle> = {
     ...Constants.TEXT_LABEL_BUTTON_STYLE,
     fill: '#CACFEA',
-    backgroundFill: '#6D738F'
-  }
+    backgroundFill: '#6D738F',
+  };
 }

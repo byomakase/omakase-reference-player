@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import { ChartLegendItem } from './chart-legend.state'
+import {ChartLegendItem} from './chart-legend.state';
 
 export namespace ChartLegendActions {
+  export class Show {
+    static readonly type = '[Chart Legend] Show';
 
-    export class Show {
-      static readonly type = '[Chart Legend] Show'
-
-      constructor(public items: ChartLegendItem[]) {}
-    }
-  
-    export class Hide {
-      static readonly type = '[Chart Legend] Hide'
-    }
-  
+    constructor(public items: ChartLegendItem[]) {}
   }
+
+  export class Hide {
+    static readonly type = '[Chart Legend] Hide';
+  }
+}

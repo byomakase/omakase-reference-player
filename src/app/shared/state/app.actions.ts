@@ -17,12 +17,18 @@
 import {Exception} from '../../core/exception/exception.model';
 
 export namespace AppActions {
-
   export class ShowExceptionModal {
-    static readonly type = '[Exception] Show exception modal'
+    static readonly type = '[Modal] Show exception modal';
 
-    constructor(public exception: Exception) {
-    }
+    constructor(public exception: Exception) {}
   }
 
+  export class ShowInfoModal {
+    static readonly type = '[Modal] Show info modal';
+
+    constructor(
+      public message: string,
+      public autoclose?: 'play' | 'fullscreen'
+    ) {}
+  }
 }

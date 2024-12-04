@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import {TextLabel} from '@byomakase/omakase-player';
+import {Dimension, TextLabel, TimelineNode} from '@byomakase/omakase-player';
 import {SoundControl, SoundControlState} from './sound-control';
 import {Constants} from '../../../../../constants/constants';
-import {TimelineNode} from '@byomakase/omakase-player/dist/timeline/timeline-component';
 import {CanvasUtil} from '../../../../../../util/canvas-util';
-import {Dimension} from '@byomakase/omakase-player/dist/common/measurement';
+import {TextLabelStyle} from '@byomakase/omakase-player/dist/timeline/timeline-component';
 
 export interface SoundControlTextButtonConfig {
+  state: SoundControlState;
   text: string;
-  disabled: boolean;
   width: number;
   height: number;
 }
@@ -35,45 +34,44 @@ export class SoundControlTextButton implements SoundControl {
 
   constructor(config: SoundControlTextButtonConfig) {
     this._config = config;
-    this._state = this._config.disabled ? 'disabled' : 'default';
+    this._state = this._config.state;
     this._textLabel = new TextLabel({
       text: this._config.text,
-      listening: !this._config.disabled,
-      style: {
-        ...(this._config.disabled ? Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE : Constants.TEXT_LABEL_BUTTON_STYLE),
-      }
+      listening: true,
+      style: this.resolveStyle(this._config.state),
     });
   }
 
   set state(value: SoundControlState) {
     this._state = value;
 
-    switch (this._state) {
-      case 'default':
-        this._textLabel.style = {
-          ...Constants.TEXT_LABEL_BUTTON_STYLE
-        }
-        break;
-      case 'active':
-        this._textLabel.style = {
-          ...Constants.TEXT_LABEL_BUTTON_ACTIVE_STYLE
-        }
-        break;
-      case 'disabled':
-        this._textLabel.style = {
-          ...Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE
-        }
-        break;
-    }
+    this._textLabel.style = this.resolveStyle(this._state);
 
     switch (this._state) {
       case 'muted':
-        this._textLabel.konvaNode.clipFunc(CanvasUtil.createCrossedRectClipFunc(this._config.width, this._config.height, 3))
+        this._textLabel.konvaNode.clipFunc(CanvasUtil.createCrossedRectClipFunc(this._config.width, this._config.height, 3));
         break;
       default:
         // @ts-ignore
-        this._textLabel.konvaNode.clipFunc(void 0)
+        this._textLabel.konvaNode.clipFunc(void 0);
         break;
+    }
+  }
+
+  protected resolveStyle(state: SoundControlState): Partial<TextLabelStyle> {
+    switch (this._state) {
+      case 'active':
+        return {
+          ...Constants.TEXT_LABEL_BUTTON_ACTIVE_STYLE,
+        };
+      case 'disabled':
+        return {
+          ...Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE,
+        };
+      default:
+        return {
+          ...Constants.TEXT_LABEL_BUTTON_STYLE,
+        };
     }
   }
 
@@ -84,7 +82,7 @@ export class SoundControlTextButton implements SoundControl {
   get dimension(): Dimension {
     return {
       width: this._config.width,
-      height: this._config.height
-    }
+      height: this._config.height,
+    };
   }
 }

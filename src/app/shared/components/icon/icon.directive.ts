@@ -18,24 +18,25 @@ import {ChangeDetectorRef, Directive, ElementRef, HostBinding, Input, OnChanges,
 import {IconName, IconService} from './icon.service';
 
 @Directive({
-  selector: 'i[appIcon]'
+  selector: 'i[appIcon]',
 })
 export class IconDirective implements OnChanges {
   @Input() appIcon?: IconName;
 
   @HostBinding('class.icon') cssClassIcon = true;
 
-  constructor(private elementRef: ElementRef,
-              private changeDetectorRef: ChangeDetectorRef,
-              private appIconService: IconService) {
-  }
+  constructor(
+    private elementRef: ElementRef,
+    private changeDetectorRef: ChangeDetectorRef,
+    private appIconService: IconService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges) {
     let name: IconName = changes['appIcon'].currentValue;
 
     let cssClassFriendlyName = name ? name.replace(/[^a-z0-9_-]/gi, '-') : '';
 
-    this.elementRef.nativeElement.classList.add(`icon`, `${cssClassFriendlyName}`)
+    this.elementRef.nativeElement.classList.add(`icon`, `${cssClassFriendlyName}`);
 
     const html = this.appIconService.getIconHtml(name);
 

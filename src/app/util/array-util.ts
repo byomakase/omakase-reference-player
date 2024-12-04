@@ -16,6 +16,6 @@
 
 export class ArrayUtil {
   static range(start: number, end: number): number[] {
-    return Array.from({length: (end + 1 - start)}, (v, k) => k + start);
+    return Array.from({length: end + 1 - start}, (v, k) => k + start);
   }
 }

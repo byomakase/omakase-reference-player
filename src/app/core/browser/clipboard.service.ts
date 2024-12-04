@@ -18,12 +18,10 @@ import {Injectable} from '@angular/core';
 import {fromPromise} from 'rxjs/internal/observable/innerFrom';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ClipboardService {
-
-  constructor() {
-  }
+  constructor() {}
 
   writeText(data: string) {
     fromPromise(navigator.clipboard.writeText(data)).subscribe();

@@ -16,25 +16,15 @@
 
 import {NgModule} from '@angular/core';
 
-const DIRECTIVES: any[] = []
+const DIRECTIVES: any[] = [];
 
-const MODULES: any[] = []
+const MODULES: any[] = [];
 
-const VALIDATORS: any[] = []
+const VALIDATORS: any[] = [];
 
 @NgModule({
-  declarations: [
-    ...DIRECTIVES
-  ],
-  imports: [
-    ...MODULES,
-    ...VALIDATORS
-  ],
-  exports: [
-    ...MODULES,
-    ...DIRECTIVES,
-    ...VALIDATORS
-  ]
+  declarations: [...DIRECTIVES],
+  imports: [...MODULES, ...VALIDATORS],
+  exports: [...MODULES, ...DIRECTIVES, ...VALIDATORS],
 })
-export class FormsModule {
-}
+export class FormsModule {}

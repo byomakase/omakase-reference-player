@@ -30,6 +30,7 @@ import {CustomErrorHandler} from './shared/handlers/custom-error-handler';
 import {VuMeterState} from './features/main/vu-meter/vu-meter.state';
 import {TelemetryState} from './features/main/telemetry/telemetry.state';
 import {ChartLegendState} from './features/main/chart-legend/chart-legend.state';
+import {SegmentationState} from './features/main/segmentation/segmentation.state';
 
 function initializeApp(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -44,27 +45,25 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: () => initializeApp,
       deps: [AppEffectsService, LocalStorageService],
-      multi: true
+      multi: true,
     },
     {
       provide: WindowToken,
-      useFactory: windowProvider
+      useFactory: windowProvider,
     },
     // https://angular.io/guide/standalone-components
     importProvidersFrom([
-      NgxsModule.forRoot([AppState, TimelineConfiguratorState, VuMeterState, TelemetryState, ChartLegendState], {
-        developmentMode: true
+      NgxsModule.forRoot([AppState, TimelineConfiguratorState, VuMeterState, TelemetryState, ChartLegendState, SegmentationState], {
+        developmentMode: true,
       }),
       NgxsReduxDevtoolsPluginModule.forRoot(),
       BrowserAnimationsModule,
-      HttpClientModule
+      HttpClientModule,
     ]),
     {
       provide: ErrorHandler,
       useClass: CustomErrorHandler,
-      deps: [
-        Store
-      ]
+      deps: [Store],
     },
-  ]
+  ],
 };

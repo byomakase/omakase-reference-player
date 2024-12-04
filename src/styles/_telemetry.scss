@@ -23,7 +23,6 @@
 
   // expandable frame
   .telemetry-frame {
-
     .telemetry-header {
       height: 40px;
       background-color: $color-7;
@@ -85,18 +84,18 @@
       }
 
       .telemetry-cue-footer {
-        background-color: #494D5E;
+        background-color: #494d5e;
         color: rgba(255, 255, 255, 0.5);
         font-size: 11px;
         padding: 2.5px 20px;
         line-height: 15px;
 
-        .telemetry-start-time, .telemetry-end-time {
+        .telemetry-start-time,
+        .telemetry-end-time {
           display: inline-block;
           min-width: 120px;
         }
       }
-
     }
 
     .telemetry-placeholder {
@@ -107,13 +106,15 @@
     }
 
     &.minimized {
-      .telemetry-title, .telemetry-content {
+      .telemetry-title,
+      .telemetry-content {
         display: none !important;
       }
     }
 
     &.maximized {
-      .expand-button, .telemetry-placeholder {
+      .expand-button,
+      .telemetry-placeholder {
         display: none !important;
       }
     }
@@ -127,7 +128,8 @@
       border: 0;
     }
 
-    .btn-minimize, .btn-maximize {
+    .btn-minimize,
+    .btn-maximize {
       width: 50px;
       background-size: 30px 30px;
     }

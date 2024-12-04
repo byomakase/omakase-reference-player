@@ -17,10 +17,9 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'filesize'
+  name: 'filesize',
 })
 export class FilesizePipe implements PipeTransform {
-
   transform(value: number, ...args: unknown[]): unknown {
     if (value === 0) {
       return '0 Bytes';
@@ -32,5 +31,4 @@ export class FilesizePipe implements PipeTransform {
 
     return parseFloat((value / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
-
 }

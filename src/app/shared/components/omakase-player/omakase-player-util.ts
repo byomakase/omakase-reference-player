@@ -16,20 +16,19 @@
 
 import {HelpMenuGroup, HelpMenuItem, OmakasePlayerApi} from '@byomakase/omakase-player';
 import {ArrayUtil} from '../../../util/array-util';
-import { UserAgent } from '../../../core/browser/window.service';
+import {UserAgent} from '../../../core/browser/window.service';
 
 const playerPlaybackRateList = [0.25, 0.5, 0.75, 1, 2, 4, 8];
 
 export class OmakasePlayerUtil {
-
   public static getKeyboardShortcutsHelpMenuGroup(platform: 'unknown' | 'macos' | 'windows' | 'linux'): HelpMenuGroup {
     let keyCombination = (...keys: string[]) => {
-      return keys.join(' + ')
-    }
+      return keys.join(' + ');
+    };
 
     let multipleCombinations = (...keys: string[]) => {
-      return keys.join(', ')
-    }
+      return keys.join(', ');
+    };
 
     let shiftKey = 'shift'.toUpperCase();
     let ctrlKey = 'ctrl'.toUpperCase();
@@ -39,135 +38,134 @@ export class OmakasePlayerUtil {
     let playbackRate: HelpMenuItem[] = ArrayUtil.range(2, 8).map((p, index) => {
       return {
         description: `Playback Speed rate ${playerPlaybackRateList[index]}x`,
-        name: keyCombination(ctrlKey, shiftKey, `${p}`)
-      }
-    })
-
+        name: keyCombination(ctrlKey, shiftKey, `${p}`),
+      };
+    });
 
     let helpMenuItems: HelpMenuItem[] = [
       {
         description: 'Play / Pause',
-        name: keyCombination('Space')
+        name: keyCombination('Space'),
       },
       {
         description: 'Toggle Mute',
-        name: keyCombination('m')
+        name: keyCombination('m'),
       },
       {
         description: 'Toggle Text On / Off',
-        name: keyCombination('s')
+        name: keyCombination('s'),
       },
 
       {
         description: 'Collapse / Expand All Timeline Rows',
-        name: keyCombination(ctrlKey, shiftKey, 's')
+        name: keyCombination(ctrlKey, shiftKey, 's'),
       },
       {
         description: 'Toggle Next Audio Track',
-        name: keyCombination(shiftKey, 'a')
+        name: keyCombination(shiftKey, 'a'),
       },
       {
         description: 'Toggle Previous Audio Track',
-        name: keyCombination('a')
+        name: keyCombination('a'),
       },
       {
         description: 'Toggle Next Text Track',
-        name: keyCombination(shiftKey, 't')
+        name: keyCombination(shiftKey, 't'),
       },
       {
         description: 'Toggle Previous Text Track',
-        name: keyCombination('t')
+        name: keyCombination('t'),
       },
       {
         description: 'Toggle Next Channel of Active Audio Track',
-        name: keyCombination(shiftKey, 'c')
+        name: keyCombination(shiftKey, 'c'),
       },
       {
         description: 'Toggle Previous Channel of Active Audio Track',
-        name: keyCombination('c')
+        name: keyCombination('c'),
       },
       {
         description: 'One Frame Forward',
-        name: keyCombination('Arrow Right')
+        name: keyCombination('Arrow Right'),
       },
 
       {
         description: 'One Frame Backward',
-        name: keyCombination('Arrow Left')
+        name: keyCombination('Arrow Left'),
       },
 
       {
         description: '10 Frames Forward',
-        name: keyCombination(ctrlKey, shiftKey, 'Arrow Right')
+        name: keyCombination(ctrlKey, shiftKey, 'Arrow Right'),
       },
 
       {
         description: '10 Frames Backwards',
-        name: keyCombination(ctrlKey, shiftKey, 'Arrow Left')
+        name: keyCombination(ctrlKey, shiftKey, 'Arrow Left'),
       },
 
       {
         description: 'One Second Forward',
-        name: keyCombination(shiftKey, 'Arrow Up')
+        name: keyCombination(shiftKey, 'Arrow Up'),
       },
 
       {
         description: 'One Second Backward',
-        name: keyCombination(shiftKey, 'Arrow Down')
+        name: keyCombination(shiftKey, 'Arrow Down'),
       },
 
       {
         description: 'Ten Seconds Forward',
-        name: keyCombination(ctrlKey, shiftKey, 'Arrow Up')
+        name: keyCombination(ctrlKey, shiftKey, 'Arrow Up'),
       },
 
       {
         description: 'Ten Seconds Backward',
-        name: keyCombination(ctrlKey, shiftKey, 'Arrow Down')
+        name: keyCombination(ctrlKey, shiftKey, 'Arrow Down'),
       },
 
       {
         description: 'Video in Full Screen',
-        name: keyCombination('f')
+        name: keyCombination('f'),
       },
       ...playbackRate,
       {
         description: 'Timeline Zoom level 100%',
-        name: keyCombination(ctrlKey, '0')
+        name: keyCombination(ctrlKey, '0'),
       },
 
       {
         description: 'Timeline Zoom In',
-        name: keyCombination('=')
+        name: keyCombination('='),
       },
 
       {
         description: 'Timeline Zoom Out',
-        name: keyCombination('_')
+        name: keyCombination('_'),
       },
 
       {
         description: 'Increase Volume',
-        name: keyCombination(shiftKey, 'v')
+        name: keyCombination(shiftKey, 'v'),
       },
       {
         description: 'Increase Volume',
-        name: keyCombination(shiftKey, 'v')
+        name: keyCombination(shiftKey, 'v'),
       },
       {
         description: 'Reduce Volume',
-        name: keyCombination('v')
+        name: keyCombination('v'),
       },
       // {
       //   description: 'Launch Configuration Panel',
       //   name: keyCombination(ctrlKey, shiftKey, 'c')
       // },
-    ]
+    ];
 
     return {
       name: $localize`Keyboard shortcuts`,
-      items: [...helpMenuItems]
-    }
+      items: [...helpMenuItems],
+    };
   }
 
   /**
@@ -179,14 +177,19 @@ export class OmakasePlayerUtil {
   public static handleKeyboardEvent(event: KeyboardEvent, omakasePlayer: OmakasePlayerApi, userAgent?: UserAgent): boolean {
     let config = {
       zoomStep: 200,
-      volumeStep: 0.1
+      volumeStep: 0.1,
+    };
+
+    const targetElement = event.target as HTMLElement;
+    const formInputs = ['INPUT', 'TEXTAREA'];
+    if (formInputs.includes(targetElement.tagName.toUpperCase())) {
+      return false;
     }
 
     if (omakasePlayer && omakasePlayer.video) {
-
-
       //  Play / Pause
-      if (event.code === 'Space' && (userAgent !== 'safari' || !omakasePlayer.video.isFullscreen())) { // enabled only in non-fullscreen mode for safari
+      if (event.code === 'Space' && (userAgent !== 'safari' || !omakasePlayer.video.isFullscreen())) {
+        // enabled only in non-fullscreen mode for safari
         omakasePlayer.video.togglePlayPause();
         return true;
       }
@@ -205,7 +208,7 @@ export class OmakasePlayerUtil {
 
       if (['ArrowLeft', 'ArrowRight'].includes(event.key)) {
         let upOrDown = event.key === 'ArrowRight' ? 1 : -1;
-        let amount = (event.ctrlKey && event.shiftKey) ? 10 : 1;
+        let amount = event.ctrlKey && event.shiftKey ? 10 : 1;
 
         if (omakasePlayer.video.isPlaying()) {
           omakasePlayer.video.pause();
@@ -248,7 +251,7 @@ export class OmakasePlayerUtil {
       // Playback speed
       if (event.shiftKey && event.ctrlKey) {
         let mapping = ArrayUtil.range(2, 8).reduce((map, p, index) => {
-          map.set(`Digit${p}`, playerPlaybackRateList[index])
+          map.set(`Digit${p}`, playerPlaybackRateList[index]);
           return map;
         }, new Map<string, number>());
 

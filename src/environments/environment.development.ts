@@ -19,5 +19,5 @@ import {Environment} from './environment.model';
 export const environment: Environment = {
   envName: 'development',
   apiUrl: 'OVERRIDEN',
-  useProxy: true
+  useProxy: true,
 };

@@ -32,5 +32,25 @@ export class ColorUtil {
     } else {
       return hexColor;
     }
-  };
+  }
+
+  static getContrastingTextColor(backgroundColor: string): string {
+    if (!/^#([0-9A-Fa-f]{3}){1,2}$/.test(backgroundColor)) {
+      throw new Error('Invalid hex color format.');
+    }
+
+    const hex = backgroundColor.length === 4 ? '#' + [...backgroundColor.slice(1)].map((char) => char + char).join('') : backgroundColor;
+
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    const luminance = (channel: number) => {
+      const c = channel / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+    const relativeLuminance = 0.2126 * luminance(r) + 0.7152 * luminance(g) + 0.0722 * luminance(b);
+
+    return relativeLuminance > 0.5 ? '#000000' : '#ffffff';
+  }
 }

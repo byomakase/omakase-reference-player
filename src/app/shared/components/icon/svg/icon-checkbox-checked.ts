@@ -24,4 +24,4 @@ export const IconCheckboxChecked = `<svg width="18" height="18" viewBox="0 0 18 
 <rect width="18" height="18" fill="white"/>
 </clipPath>
 </defs>
-</svg>`
+</svg>`;

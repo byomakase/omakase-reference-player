@@ -15,15 +15,18 @@
  */
 
 import {Injectable} from '@angular/core';
+import {BehaviorSubject} from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LayoutService {
   private _title: string | undefined;
 
-  constructor() {
-  }
+  private _activeTab: string = 'qc';
+  showTabs$ = new BehaviorSubject<boolean>(false);
+
+  constructor() {}
 
   get title(): string | undefined {
     return this._title;
@@ -31,6 +34,14 @@ export class LayoutService {
 
   set title(value: string | undefined) {
     this._title = value;
+  }
+
+  set activeTab(value: string) {
+    this._activeTab = value;
+  }
+
+  get activeTab(): string {
+    return this._activeTab;
   }
 
   clearTitle() {

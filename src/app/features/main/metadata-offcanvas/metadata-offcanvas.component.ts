@@ -25,21 +25,12 @@ import {NgxJsonViewerComponent} from 'ngx-json-viewer';
 @Component({
   selector: 'div[appMetadataOffcanvas]',
   standalone: true,
-  imports: [
-    CoreModule,
-    SharedModule
-  ],
+  imports: [CoreModule, SharedModule],
   template: `
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title">
-        {{ sourceInfo.name }} | Tech Metadata
-      </h5>
-      <button
-        type="button"
-        class="btn-close text-reset"
-        aria-label="Close"
-        (click)="activeOffcanvas.dismiss()"
-      ></button>
+      <h5 class="offcanvas-title">{{ sourceInfo.name }}&nbsp;</h5>
+      <h5 class="offcanvas-title" id="tech-metadata">| Tech Metadata</h5>
+      <button type="button" class="btn-close text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss()"></button>
     </div>
     <div class="offcanvas-body">
       <div class="d-flex flex-column h-100">
@@ -49,7 +40,7 @@ import {NgxJsonViewerComponent} from 'ngx-json-viewer';
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MetadataOffcanvasComponent extends BaseOffcanvas implements AfterViewInit {
   @ViewChild('ngxJsonViewer') ngxJsonViewer?: NgxJsonViewerComponent;
@@ -57,8 +48,10 @@ export class MetadataOffcanvasComponent extends BaseOffcanvas implements AfterVi
   sourceInfo!: SourceInfo;
   mediaInfo!: MediaInfo;
 
-  constructor(activeOffcanvas: NgbActiveOffcanvas,
-              private changeDetectorRef: ChangeDetectorRef) {
+  constructor(
+    activeOffcanvas: NgbActiveOffcanvas,
+    private changeDetectorRef: ChangeDetectorRef
+  ) {
     super(activeOffcanvas);
   }
 

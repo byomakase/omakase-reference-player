@@ -28,7 +28,7 @@ export interface VttFileMetaParsed {
 }
 
 export interface VttFileParsed {
-  valid: any
+  valid: any;
   meta: VttFileMetaParsed;
   cues: VttCueParsed[];
 }
@@ -41,10 +41,6 @@ export interface AppVttCue {
   vttCue?: VTTCue;
 }
 
-export interface AppMarkerVttCue extends AppVttCue {
+export interface AppMarkerVttCue extends AppVttCue {}
 
-}
-
-export interface AppChartVttCue extends AppVttCue {
-
-}
+export interface AppChartVttCue extends AppVttCue {}

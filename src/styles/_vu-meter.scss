@@ -19,7 +19,6 @@
 
   // expandable frame
   .vu-meter-frame {
-
     .vu-meter-header {
       height: 40px;
       background-color: $color-7;
@@ -30,7 +29,6 @@
       background-color: $color-6;
 
       .web-audio-peak-meter {
-
         > div {
           // immediate container
 
@@ -72,7 +70,7 @@
           //background-color: darkorange;
           margin-right: 7px;
           font-size: 12px;
-          color: #70849A;
+          color: #70849a;
         }
       }
     }
@@ -92,6 +90,7 @@
             &:nth-child(1) {
               // bars container with scale
               width: 100% !important;
+
               > div {
                 // each bar
                 > div {
@@ -127,7 +126,8 @@
       border: 0;
     }
 
-    .btn-minimize, .btn-maximize {
+    .btn-minimize,
+    .btn-maximize {
       width: 50px;
       background-size: 30px 30px;
     }

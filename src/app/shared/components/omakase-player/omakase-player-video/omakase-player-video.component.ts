@@ -14,88 +14,58 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {OmakasePlayer, OmakasePlayerApi, OmakasePlayerConfig} from '@byomakase/omakase-player';
-import {BehaviorSubject, Subject} from 'rxjs';
-import {UuidUtil} from '../../../../util/uuid-util';
+import {AfterViewInit, Component, HostBinding, Input, OnDestroy, OnInit} from '@angular/core';
+import {OmakasePlayerConfig} from '@byomakase/omakase-player';
+import {Subject} from 'rxjs';
+import {CryptoUtil} from '../../../../util/crypto-util';
+import {OmpApiService} from '../omp-api.service';
 
 @Component({
   selector: 'div[appOmakasePlayerVideo]',
   standalone: true,
   imports: [],
-  template: `<ng-content></ng-content>`,
+  template: ` <ng-content></ng-content>`,
 })
 export class OmakasePlayerVideoComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input('config')
   config: Partial<OmakasePlayerConfig> | undefined;
 
-  @Output()
-  readonly onReady: EventEmitter<OmakasePlayerApi> = new EventEmitter<OmakasePlayerApi>();
-  readonly omakasePlayer$: Subject<OmakasePlayerApi | undefined> = new BehaviorSubject<OmakasePlayerApi | undefined>(void 0);
-
-  private _omakasePlayerApi: OmakasePlayerApi | undefined;
   private _onDestroy$ = new Subject<void>();
 
-  constructor() {
-
-  }
+  constructor(protected ompApiService: OmpApiService) {}
 
   ngOnInit(): void {
     let possibleConfig: Partial<OmakasePlayerConfig> = {
-      playerHTMLElementId: UuidUtil.uuid()
-    }
+      playerHTMLElementId: CryptoUtil.uuid(),
+    };
 
     // ensure playerHTMLElementId is set because it has to be in component template before OmakasePlayer instantiation
     if (this.config && !this.config.playerHTMLElementId) {
       this.config = {
         ...this.config,
-        ...possibleConfig
-      }
+        ...possibleConfig,
+      };
     } else if (!this.config) {
       this.config = {
-        ...possibleConfig
-      }
+        ...possibleConfig,
+      };
     } else {
       // config is set and config.playerHTMLElementId is set, continue
     }
   }
 
   ngAfterViewInit() {
-    this.createOmakasePlayer();
+    this.ompApiService.create(this.config);
   }
 
   ngOnDestroy() {
     this._onDestroy$.next();
     this._onDestroy$.complete();
-    this.destroyOmakasePlayer();
+    this.ompApiService.destroy();
   }
 
   @HostBinding('id')
   get hostElementId(): string | undefined {
     return this.config?.playerHTMLElementId;
   }
-
-  private createOmakasePlayer() {
-    this.destroyOmakasePlayer();
-    this._omakasePlayerApi = new OmakasePlayer(this.config);
-    this.omakasePlayer$.next(this._omakasePlayerApi);
-    this.onReady.emit(this._omakasePlayerApi);
-  }
-
-  private destroyOmakasePlayer() {
-    if (this._omakasePlayerApi) {
-      try {
-        this._omakasePlayerApi.destroy();
-      } catch (e) {
-        console.error(e);
-      }
-      this._omakasePlayerApi = void 0;
-    }
-    this.omakasePlayer$.next(void 0);
-  }
-
-  get omakasePlayerApi(): OmakasePlayerApi | undefined {
-    return this._omakasePlayerApi;
-  }
-
 }

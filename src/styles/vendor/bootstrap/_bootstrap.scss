@@ -71,14 +71,17 @@
 @import "bootstrap/scss/helpers";
 
 $utilities: map-merge(
-                $utilities, (
-                "border-bottom": map-merge(
-                                map-get($utilities, "border-bottom"),
-                                (responsive: true),
-                ),
+  $utilities,
+  (
+    "border-bottom":
+      map-merge(
+        map-get($utilities, "border-bottom"),
+        (
+          responsive: true,
         )
+      ),
+  )
 );
-
 
 // 7. Optionally include utilities API last to generate classes based on the Sass map in `_utilities.scss`
 @import "bootstrap/scss/utilities/api";

@@ -21,17 +21,16 @@ import {Select, Store} from '@ngxs/store';
 import {TimelineConfiguratorActions} from './timeline-configurator.actions';
 import {SharedModule} from '../../../shared/shared.module';
 import {TimelineConfiguratorState, TimelineConfiguratorStateModel} from './timeline-configurator.state';
-import {TimelineApi} from '@byomakase/omakase-player';
-import {TimeoutTimer} from '../../../util/timer-util';
 import {DropdownComponent, DropdownOption} from '../../../shared/components/dropdown/dropdown.component';
 import {CheckboxComponent} from '../../../shared/components/checkbox/checkbox.component';
 import {TelemetryLane, TimelineService} from '../../timeline/timeline.service';
-import {BaseGroupingLane} from '../../../shared/components/omakase-player/omakase-player-timeline/grouping/base-grouping-lane';
+import {BaseGroupingLane, GroupingLaneVisibility} from '../../../shared/components/omakase-player/omakase-player-timeline/grouping/base-grouping-lane';
+import {OmpApiService} from '../../../shared/components/omakase-player/omp-api.service';
 import Minimize = TimelineConfiguratorActions.Minimize;
 import Maximize = TimelineConfiguratorActions.Maximize;
 import SelectLane = TimelineConfiguratorActions.SelectLane;
 
-const animateDurationMs = 300
+const animateDurationMs = 300;
 const minimizedWidth = 0;
 const maximizedWidth = 375;
 const animateTimings = `${animateDurationMs}ms ease-in-out`;
@@ -39,30 +38,32 @@ const animateTimings = `${animateDurationMs}ms ease-in-out`;
 @Component({
   selector: 'div[timelineConfigurator]',
   standalone: true,
-  imports: [
-    SharedModule,
-    DropdownComponent,
-    CheckboxComponent
-  ],
+  imports: [SharedModule, DropdownComponent, CheckboxComponent],
   animations: [
     trigger('toggleMinimizeMaximize', [
-      state('minimized', style({
-        width: `${minimizedWidth}px`
-      })),
-      state('maximized', style({
-        width: `${maximizedWidth}px`,
-      })),
-      transition('* => *', [
-        animate(animateTimings),
-      ])
+      state(
+        'minimized',
+        style({
+          width: `${minimizedWidth}px`,
+        })
+      ),
+      state(
+        'maximized',
+        style({
+          width: `${maximizedWidth}px`,
+        })
+      ),
+      transition('* => *', [animate(animateTimings)]),
     ]),
   ],
   template: `
-    <div id="timeline-configurator"
-         [@toggleMinimizeMaximize]="animationState|async"
-         (@toggleMinimizeMaximize.start)="onAnimationEventStart($event)"
-         (@toggleMinimizeMaximize.done)="onAnimationEventDone($event)">
-
+    <div
+      id="timeline-configurator"
+      [ngStyle]="{opacity: hideComponent ? 0 : 1}"
+      [@toggleMinimizeMaximize]="animationState | async"
+      (@toggleMinimizeMaximize.start)="onAnimationEventStart($event)"
+      (@toggleMinimizeMaximize.done)="onAnimationEventDone($event)"
+    >
       <div class="d-flex justify-content-end timeline-config-header">
         <div class="flex-grow-1 timeline-config-title">TIMELINE CONFIGURATION</div>
         <div class="btn-group" role="group">
@@ -104,41 +105,30 @@ const animateTimings = `${animateDurationMs}ms ease-in-out`;
             <app-dropdown [options]="options" [selectedOption]="options[0].value" [isSmall]="true"></app-dropdown>
           </div>
         </div>
-      </div>
-    </div>-->
-  `
+      </div-->
+    </div>
+  `,
 })
 export class TimelineConfiguratorComponent implements OnInit, OnDestroy {
   @Select(TimelineConfiguratorState) state$!: Observable<TimelineConfiguratorStateModel>;
 
   @Input()
-  timelineApi: TimelineApi | undefined;
-
-  // options = [
-  //   {
-  //     label: 'Small',
-  //     value: 's'
-  //   }
-  // ]
+  visibility: GroupingLaneVisibility = 'maximized';
 
   selectedLaneId$ = this.store.select(TimelineConfiguratorState.selectedLaneId);
   laneOptions$ = this.store.select(TimelineConfiguratorState.laneOptions);
 
   selectedLane?: BaseGroupingLane<any>;
   analyticsLanes: TelemetryLane[] = [];
-
-  private _timelineResizeTimer: TimeoutTimer = new TimeoutTimer(1000, 30);
+  hideComponent = true; // keep component hidden until 'maximize' is first called
 
   private _onDestroy$ = new Subject<void>();
 
   constructor(
     protected store: Store,
+    protected ompApiService: OmpApiService,
     protected timelineService: TimelineService
-  ) {
-    this._timelineResizeTimer.onRefresh$.pipe(takeUntil(this._onDestroy$)).subscribe(value => {
-      this.timelineSettleLayout();
-    })
-  }
+  ) {}
 
   ngOnInit() {
     this.store
@@ -159,7 +149,7 @@ export class TimelineConfiguratorComponent implements OnInit, OnDestroy {
           const visibility = this.store.selectSnapshot(TimelineConfiguratorState.visibility);
           if (selectedLaneId) {
             this.selectedLane = this.timelineService.getTimelineLaneById(selectedLaneId) as BaseGroupingLane<any>;
-            this.analyticsLanes = this.selectedLane.childLanes.filter(lane => this.timelineService.isAnalyticsLane(lane)) as TelemetryLane[];
+            this.analyticsLanes = this.selectedLane.childLanes.filter((lane) => this.timelineService.isAnalyticsLane(lane)) as TelemetryLane[];
             if (visibility === 'minimized') {
               this.store.dispatch(new Maximize());
             }
@@ -188,20 +178,27 @@ export class TimelineConfiguratorComponent implements OnInit, OnDestroy {
   }
 
   minimize() {
-    this.store.dispatch(new Minimize())
+    this.store.dispatch(new Minimize());
   }
 
   maximize() {
-    this.store.dispatch(new Maximize())
+    this.store.dispatch(new Maximize());
   }
 
   onAnimationEventStart(event: AnimationEvent) {
-    this._timelineResizeTimer.start();
+    if (this.store.selectSnapshot(TimelineConfiguratorState.visibility) === 'minimized') {
+      document.getElementById('timeline')!.style.width = `calc(100% - ${minimizedWidth}px)`;
+      this.timelineSettleLayout();
+    } else {
+      this.hideComponent = false;
+    }
   }
 
   onAnimationEventDone(event: AnimationEvent) {
-    this._timelineResizeTimer.stop();
-    this.timelineSettleLayout();
+    if (this.store.selectSnapshot(TimelineConfiguratorState.visibility) === 'maximized') {
+      document.getElementById('timeline')!.style.width = `calc(100% - ${maximizedWidth}px)`;
+      this.timelineSettleLayout();
+    }
   }
 
   selectLane(lane: DropdownOption<string>) {
@@ -209,16 +206,21 @@ export class TimelineConfiguratorComponent implements OnInit, OnDestroy {
   }
 
   toggleLane(lane: TelemetryLane | BaseGroupingLane<any>) {
-    lane.toggleHidden();
+    lane.toggleHidden(this.toggledVisibility);
   }
 
   private timelineSettleLayout() {
-    this.timelineApi?.settleLayout();
+    this.ompApiService.api?.timeline?.settleLayout();
   }
 
   get animationState(): Observable<string> {
-    return this.state$.pipe(take(1), map(p => p.visibility));
+    return this.state$.pipe(
+      take(1),
+      map((p) => p.visibility)
+    );
   }
 
-
+  get toggledVisibility(): GroupingLaneVisibility {
+    return this.visibility;
+  }
 }

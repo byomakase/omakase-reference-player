@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {ImageButton} from '@byomakase/omakase-player';
+import {Dimension, ImageButton, TimelineNode} from '@byomakase/omakase-player';
 import {SoundControl, SoundControlState} from './sound-control';
-import {TimelineNode} from '@byomakase/omakase-player/dist/timeline/timeline-component';
-import {Dimension} from '@byomakase/omakase-player/dist/common/measurement';
 
 export interface SoundControlConfig {
+  state: SoundControlState;
   srcDefault: string;
   srcActive: string;
   srcMuted: string;
   srcDisabled: string;
-  disabled: boolean;
   width: number;
   height: number;
 }
@@ -36,40 +34,38 @@ export class SoundControlImageButton implements SoundControl {
 
   constructor(config: SoundControlConfig) {
     this._config = config;
-    this._state = this._config.disabled ? 'disabled' : 'default';
+    this._state = this._config.state;
     this._button = new ImageButton({
-      src: this._config.disabled ? this._config.srcDisabled : this._config.srcDefault,
+      src: this.resolveButtonSrc(this._config.state),
       width: this._config.width,
       height: this._config.height,
-      listening: !this._config.disabled
+      listening: true,
     });
+  }
+
+  protected resolveButtonSrc(state: SoundControlState): string {
+    switch (state) {
+      case 'default':
+        return this._config.srcDefault;
+      case 'active':
+        return this._config.srcActive;
+      case 'muted':
+        return this._config.srcMuted;
+      case 'disabled':
+        return this._config.srcDisabled;
+    }
   }
 
   set state(value: SoundControlState) {
     this._state = value;
 
-    let newSrc: string | undefined;
-
-    switch (this._state) {
-      case 'default':
-        newSrc = this._config.srcDefault;
-        break;
-      case 'active':
-        newSrc = this._config.srcActive;
-        break;
-      case 'muted':
-        newSrc = this._config.srcMuted;
-        break;
-      case 'disabled':
-        newSrc = this._config.srcDisabled;
-        break;
-    }
+    let src = this.resolveButtonSrc(this._state);
 
     this._button.setImage({
-      src: newSrc,
+      src: src,
       width: this._config.width,
-      height: this._config.height
-    }).subscribe()
+      height: this._config.height,
+    });
   }
 
   get timelineNode(): TimelineNode {
@@ -79,7 +75,7 @@ export class SoundControlImageButton implements SoundControl {
   get dimension(): Dimension {
     return {
       width: this._config.width,
-      height: this._config.height
-    }
+      height: this._config.height,
+    };
   }
 }

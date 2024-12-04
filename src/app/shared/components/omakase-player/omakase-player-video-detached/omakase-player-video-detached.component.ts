@@ -1,0 +1,67 @@
+import {AfterViewInit, Component, HostBinding, Input, OnDestroy, OnInit} from '@angular/core';
+import {Constants} from '../../../constants/constants';
+import {CryptoUtil} from '../../../../util/crypto-util';
+import {Subject, takeUntil} from 'rxjs';
+import {OmakasePlayerConfig} from '@byomakase/omakase-player';
+import {OmpApiService} from '../omp-api.service';
+
+@Component({
+  selector: 'div[appOmakasePlayerVideoDetached]',
+  standalone: true,
+  imports: [],
+  template: ` <div>radi</div>`,
+})
+export class OmakasePlayerVideoDetachedComponent implements OnInit, OnDestroy, AfterViewInit {
+  @Input('config')
+  config: Partial<OmakasePlayerConfig> | undefined = Constants.OMAKASE_PLAYER_DETACHED_CONFIG;
+
+  private _onDestroy$ = new Subject<void>();
+
+  constructor(protected ompApiService: OmpApiService) {}
+
+  ngOnInit(): void {
+    let possibleConfig: Partial<OmakasePlayerConfig> = {
+      playerHTMLElementId: CryptoUtil.uuid(),
+    };
+
+    // ensure playerHTMLElementId is set because it has to be in component template before OmakasePlayer instantiation
+    if (this.config && !this.config.playerHTMLElementId) {
+      this.config = {
+        ...this.config,
+        ...possibleConfig,
+      };
+    } else if (!this.config) {
+      this.config = {
+        ...possibleConfig,
+      };
+    } else {
+      // config is set and config.playerHTMLElementId is set, continue
+    }
+  }
+
+  ngAfterViewInit() {
+    this.ompApiService.create(this.config);
+
+    this.ompApiService.api!.video.onVideoLoaded$.pipe(takeUntil(this._onDestroy$)).subscribe({
+      next: () => {
+        if (!this.ompApiService.api!.video.isFullscreen()) {
+          window.resizeTo(
+            this.ompApiService.api!.video.getHTMLVideoElement().getBoundingClientRect().width,
+            this.ompApiService.api!.video.getHTMLVideoElement().getBoundingClientRect().height + window.outerHeight - window.innerHeight
+          );
+        }
+      },
+    });
+  }
+
+  ngOnDestroy() {
+    this._onDestroy$.next();
+    this._onDestroy$.complete();
+    this.ompApiService.destroy();
+  }
+
+  @HostBinding('id')
+  get hostElementId(): string | undefined {
+    return this.config?.playerHTMLElementId;
+  }
+}

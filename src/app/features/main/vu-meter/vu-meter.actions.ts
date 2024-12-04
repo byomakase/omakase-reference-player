@@ -15,20 +15,19 @@
  */
 
 export namespace VuMeterActions {
-
   export class Minimize {
-    static readonly type = '[Vu Meter] Minimize'
+    static readonly type = '[Vu Meter] Minimize';
   }
 
   export class Maximize {
-    static readonly type = '[Vu Meter] Maximize'
+    static readonly type = '[Vu Meter] Maximize';
   }
 
   export class ToggleMinimizeMaximize {
-    static readonly type = '[Vu Meter] Toggle Minimize Maximize'
+    static readonly type = '[Vu Meter] Toggle Minimize Maximize';
   }
 
   export class AnimationEventTriggered {
-    static readonly type = '[Vu Meter] Animation Event Triggered'
+    static readonly type = '[Vu Meter] Animation Event Triggered';
   }
 }

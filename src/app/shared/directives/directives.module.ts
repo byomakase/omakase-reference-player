@@ -17,18 +17,11 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 
-const DIRECTIVES: any[] = []
+const DIRECTIVES: any[] = [];
 
 @NgModule({
-  declarations: [
-    ...DIRECTIVES
-  ],
-  exports: [
-    ...DIRECTIVES
-  ],
-  imports: [
-    CommonModule
-  ]
+  declarations: [...DIRECTIVES],
+  exports: [...DIRECTIVES],
+  imports: [CommonModule],
 })
-export class DirectivesModule {
-}
+export class DirectivesModule {}

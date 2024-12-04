@@ -20,17 +20,12 @@ import {Observable} from 'rxjs';
 import {SessionData} from '../../model/domain.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MainService {
-
-  constructor(protected http: HttpClient) {
-
-  }
+  constructor(protected http: HttpClient) {}
 
   fetchBootstrapPayload(sessionUrl: string): Observable<SessionData> {
     return this.http.get<SessionData>(sessionUrl);
   }
-
-
 }
