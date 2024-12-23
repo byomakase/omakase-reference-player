@@ -17,13 +17,15 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
+export type LayoutTab = 'qc' | 'segmentation';
+
 @Injectable({
   providedIn: 'root',
 })
 export class LayoutService {
   private _title: string | undefined;
 
-  private _activeTab: string = 'qc';
+  private _activeTab: LayoutTab = 'qc';
   showTabs$ = new BehaviorSubject<boolean>(false);
 
   constructor() {}
@@ -36,7 +38,7 @@ export class LayoutService {
     this._title = value;
   }
 
-  set activeTab(value: string) {
+  set activeTab(value: LayoutTab) {
     this._activeTab = value;
   }
 

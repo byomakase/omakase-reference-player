@@ -15,13 +15,12 @@
  */
 
 import {HelpMenuGroup, HelpMenuItem, OmakasePlayerApi} from '@byomakase/omakase-player';
-import {ArrayUtil} from '../../../util/array-util';
 import {UserAgent} from '../../../core/browser/window.service';
 
 const playerPlaybackRateList = [0.25, 0.5, 0.75, 1, 2, 4, 8];
 
 export class OmakasePlayerUtil {
-  public static getKeyboardShortcutsHelpMenuGroup(platform: 'unknown' | 'macos' | 'windows' | 'linux'): HelpMenuGroup {
+  public static getKeyboardShortcutsHelpMenuGroup(platform: 'unknown' | 'macos' | 'windows' | 'linux'): HelpMenuGroup[] {
     let keyCombination = (...keys: string[]) => {
       return keys.join(' + ');
     };
@@ -35,105 +34,84 @@ export class OmakasePlayerUtil {
     let altKey = platform === 'macos' ? 'option' : 'alt';
     let metaKey = platform === 'windows' ? 'win' : platform === 'linux' ? 'super' : 'cmd';
 
-    let playbackRate: HelpMenuItem[] = ArrayUtil.range(2, 8).map((p, index) => {
-      return {
-        description: `Playback Speed rate ${playerPlaybackRateList[index]}x`,
-        name: keyCombination(ctrlKey, shiftKey, `${p}`),
-      };
-    });
-
-    let helpMenuItems: HelpMenuItem[] = [
+    let playbackHelpMenuItems: HelpMenuItem[] = [
       {
         description: 'Play / Pause',
         name: keyCombination('Space'),
       },
+
       {
-        description: 'Toggle Mute',
-        name: keyCombination('m'),
-      },
-      {
-        description: 'Toggle Text On / Off',
+        description: 'Toggle Sound',
         name: keyCombination('s'),
       },
 
       {
-        description: 'Collapse / Expand All Timeline Rows',
-        name: keyCombination(ctrlKey, shiftKey, 's'),
+        description: 'Toggle Text On / Off',
+        name: keyCombination('d'),
       },
+
       {
-        description: 'Toggle Next Audio Track',
-        name: keyCombination(shiftKey, 'a'),
+        description: 'Toggle Full Screen',
+        name: keyCombination('f'),
       },
+
       {
-        description: 'Toggle Previous Audio Track',
-        name: keyCombination('a'),
+        description: 'Increase Volume',
+        name: keyCombination(shiftKey, '\\'),
       },
+
       {
-        description: 'Toggle Next Text Track',
-        name: keyCombination(shiftKey, 't'),
+        description: 'Reduce Volume',
+        name: keyCombination('\\'),
       },
-      {
-        description: 'Toggle Previous Text Track',
-        name: keyCombination('t'),
-      },
-      {
-        description: 'Toggle Next Channel of Active Audio Track',
-        name: keyCombination(shiftKey, 'c'),
-      },
-      {
-        description: 'Toggle Previous Channel of Active Audio Track',
-        name: keyCombination('c'),
-      },
+
       {
         description: 'One Frame Forward',
-        name: keyCombination('Arrow Right'),
+        name: keyCombination('Right Arrow'),
       },
 
       {
         description: 'One Frame Backward',
-        name: keyCombination('Arrow Left'),
+        name: keyCombination('Left Arrow'),
       },
 
       {
         description: '10 Frames Forward',
-        name: keyCombination(ctrlKey, shiftKey, 'Arrow Right'),
+        name: keyCombination(shiftKey, 'Right Arrow'),
       },
 
       {
         description: '10 Frames Backwards',
-        name: keyCombination(ctrlKey, shiftKey, 'Arrow Left'),
+        name: keyCombination(shiftKey, 'Left Arrow'),
       },
 
       {
-        description: 'One Second Forward',
-        name: keyCombination(shiftKey, 'Arrow Up'),
+        description: 'Stop shuttle and pause',
+        name: keyCombination('k'),
       },
 
       {
-        description: 'One Second Backward',
-        name: keyCombination(shiftKey, 'Arrow Down'),
+        description: 'Decrease Shuttle Forwards',
+        name: keyCombination('l'),
       },
 
       {
-        description: 'Ten Seconds Forward',
-        name: keyCombination(ctrlKey, shiftKey, 'Arrow Up'),
+        description: 'Increase Shuttle Forwards',
+        name: keyCombination(shiftKey, 'l'),
       },
 
       {
-        description: 'Ten Seconds Backward',
-        name: keyCombination(ctrlKey, shiftKey, 'Arrow Down'),
+        description: 'Set playhead to Start of Media and Stop',
+        name: keyCombination('1 / Home'),
       },
 
       {
-        description: 'Video in Full Screen',
-        name: keyCombination('f'),
+        description: 'Set playhead to End of Media and Stop',
+        name: keyCombination(ctrlKey, '1') + ' / End',
       },
-      ...playbackRate,
-      {
-        description: 'Timeline Zoom level 100%',
-        name: keyCombination(ctrlKey, '0'),
-      },
+    ];
 
+    let timelineHelpMenuItems: HelpMenuItem[] = [
       {
         description: 'Timeline Zoom In',
         name: keyCombination('='),
@@ -141,31 +119,155 @@ export class OmakasePlayerUtil {
 
       {
         description: 'Timeline Zoom Out',
-        name: keyCombination('_'),
+        name: keyCombination('-'),
       },
 
       {
-        description: 'Increase Volume',
-        name: keyCombination(shiftKey, 'v'),
+        description: 'Timeline Zoom level 100%',
+        name: keyCombination('0'),
       },
+
       {
-        description: 'Increase Volume',
-        name: keyCombination(shiftKey, 'v'),
+        description: 'Collapse / Expand All Timeline Rows',
+        name: keyCombination('a'),
       },
+
       {
-        description: 'Reduce Volume',
-        name: keyCombination('v'),
+        description: 'Show / Hide Cofiguration Panel',
+        name: keyCombination('g'),
       },
-      // {
-      //   description: 'Launch Configuration Panel',
-      //   name: keyCombination(ctrlKey, shiftKey, 'c')
-      // },
+
+      {
+        description: 'Toggle Next Text Track',
+        name: keyCombination(shiftKey, 't'),
+      },
+
+      {
+        description: 'Toggle Previous Text Track',
+        name: keyCombination('t'),
+      },
+
+      {
+        description: 'Toggle Next Audio Track',
+        name: keyCombination(shiftKey, 'e'),
+      },
+
+      {
+        description: 'Toggle Previous Audio Track',
+        name: keyCombination('e'),
+      },
+
+      {
+        description: 'Toggle Next Channel of Active Audio Track',
+        name: keyCombination(shiftKey, 'r'),
+      },
+
+      {
+        description: 'Toggle Previous Channel of Active Audio Track',
+        name: keyCombination('r'),
+      },
     ];
 
-    return {
-      name: $localize`Keyboard shortcuts`,
-      items: [...helpMenuItems],
-    };
+    let segmentationAndMarkersHelpMenuItems: HelpMenuItem[] = [
+      {
+        description: 'Mark In / Out',
+        name: keyCombination('m'),
+      },
+
+      {
+        description: 'Add point',
+        name: keyCombination(','),
+      },
+
+      {
+        description: 'Split Active Marker',
+        name: keyCombination('.'),
+      },
+
+      {
+        description: 'Delete Active Marker',
+        name: keyCombination('n'),
+      },
+
+      {
+        description: 'Toggle Previous Marker',
+        name: keyCombination('/'),
+      },
+
+      {
+        description: 'Toggle Next Marker',
+        name: keyCombination(shiftKey, '/'),
+      },
+
+      {
+        description: 'Set Start of Active Marker to Playhead Position',
+        name: keyCombination('i'),
+      },
+
+      {
+        description: 'Set End of Active Marker to Playhead Position',
+        name: keyCombination('o'),
+      },
+
+      {
+        description: 'Set Playhead to Start of Active Marker',
+        name: keyCombination('['),
+      },
+
+      {
+        description: 'Set Playhead to End of Active Marker',
+        name: keyCombination(']'),
+      },
+
+      {
+        description: 'Rewind 3 Seconds and Play to Current Playhead',
+        name: keyCombination(metaKey, 'Arrow Left'),
+      },
+
+      {
+        description: 'Play 3 Seconds and Rewind to Current Playhead',
+        name: keyCombination(metaKey, 'Arrow Right'),
+      },
+
+      {
+        description: 'Loop on Active Marker',
+        name: keyCombination('p'),
+      },
+    ];
+
+    let sessionNavigationHelpMenuItems: HelpMenuItem[] = [
+      {
+        description: 'Navigate to Previous Session',
+        name: keyCombination(altKey, 'Arrow Left'),
+      },
+
+      {
+        description: 'Navigate to Next Session',
+        name: keyCombination(altKey, 'Arrow Right'),
+      },
+    ];
+
+    return [
+      {
+        name: $localize`Playback Functions Shortcuts`,
+        items: [...playbackHelpMenuItems],
+      },
+
+      {
+        name: $localize`Timeline Manipulation Shortcuts`,
+        items: [...timelineHelpMenuItems],
+      },
+
+      {
+        name: $localize`Segmentation and Markers Shortcuts`,
+        items: [...segmentationAndMarkersHelpMenuItems],
+      },
+
+      {
+        name: $localize`Session Navigation Shortcus`,
+        items: [...sessionNavigationHelpMenuItems],
+      },
+    ];
   }
 
   /**
@@ -181,7 +283,7 @@ export class OmakasePlayerUtil {
     };
 
     const targetElement = event.target as HTMLElement;
-    const formInputs = ['INPUT', 'TEXTAREA'];
+    const formInputs = ['INPUT', 'TEXTAREA', 'OMAKASE-MARKER-LIST'];
     if (formInputs.includes(targetElement.tagName.toUpperCase())) {
       return false;
     }
@@ -194,51 +296,71 @@ export class OmakasePlayerUtil {
         return true;
       }
 
-      // Toggle Mute
-      if (event.code === 'KeyM') {
+      // Toggle Sound
+      if (event.code === 'KeyS' && !event.shiftKey && !event.ctrlKey) {
         omakasePlayer.video.toggleMuteUnmute();
         return true;
       }
 
       // Toggle Text On / Off
-      if (event.code === 'KeyS' && !(event.ctrlKey && event.shiftKey)) {
+      if (event.code === 'KeyD' && !(event.ctrlKey && event.shiftKey)) {
         omakasePlayer.subtitles.toggleShowHideActiveTrack();
         return true;
       }
 
-      if (['ArrowLeft', 'ArrowRight'].includes(event.key)) {
-        let upOrDown = event.key === 'ArrowRight' ? 1 : -1;
-        let amount = event.ctrlKey && event.shiftKey ? 10 : 1;
+      // Reset shuttle
+      if (event.code === 'KeyK') {
+        omakasePlayer.video.setPlaybackRate(1);
+        omakasePlayer.video.pause();
+      }
 
-        if (omakasePlayer.video.isPlaying()) {
-          omakasePlayer.video.pause();
+      // Change shuttle
+      if (event.code === 'KeyL') {
+        let increaseOrDecrease = event.shiftKey ? 1 : -1;
+        const playbackRateIndex = playerPlaybackRateList.indexOf(omakasePlayer.video.getPlaybackRate()) + increaseOrDecrease;
+        let playbackRate;
+
+        if (playbackRateIndex < 0) {
+          playbackRate = playerPlaybackRateList.at(0);
+        } else if (playbackRateIndex >= playerPlaybackRateList.length) {
+          playbackRate = playerPlaybackRateList.at(-1);
+        } else {
+          playbackRate = playerPlaybackRateList.at(playbackRateIndex);
         }
 
-        omakasePlayer.video.seekFromCurrentFrame(amount * upOrDown).subscribe();
+        omakasePlayer.video.setPlaybackRate(playbackRate!);
+        omakasePlayer.video.isPaused() && omakasePlayer.video.play();
 
         return true;
       }
 
-      if (['ArrowUp', 'ArrowDown'].includes(event.key) && ((event.shiftKey && event.ctrlKey) || (event.shiftKey && !event.ctrlKey))) {
-        let upOrDown = event.key === 'ArrowUp' ? 1 : -1;
+      if (omakasePlayer.video.isVideoLoaded()) {
+        // N Frames Forward / Backward
+        if (['ArrowLeft', 'ArrowRight'].includes(event.key) && !event.metaKey && !event.altKey) {
+          let upOrDown = event.key === 'ArrowRight' ? 1 : -1;
+          let amount = event.shiftKey ? 10 : 1;
 
-        let amount: number | undefined;
-        if (event.shiftKey && event.ctrlKey) {
-          amount = 10;
-        } else if (event.shiftKey && !event.ctrlKey) {
-          amount = 1;
-        }
-
-        if (amount) {
           if (omakasePlayer.video.isPlaying()) {
             omakasePlayer.video.pause();
           }
 
-          omakasePlayer.video.seekFromCurrentTime(amount * upOrDown).subscribe();
+          omakasePlayer.video.seekFromCurrentFrame(amount * upOrDown).subscribe();
 
           return true;
-        } else {
-          return false;
+        }
+
+        // Playhead Position to Start
+        if ((event.code === 'Digit1' && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) || event.code === 'Home') {
+          omakasePlayer.video.pause().subscribe(() => omakasePlayer.video.seekToFrame(0));
+
+          return true;
+        }
+
+        // Playhead Position to End
+        if ((event.code === 'Digit1' && event.ctrlKey) || event.code === 'End') {
+          omakasePlayer.video.pause().subscribe(() => omakasePlayer.video.seekToFrame(omakasePlayer.video.getTotalFrames()));
+
+          return true;
         }
       }
 
@@ -248,21 +370,8 @@ export class OmakasePlayerUtil {
         return true;
       }
 
-      // Playback speed
-      if (event.shiftKey && event.ctrlKey) {
-        let mapping = ArrayUtil.range(2, 8).reduce((map, p, index) => {
-          map.set(`Digit${p}`, playerPlaybackRateList[index]);
-          return map;
-        }, new Map<string, number>());
-
-        if (mapping.has(event.code)) {
-          omakasePlayer.video.setPlaybackRate(mapping.get(event.code)!);
-          return true;
-        }
-      }
-
       // Zoom 100%
-      if (event.code === 'Digit0' && event.ctrlKey) {
+      if (event.code === 'Digit0') {
         omakasePlayer.timeline!.zoomToEased(100).subscribe();
         return true;
       }
@@ -276,14 +385,6 @@ export class OmakasePlayerUtil {
       // Zoom Out
       if (event.key === '-') {
         omakasePlayer.timeline!.zoomOutEased().subscribe();
-        return true;
-      }
-
-      // Volume
-      if (event.code === 'KeyV') {
-        let step = 0.1;
-        let upOrDown = event.shiftKey ? 1 : -1;
-        omakasePlayer.video.setVolume(omakasePlayer.video.getVolume() + step * upOrDown);
         return true;
       }
     }

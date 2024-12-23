@@ -4,6 +4,7 @@ app-inline-edit {
   .inline-edit-input {
     height: 20px;
     padding: 0 5px;
+    outline: none;
   }
 
   .inline-edit-text {
@@ -11,6 +12,7 @@ app-inline-edit {
   }
 
   .inline-edit-actions {
+    display: none;
     position: absolute;
     right: 0;
 

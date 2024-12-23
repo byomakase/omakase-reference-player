@@ -60,22 +60,29 @@
             }
           }
           <div *ngSwitchCase="'segmentation'" id="segmentation">
-            <div id="segmentation-content" class="d-flex flex-column" appSegmentation></div>
+            <div
+              id="segmentation-content"
+              class="d-flex flex-column"
+              [segmentationActions]="sessionData?.presentation?.segmentation_actions"
+              appSegmentation></div>
           </div>
         </div>
-        <div id="timeline-controls-wrapper-north" #timelineControlsWrapperNorth>
-          <div
-            appTimelineControls
-            [timelineLanesAdded$]="timelineLanesAdded$"
-            [visibility]="groupingLanesVisibility"
-            [activeTab]="activeTab"
-            [disabled]="!groupingLanes"
-            [analysisGroups]="analysisGroups"
-            (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
-            (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
-            [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
-        </div>
+        @if (timelineControlsUp) {
+          <div id="timeline-controls-wrapper-north" #timelineControlsWrapperNorth>
+            <div
+              appTimelineControls
+              [timelineLanesAdded$]="timelineLanesAdded$"
+              [visibility]="groupingLanesVisibility"
+              [activeTab]="activeTab"
+              [disabled]="!groupingLanes"
+              [analysisGroups]="analysisGroups"
+              (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
+              (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
+              [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
+          </div>
+        }
       </div>
+
       @if (hasTelemetryLane) {
         <div id="telemetry-wrapper" #telemetryWrapper>
           <div appTelemetry class="h-100" [ngClass]="{'has-vu-meter': isVuMeterSupported}"></div>
@@ -92,6 +99,7 @@
             <div appOmakasePlayerVideo [config]="OmakasePlayerConstants.OMAKASE_PLAYER_CONFIG"></div>
             <div
               appPlayerControls
+              [isVttLoading]="disableSessionButtons | async"
               [masterManifests]="masterManifests"
               [currentMasterManifest]="currentMasterManifest"
               (onManifestChange)="handleManifestChange($event)"></div>
@@ -104,18 +112,20 @@
     </div>
 
     <div id="south-pole" class="flex-grow-1 d-flex flex-column">
-      <div id="timeline-controls-wrapper-south" #timelineControlsWrapperSouth>
-        <div
-          appTimelineControls
-          [timelineLanesAdded$]="timelineLanesAdded$"
-          [visibility]="groupingLanesVisibility"
-          [activeTab]="activeTab"
-          [disabled]="!groupingLanes"
-          [analysisGroups]="analysisGroups"
-          (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
-          (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
-          [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
-      </div>
+      @if (!timelineControlsUp) {
+        <div id="timeline-controls-wrapper-south" #timelineControlsWrapperSouth>
+          <div
+            appTimelineControls
+            [timelineLanesAdded$]="timelineLanesAdded$"
+            [visibility]="groupingLanesVisibility"
+            [activeTab]="activeTab"
+            [disabled]="!groupingLanes"
+            [analysisGroups]="analysisGroups"
+            (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
+            (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
+            [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
+        </div>
+      }
       <div id="timeline-container" class="d-flex">
         <div id="timeline">
           <div appOmakasePlayerTimeline [config]="OmakasePlayerConstants.TIMELINE_CONFIG" (onReady)="onOmakasePlayerTimelineReady($event)">
@@ -137,5 +147,10 @@
     </div>
 
     <div appChartLegend></div>
+    <div class="toast-container">
+      @for (toast of toastService.toasts; track toast) {
+        <app-toast [toast]="toast"></app-toast>
+      }
+    </div>
   </main>
 </app-layout>

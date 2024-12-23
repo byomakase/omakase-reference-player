@@ -184,42 +184,46 @@ export interface MediaTracks {
   text?: TextMediaTrack[];
 }
 
+export type InfoTabType = 'json' | 'file_list';
+
+export type InfoTabVisualization = 'json_tree' | 'list';
+
 export interface InfoTab {
   name: string;
-  type: string;
-  visualization: string;
+  type: InfoTabType;
+  visualization: InfoTabVisualization;
   data: any; // TODO
+  files: any[];
+}
+
+export interface InfoTabFile {
+  filename: string;
+  description?: string;
+  url?: string;
 }
 
 export interface Layout {
-  default_view: string;
-  color_scheme: string;
-  video_position: string;
   qc?: boolean;
   segmentation?: boolean;
   approval?: boolean;
+  annotations?: boolean;
+  annotation_threading?: boolean;
+}
+
+export interface SegmentationAction {
+  name: string;
+  data?: any;
 }
 
 export interface Presentation {
   layout: Layout;
   info_tabs: InfoTab[];
-  player_configuration: {
-    manifest_id: string;
-    subtitle_id: string;
-    audio_track_id: string;
-  };
   timeline_configuration: {
-    visual_reference_height: Record<string, string>;
-    track_display: {
-      id: string;
-      visual_reference_id: string;
-      channel_ids: number[];
-      analysis_ids: number[];
-    }[];
     track_ordering?: string[];
     visible_tracks?: string[];
     visible_analysis_groups?: string[];
   };
+  segmentation_actions: SegmentationAction[];
 }
 
 export interface BasicAuthenticationData {
@@ -254,19 +258,23 @@ export interface BearerAuthenticationData {
 }
 
 export interface SessionData {
-  authentication?: AuthenticationData;
+  version: string;
   session?: {
+    id?: string;
     next?: string;
     previous?: string;
     status?: string;
+    services?: {
+      media_authentication?: AuthenticationData;
+    };
   };
   data: {
     source_info: SourceInfo[];
     media_info: MediaInfo[];
     master_manifests: MasterManifest[];
     media_tracks: MediaTracks;
-    presentation: Presentation;
   };
+  presentation?: Presentation;
 }
 
 export type TimelineLaneWithOptionalGroup<T> = T & {group?: string};

@@ -39,8 +39,8 @@ import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
       </div>
       <div class="modal-footer">
         <div class="d-flex btn-group">
-          <button type="button" class="btn action-button" (click)="onOkAction()">Ok</button>
-          <button type="button" class="btn close-button" (click)="activeModal.dismiss()">Cancel</button>
+          <button type="button" class="btn action-button" (click)="onOkAction()">{{ confirmText }}</button>
+          <button type="button" class="btn close-button" (click)="activeModal.dismiss()">{{ cancelText }}</button>
         </div>
       </div>
     </div>
@@ -51,6 +51,10 @@ export class ConfirmationModalComponent {
   confirmationMessage?: string;
   @Input()
   headerText?: string;
+  @Input()
+  confirmText = 'Ok';
+  @Input()
+  cancelText = 'Cancel';
   @Output()
   onOk$: EventEmitter<any> = new EventEmitter<any>();
 

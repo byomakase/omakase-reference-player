@@ -15,6 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
+import {Subject, Subscription, take} from 'rxjs';
 import {TimelineService} from '../../timeline/timeline.service';
 import {Marker, MarkerLane, MarkerLaneStyle, MarkerListApi, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation} from '@byomakase/omakase-player';
 import {Store} from '@ngxs/store';
@@ -29,6 +30,7 @@ import DeleteTrack = SegmentationActions.DeleteTrack;
 import SetActiveTrack = SegmentationActions.SetActiveTrack;
 import UpdateTrack = SegmentationActions.UpdateTrack;
 import SetTracks = SegmentationActions.SetTracks;
+import {LayoutService} from '../../../core/layout/layout.service';
 
 interface MarkerRecolorData {
   marker: MarkerApi;
@@ -45,22 +47,36 @@ export class SegmentationService {
   private _selectedMarker?: MarkerApi;
   private _recoloredSplitMarker?: MarkerRecolorData;
   private _incompleteMarker?: PeriodMarker;
+  private _initSubscription?: Subscription;
+  private _markerLane?: MarkerLane;
+
+  onMarkerUpdate$ = new Subject<MarkerApi>();
 
   constructor(
     private timelineService: TimelineService,
     private store: Store,
-    private ompApiService: OmpApiService
+    private ompApiService: OmpApiService,
+    private layoutService: LayoutService
   ) {}
 
   initSegmentationMode() {
     if (this._isInitialized) {
       return;
     }
-    this.createSegmentationTrack();
-    this._isInitialized = true;
+    if (this.ompApiService.api) {
+      this.createSegmentationTrack();
+      this._isInitialized = true;
+    } else {
+      this._initSubscription = this.timelineService.onReady$.pipe(take(1)).subscribe(() => {
+        this.createSegmentationTrack();
+        this._isInitialized = true;
+        delete this._initSubscription;
+      });
+    }
   }
 
   resetSegmentationMode() {
+    this._initSubscription?.unsubscribe();
     this.store.dispatch(new SetTracks([]));
     this._isInitialized = false;
     this._segmentationCounter = 1;
@@ -90,6 +106,11 @@ export class SegmentationService {
       description: name,
       style: {
         ...style,
+      },
+    });
+    markerLane.onMarkerUpdate$.subscribe({
+      next: (event) => {
+        this.onMarkerUpdate$.next(event.marker);
       },
     });
     this.timelineService.addTimelineLaneAtIndex(markerLane, segmentationTrackCount + 1);
@@ -150,9 +171,8 @@ export class SegmentationService {
 
   addPeriodMarker(timeObservation?: PeriodObservation): PeriodMarker {
     const {segmentationTrack, markerLane} = this.getActiveTrackAndLane();
-    const markerCount = markerLane.getMarkers().length + 1;
     const marker = new PeriodMarker({
-      text: `Marker ${markerCount}`,
+      text: this.resolveHeuristicName(),
       timeObservation: {
         start: timeObservation?.start ?? 0,
         end: timeObservation?.end,
@@ -189,14 +209,15 @@ export class SegmentationService {
 
   addMomentMarker(timeObservation?: MomentObservation): MomentMarker {
     const {segmentationTrack, markerLane} = this.getActiveTrackAndLane();
-    const markerCount = markerLane.getMarkers().length + 1;
     const marker = new MomentMarker({
-      text: `Marker ${markerCount}`,
+      text: this.resolveHeuristicName(),
       timeObservation: {
         time: timeObservation?.time ?? 0,
       },
       style: {
         ...Constants.MOMENT_MARKER_STYLE,
+        lineStrokeWidth: 2,
+        lineOpacity: 0.2,
         color: segmentationTrack.color,
       },
       editable: true,
@@ -223,12 +244,17 @@ export class SegmentationService {
   }
 
   selectMarker(marker: Marker) {
-    if (!this.markerList || this._incompleteMarker) {
-      return;
-    }
-    const selectedMarker = this.markerList.getSelectedMarker();
-    if (marker.id !== selectedMarker?.id) {
-      this.markerList.toggleMarker(marker.id);
+    if (this.layoutService.activeTab === 'segmentation') {
+      if (!this.markerList || this._incompleteMarker) {
+        return;
+      }
+      const selectedMarker = this.markerList.getSelectedMarker();
+      if (marker.id !== selectedMarker?.id) {
+        this.markerList.toggleMarker(marker.id);
+      }
+    } else {
+      this.markerLane!.toggleMarker(marker.id);
+      this.selectedMarker = marker;
     }
   }
 
@@ -269,6 +295,11 @@ export class SegmentationService {
     const activeMarker = this.markerList?.getSelectedMarker();
     if (activeMarker) {
       this.markerList!.toggleMarker(activeMarker.id);
+
+      if (this.layoutService.activeTab === 'qc') {
+        this.markerLane!.toggleMarker(activeMarker.id);
+        this.selectedMarker = activeMarker;
+      }
     }
   }
 
@@ -326,10 +357,26 @@ export class SegmentationService {
     return segmentationColors.find((color) => segmentationTracks.filter((track) => track.color === color).length === minColorUsage) ?? segmentationColors[0];
   }
 
+  private resolveHeuristicName(): string {
+    const {markerLane} = this.getActiveTrackAndLane();
+    const makers = markerLane.getMarkers();
+    const maxCount = 100;
+    for (let i = 1; i < maxCount; i++) {
+      if (!makers.find((m) => m.name?.toLowerCase() === `marker ${i}`)) {
+        return `Marker ${i}`;
+      }
+    }
+    return `Marker ${maxCount}`;
+  }
+
   private addMarkerClickHandler(marker: Marker, segmentationTrack: SegmentationTrack) {
     marker.onClick$.subscribe(() => {
       const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
+      if (this.layoutService.activeTab === 'qc' && activeTrack && this.selectedMarker) {
+        this.markerLane!.toggleMarker(this.selectedMarker.id);
+      }
       if (activeTrack?.id !== segmentationTrack.id) {
+        this.markerLane = this.timelineService.getTimelineLaneById(segmentationTrack.markerLaneId) as MarkerLane;
         this.store.dispatch(new SetActiveTrack(segmentationTrack));
         // timeout is needed to propagate the SetActiveTrack event
         setTimeout(() => {
@@ -339,5 +386,13 @@ export class SegmentationService {
         this.selectMarker(marker);
       }
     });
+  }
+
+  set markerLane(value: MarkerLane | undefined) {
+    this._markerLane = value;
+  }
+
+  get markerLane(): MarkerLane | undefined {
+    return this._markerLane;
   }
 }

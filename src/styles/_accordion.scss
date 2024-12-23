@@ -77,3 +77,40 @@
     }
   }
 }
+
+.file-list {
+  &:last-child {
+    border-bottom: 1px solid $accordion-border-color;
+  }
+
+  .accordion {
+    .custom-accordion-item {
+      border-radius: 0 !important;
+      border-bottom: 0;
+
+      .file-accordion {
+        padding: 14px 20px 14px 12px;
+
+        .name {
+          min-width: 15.5em;
+          font-size: 15px;
+          font-weight: 700;
+          line-height: 18px;
+          color: $color-2;
+        }
+
+        .description {
+          font-size: 15px;
+          font-weight: 400;
+          line-height: 18px;
+          color: #fff;
+        }
+
+        .download-btn {
+          padding: 0;
+          border: 0;
+        }
+      }
+    }
+  }
+}

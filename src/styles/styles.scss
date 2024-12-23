@@ -45,6 +45,7 @@
 @import "status";
 
 @import "modal";
+@import "toast";
 
 html,
 body {
@@ -139,20 +140,46 @@ main {
         display: none !important;
       }
 
+      .has-header {
+        flex-direction: column;
+      }
+
+      .no-header {
+        overflow-y: auto;
+      }
+
       #metadata-explorer {
         display: flex;
         flex-grow: 1;
         height: 100%;
-        border-right: 1px solid $color-5;
-        overflow-y: auto;
-      }
-
-      #metadata-content {
-        display: flex;
-        flex-direction: column;
         padding: 20px 30px;
-        flex-grow: 1;
-        overflow-x: auto;
+        border-right: 1px solid $color-5;
+
+        #metadata-explorer-container {
+          overflow-y: auto;
+
+          .name-header {
+            min-width: 16.5em;
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 20px;
+            color: $color-2;
+          }
+
+          .description-header {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 20px;
+            color: $color-2;
+          }
+
+          #metadata-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow-x: auto;
+          }
+        }
       }
 
       #segmentation {
@@ -170,11 +197,6 @@ main {
     }
 
     #timeline-controls-wrapper-north {
-      @media (max-width: 1000px) {
-        // down
-        display: none;
-      }
-
       #timeline-controls {
         background-color: $color-6;
         border-bottom: 1px solid $color-5;
@@ -239,11 +261,6 @@ main {
 
 #south-pole {
   #timeline-controls-wrapper-south {
-    @media (min-width: 1001px) {
-      // up
-      display: none;
-    }
-
     #timeline-controls {
       background-color: $color-6;
       border-bottom: 1px solid $color-5;

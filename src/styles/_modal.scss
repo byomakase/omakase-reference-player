@@ -7,9 +7,10 @@
 
   .custom-modal {
     border-radius: 5px;
-    border: 1px solid #656b7e;
-    background-color: #454853;
+    border: 1px solid $color-24;
+    background-color: $color-25;
     filter: drop-shadow(0 4px 5px #000);
+    font-family: $font-family-nunito;
 
     .modal-header {
       padding: 22px 20px 0px 35px;
@@ -51,7 +52,7 @@
         input {
           width: 200px;
           height: 40px;
-          border: 1px solid #655372;
+          border: 1px solid $color-4;
           border-radius: 5px;
           padding: 8px 30px 8px 20px;
           background-color: $color-6;
@@ -70,35 +71,36 @@
       padding: 30px 20px 30px 35px;
 
       .btn-group {
-        gap: 30px;
+        gap: 10px;
         margin: 0;
 
         .btn {
           height: 40px;
+          width: 118px;
           font-size: 13px;
           line-height: 18px;
           font-weight: 700;
           border-radius: 5px;
-          padding: 0 20px 0 20px;
-          border: 0;
-          border-bottom: 1px solid #3e44fe;
+          border: 1px solid;
         }
 
         .action-button {
-          background-color: #4e5996;
-          color: #ffff;
+          background-color: $color-30;
+          border-color: $color-27;
+          color: #fff;
 
           &:hover {
-            background-color: darken($color: #4e5996, $amount: 5);
+            background-color: darken($color: $color-30, $amount: 5);
           }
         }
 
         .close-button {
-          background-color: $color-2;
-          color: #13141b;
+          background-color: $color-29;
+          border-color: $color-28;
+          color: #fff;
 
           &:hover {
-            background-color: darken($color: $color-2, $amount: 5);
+            background-color: darken($color: $color-29, $amount: 5);
           }
         }
       }

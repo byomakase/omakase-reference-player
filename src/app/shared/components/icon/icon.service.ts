@@ -59,6 +59,16 @@ import {IconStatus} from './svg/icon-status';
 import {IconMarkerSplit} from './svg/icon-marker-split';
 import {IconConfirm} from './svg/icon-confirm';
 import {IconReject} from './svg/icon-reject';
+import {IconLoop} from './svg/icon-loop';
+import {IconPdf} from './svg/icon-pdf';
+import {IconJson} from './svg/icon-json';
+import {IconTxt} from './svg/icon-txt';
+import {IconDownload} from './svg/icon-download';
+import {IconCsv} from './svg/icon-csv';
+import {IconBinary} from './svg/icon-binary';
+import {IconToastError} from './svg/icon-toast-error';
+import {IconToastWarning} from './svg/icon-toast-warning';
+import {IconToastSuccess} from './svg/icon-toast-success';
 
 export type IconName =
   | 'arrow-down'
@@ -104,7 +114,17 @@ export type IconName =
   | 'bracket-right'
   | 'bracket-left'
   | 'confirm'
-  | 'reject';
+  | 'reject'
+  | 'loop'
+  | 'pdf'
+  | 'json'
+  | 'txt'
+  | 'csv'
+  | 'binary'
+  | 'download'
+  | 'toast-success'
+  | 'toast-warning'
+  | 'toast-error';
 
 @Injectable({
   providedIn: 'root',
@@ -117,6 +137,12 @@ export class IconService {
     'chevron-right': IconChevronRight,
     'code': IconCode,
     'corners': IconCorners,
+    'pdf': IconPdf,
+    'json': IconJson,
+    'txt': IconTxt,
+    'csv': IconCsv,
+    'binary': IconBinary,
+    'download': IconDownload,
 
     'volume': IconVolume,
     'volume-zero': IconVolumeZero,
@@ -134,6 +160,7 @@ export class IconService {
     'play-forward-3': IconPlayForward3,
     'play-back-3': IconPlayBack3,
     'add': IconAdd,
+    'loop': IconLoop,
 
     'telemetry': IconTelemetry,
     'warning': IconWarning,
@@ -160,6 +187,10 @@ export class IconService {
     'status': IconStatus,
     'confirm': IconConfirm,
     'reject': IconReject,
+
+    'toast-error': IconToastError,
+    'toast-warning': IconToastWarning,
+    'toast-success': IconToastSuccess,
   };
 
   constructor() {}

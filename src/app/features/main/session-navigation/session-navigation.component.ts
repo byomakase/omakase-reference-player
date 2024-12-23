@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, Output} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {IconModule} from '../../../shared/components/icon/icon.module';
 import {SessionData} from '../../../model/domain.model';
@@ -75,7 +75,7 @@ export class SessionNavigationComponent {
       return;
     }
 
-    this.onPreviousSession.emit(this._sessionData.session.next);
+    this.onNextSession.emit(this._sessionData.session.next);
   }
 
   get isPrevDisabled(): boolean {
@@ -84,5 +84,25 @@ export class SessionNavigationComponent {
 
   get isNextDisabled(): boolean {
     return this._isNextDisabled;
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeypress(event: KeyboardEvent) {
+    // Navigate to Previous Session | Navigate to Next Session
+    if (['ArrowLeft', 'ArrowRight'].includes(event.key) && event.altKey) {
+      event.preventDefault();
+      let previousOrNext = event.key === 'ArrowRight' ? 1 : 0;
+      if (previousOrNext) {
+        if (this.isNextDisabled) {
+          return;
+        }
+        this.onNextSessionClick();
+      } else {
+        if (this.isPrevDisabled) {
+          return;
+        }
+        this.onPreviousSessionClick();
+      }
+    }
   }
 }

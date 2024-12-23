@@ -70,7 +70,7 @@ export class StatusComponent {
       this._status = undefined;
     }
 
-    if (this._sessionData?.data.presentation.layout.approval) {
+    if (this._sessionData?.presentation?.layout.approval) {
       this._approval = true;
 
       if (!this.statusItems.find((statusItem) => statusItem.status === this._status)) {

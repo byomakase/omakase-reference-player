@@ -44,7 +44,7 @@ import {Store} from '@ngxs/store';
 import {TelemetryActions} from '../main/telemetry/telemetry.actions';
 import {ChartLegendActions} from '../main/chart-legend/chart-legend.actions';
 import {TelemetryState} from '../main/telemetry/telemetry.state';
-import {Observable} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {OmpApiService} from '../../shared/components/omakase-player/omp-api.service';
 import SelectLane = TelemetryActions.SelectLane;
 import ShowLegend = ChartLegendActions.Show;
@@ -59,6 +59,8 @@ const telemetryHideResolution = 1300;
   providedIn: 'root',
 })
 export class TimelineService {
+  readonly onReady$: Subject<void> = new Subject();
+
   private _coloredLaneColorByIndex: Map<number, string> = new Map<number, string>();
   private _markerLaneStyleByName: Map<string, Partial<MarkerLaneStyle>> = new Map<string, Partial<MarkerLaneStyle>>();
   private _lineChartLaneStyleByName: Map<string, Partial<LineChartLaneStyle>> = new Map<string, Partial<LineChartLaneStyle>>();

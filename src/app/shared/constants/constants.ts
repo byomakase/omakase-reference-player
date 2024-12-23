@@ -101,7 +101,7 @@ export class Constants {
   };
 
   static OMAKASE_PLAYER_COMMON_CONFIG: Partial<OmakasePlayerConfig> = {
-    hls: {
+    hlsConfig: {
       debug: false,
       fragLoadPolicy: {
         default: {

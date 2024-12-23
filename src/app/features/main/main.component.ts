@@ -16,8 +16,8 @@
 
 import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 import {OmakasePlayerVideoComponent} from '../../shared/components/omakase-player/omakase-player-video/omakase-player-video.component';
-import {ImageButton, ImageButtonConfig, OmakaseAudioTrack, SubtitlesVttTrack, TimelineApi, TimelineLaneApi} from '@byomakase/omakase-player';
-import {BehaviorSubject, combineLatest, filter, forkJoin, fromEvent, Observable, Subject, take, takeUntil} from 'rxjs';
+import {ImageButton, ImageButtonConfig, OmakaseAudioTrack, SubtitlesVttTrack, ThumbnailLane, TimelineApi, TimelineLaneApi} from '@byomakase/omakase-player';
+import {BehaviorSubject, combineLatest, filter, forkJoin, fromEvent, map, Observable, of, Subject, take, takeUntil} from 'rxjs';
 import {Constants} from '../../shared/constants/constants';
 import {CoreModule} from '../../core/core.module';
 import {SharedModule} from '../../shared/shared.module';
@@ -39,14 +39,13 @@ import {
   VideoMediaTrack,
 } from '../../model/domain.model';
 import {DomainUtil} from '../../util/domain-util';
-import {TimelineService} from '../timeline/timeline.service';
+import {TelemetryLane, TimelineService} from '../timeline/timeline.service';
 import {ErrorData} from 'hls.js';
 import {AudioGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/audio-grouping-lane';
 import {VideoGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/video-grouping-lane';
 import {AudioChannelLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/audio-channel-lane';
 import {OmakasePlayerUtil} from '../../shared/components/omakase-player/omakase-player-util';
 import {WindowService} from '../../core/browser/window.service';
-import {MetadataOffcanvasComponent} from './metadata-offcanvas/metadata-offcanvas.component';
 import {BaseGroupingLane, GroupingLaneVisibility} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/base-grouping-lane';
 import {completeSub} from '../../util/rx-util';
 import {TextTrackGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/text-track-grouping-lane';
@@ -71,8 +70,16 @@ import ShowExceptionModal = AppActions.ShowExceptionModal;
 import SelectConfigLane = TimelineConfiguratorActions.SelectLane;
 import SetLaneOptions = TimelineConfiguratorActions.SetLaneOptions;
 import Minimize = TimelineConfiguratorActions.Minimize;
+import ToggleMinimizeMaximize = TimelineConfiguratorActions.ToggleMinimizeMaximize;
+import SelectLane = TimelineConfiguratorActions.SelectLane;
 import {SessionNavigationComponent} from './session-navigation/session-navigation.component';
 import {StatusComponent} from './status/status.component';
+import {TelemetryLineChartLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/telemetry-line-chart-lane';
+import {TelemetryBarChartLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/telemetry-bar-chart-lane';
+import {TelemetryOgChartLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/telemetry-og-chart-lane';
+import {TelemetryMarkerLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/telemetry-marker-lane';
+import {ToastService} from '../../shared/components/toast/toast.service';
+import {ToastComponent} from '../../shared/components/toast/toast.component';
 
 type GroupingLane = VideoGroupingLane | AudioGroupingLane | TextTrackGroupingLane;
 
@@ -84,7 +91,6 @@ type GroupingLane = VideoGroupingLane | AudioGroupingLane | TextTrackGroupingLan
     CoreModule,
     SharedModule,
     TimelineConfiguratorComponent,
-    MetadataOffcanvasComponent,
     MetadataExplorerContentComponent,
     MetadataExplorerNavComponent,
     SessionNavigationComponent,
@@ -94,6 +100,7 @@ type GroupingLane = VideoGroupingLane | AudioGroupingLane | TextTrackGroupingLan
     ChartLegendComponent,
     SegmentationListComponent,
     SegmentationComponent,
+    ToastComponent,
   ],
 })
 export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -166,7 +173,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     protected store: Store,
     protected router: Router,
     protected layoutService: LayoutService,
-    protected segmentationService: SegmentationService
+    protected segmentationService: SegmentationService,
+    protected toastService: ToastService
   ) {
     this.ompApiService.onCreate$
       .pipe(
@@ -191,6 +199,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       )
       .subscribe({
         next: () => {
+          this.timelineService.onReady$.next();
           this.ompApiService.api!.timeline!.onTimecodeClick$.pipe(takeUntil(this._destroyed$)).subscribe({
             next: (event) => {
               this.ompApiService.api!.video.seekToTimecode(event.timecode).subscribe();
@@ -204,6 +213,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit() {
     this.route.queryParams.pipe(takeUntil(this._destroyed$)).subscribe((queryParams) => {
+      this._disableSessionButtons$.next(true);
+      this.performSessionCleanup();
+
       let sessionUrl = queryParams['session'];
       let manifestId = queryParams['manifest'];
 
@@ -225,10 +237,16 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             this._sessionData = sessionData;
             this._masterManifests = this._sessionData.data.master_manifests.filter((p) => this.isManifestSupported(p));
 
-            if (this._sessionData.data.presentation.layout.qc && this._sessionData.data.presentation.layout.segmentation) {
+            if (this._sessionData.presentation?.layout.qc && this._sessionData.presentation.layout.segmentation) {
               this.layoutService.showTabs$.next(true);
+              this.layoutService.activeTab = 'qc';
             } else {
               this.layoutService.showTabs$.next(false);
+              if (this._sessionData.presentation?.layout.segmentation) {
+                this.layoutService.activeTab = 'segmentation';
+              } else {
+                this.layoutService.activeTab = 'qc';
+              }
             }
 
             this.showMetadata$.next(true);
@@ -242,8 +260,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                 next: () => {
                   this.ompApiService.api!.alerts.configure({duration: 3000});
 
-                  if (this._sessionData!.authentication) {
-                    this.ompApiService.api!.setAuthentication(this._sessionData!.authentication as BasicAuthenticationData | BearerAuthenticationData);
+                  if (this._sessionData!.session?.services?.media_authentication && this._sessionData!.session.services.media_authentication.type !== 'none') {
+                    this.ompApiService.api!.setAuthentication(this._sessionData!.session.services.media_authentication as BasicAuthenticationData | BearerAuthenticationData);
                   }
 
                   if (this._masterManifests!.length < this._sessionData!.data.master_manifests.length) {
@@ -282,8 +300,10 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private loadVideo(): Observable<void> {
+    console.log('load video');
     return new Observable<void>((o$) => {
       let frameRate = DomainUtil.resolveFrameRate(this._currentMasterManifest!, this._videoMediaTracks);
+      console.log('load', this._currentMasterManifest!.url);
       this.ompApiService
         .api!.loadVideo(this._currentMasterManifest!.url, frameRate, {
           dropFrame: isNullOrUndefined(this._currentMasterManifest!.drop_frame) ? false : this._currentMasterManifest!.drop_frame,
@@ -292,6 +312,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(take(1))
         .subscribe({
           next: (video) => {
+            console.log('video', video);
             this.populateVideoHelpMenu();
 
             try {
@@ -502,6 +523,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     let timelineExceptTextTracksCreated$ = new Subject<TimelineLaneApi[]>();
     let timelineTextTracksCreated$ = new Subject<TimelineLaneApi[]>();
     let timelineLanesAdded$ = new Subject<void>();
+    let telemetryLanesLoaded$ = new Subject<void>();
 
     this._manifestLoadBreaker$.pipe(take(1)).subscribe(() => {
       // remove listeners set for error handling
@@ -638,17 +660,39 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           .subscribe({
             next: ([lanes1, lanes2]) => {
               let timelineLanes = [...lanes1, ...lanes2];
-              if (this._sessionData!.data.presentation.timeline_configuration?.track_ordering?.length) {
-                timelineLanes = this.orderMediaTracks(timelineLanes, this._sessionData!.data.presentation.timeline_configuration.track_ordering);
+              if (this._sessionData!.presentation?.timeline_configuration?.track_ordering?.length) {
+                timelineLanes = this.orderMediaTracks(timelineLanes, this._sessionData!.presentation.timeline_configuration.track_ordering);
               }
               this.ompApiService.api!.timeline!.addTimelineLanes(timelineLanes);
-              if (this._sessionData!.data.presentation.timeline_configuration?.visible_tracks?.length) {
-                this.hideMediaTracks(timelineLanes, this._sessionData!.data.presentation.timeline_configuration.visible_tracks);
-              } else if (this._sessionData!.data.presentation.timeline_configuration?.track_ordering?.length) {
-                this.hideMediaTracks(timelineLanes, this._sessionData!.data.presentation.timeline_configuration.track_ordering);
+              if (this._sessionData!.presentation?.timeline_configuration?.visible_tracks?.length) {
+                this.hideMediaTracks(timelineLanes, this._sessionData!.presentation.timeline_configuration.visible_tracks);
+              } else if (this._sessionData!.presentation?.timeline_configuration?.track_ordering?.length) {
+                this.hideMediaTracks(timelineLanes, this._sessionData!.presentation.timeline_configuration.track_ordering);
               }
 
               completeSub(timelineLanesAdded$);
+
+              const telemetryLanes = timelineLanes.filter(
+                (lane) => lane instanceof TelemetryLineChartLane || lane instanceof TelemetryBarChartLane || lane instanceof TelemetryOgChartLane || lane instanceof TelemetryMarkerLane
+              ) as TelemetryLane[];
+              if (telemetryLanes.length) {
+                combineLatest(telemetryLanes.map((lane) => lane.onVttFileLoaded$))
+                  .pipe(takeUntil(this._manifestLoadBreaker$), take(1))
+                  .subscribe(() => {
+                    completeSub(telemetryLanesLoaded$);
+                  });
+              } else {
+                completeSub(telemetryLanesLoaded$);
+              }
+
+              const thumbnailLane = timelineLanes.find((lane) => lane instanceof ThumbnailLane) as ThumbnailLane | undefined;
+              if (thumbnailLane) {
+                thumbnailLane.onVttFileLoaded$.pipe(takeUntil(this._manifestLoadBreaker$), take(1)).subscribe((thumbnailVttFile) => {
+                  if (this.segmentationService.markerList && !this.segmentationService.markerList.thumbnailVttFile) {
+                    this.segmentationService.markerList.thumbnailVttFile = thumbnailVttFile;
+                  }
+                });
+              }
             },
           });
 
@@ -662,6 +706,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             this.store.dispatch(new SetLaneOptions(laneOptions));
             this.timelineLanesAdded$.next(true);
           },
+        });
+
+        telemetryLanesLoaded$.pipe(takeUntil(this._manifestLoadBreaker$), take(1)).subscribe({
           complete: () => {
             this._disableSessionButtons$.next(false);
           },
@@ -1023,9 +1070,11 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private populateVideoHelpMenu() {
     if (this.ompApiService.api!!.video.getHelpMenuGroups().length < 1) {
-      let helpMenuGroup = OmakasePlayerUtil.getKeyboardShortcutsHelpMenuGroup(this.windowService.platform);
-      helpMenuGroup.items = [...helpMenuGroup.items];
-      this.ompApiService.api!.video.appendHelpMenuGroup(helpMenuGroup);
+      let helpMenuGroups = OmakasePlayerUtil.getKeyboardShortcutsHelpMenuGroup(this.windowService.platform);
+      helpMenuGroups.forEach((helpMenuGroup) => {
+        helpMenuGroup.items = [...helpMenuGroup.items];
+        this.ompApiService.api!.video.appendHelpMenuGroup(helpMenuGroup);
+      });
     }
   }
 
@@ -1123,27 +1172,16 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     this.toggleGroupingLanesCollapse(visibility);
   }
 
-  customEncode(url: string) {
-    return encodeURI(url).replace(/\//g, '%2F');
-  }
-
   handleSessionChange(newSessionUrl: string) {
-    this._disableSessionButtons$.next(true);
-
-    let sessionUrl = this.route.snapshot.queryParams['session'];
-    sessionUrl = this.customEncode(sessionUrl);
-
-    if (this.ompApiService.api!.video.isPlaying()) {
-      this.ompApiService.api!.video.pause().subscribe({
-        next: () => {
-          this.performSessionCleanup();
-          this.router.navigateByUrl(this.router.url.replace(sessionUrl, newSessionUrl));
-        },
-      });
-    } else {
-      this.performSessionCleanup();
-      this.router.navigateByUrl(this.router.url.replace(sessionUrl, newSessionUrl));
-    }
+    (this.ompApiService.api!.video.isPlaying() ? this.ompApiService.api!.video.pause().pipe(map((p) => true)) : of(true)).subscribe({
+      next: () => {
+        this.router.navigate(['/'], {
+          queryParams: {
+            session: newSessionUrl,
+          },
+        });
+      },
+    });
   }
 
   private performSessionCleanup() {
@@ -1263,27 +1301,27 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         event.preventDefault();
       } else {
         const targetElement = event.target as HTMLElement;
-        const formInputs = ['INPUT', 'TEXTAREA'];
+        const formInputs = ['INPUT', 'TEXTAREA', 'OMAKASE-MARKER-LIST'];
         if (formInputs.includes(targetElement.tagName.toUpperCase())) {
           return;
         }
 
-        // Collapse / Expand All Timeline Rows - Ctrl + Shift + s
-        if (event.code === 'KeyS' && event.shiftKey && event.ctrlKey) {
+        // Collapse / Expand All Timeline Rows - a
+        if (event.code === 'KeyA') {
           this.toggleGroupingLanesCollapse(this.groupingLanesVisibility);
           event.preventDefault();
           return;
         }
 
-        // Toggle Next Audio Track - Shift + a
-        if (event.code === 'KeyA' && event.shiftKey) {
+        // Toggle Next Audio Track - Shift + e
+        if (event.code === 'KeyE' && event.shiftKey) {
           this.toggleAudioTrack('next');
           event.preventDefault();
           return;
         }
 
-        // Toggle Previous Audio Track -  a
-        if (event.code === 'KeyA') {
+        // Toggle Previous Audio Track -  e
+        if (event.code === 'KeyE') {
           this.toggleAudioTrack('previous');
           event.preventDefault();
           return;
@@ -1303,18 +1341,27 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           return;
         }
 
-        // Toggle Next Channel of Active Audio Track - Shift + a
-        if (event.code === 'KeyC' && event.shiftKey && !event.ctrlKey && !event.metaKey) {
+        // Toggle Next Channel of Active Audio Track - Shift + r
+        if (event.code === 'KeyR' && event.shiftKey && !event.ctrlKey && !event.metaKey) {
           this.toggleAudioChannelTrack('next');
           event.preventDefault();
           return;
         }
 
-        // Toggle Previous Channel of Active Audio Track-  a
-        if (event.code === 'KeyC' && !event.ctrlKey && !event.metaKey) {
+        // Toggle Previous Channel of Active Audio Track-  r
+        if (event.code === 'KeyR' && !event.ctrlKey && !event.metaKey) {
           this.toggleAudioChannelTrack('previous');
           event.preventDefault();
           return;
+        }
+
+        // Show / Hide Configuration Panel - g
+        if (event.code === 'KeyG' && this.groupingLanes && this.groupingLanes.length > 0) {
+          if (this.store.selectSnapshot(TimelineConfiguratorState.visibility) === 'maximized') {
+            this.store.dispatch(new Minimize());
+          } else {
+            this.store.dispatch(new SelectLane(this.groupingLanes.at(0)!.id));
+          }
         }
       }
     }
@@ -1378,14 +1425,11 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get navBarAboveVideo(): boolean {
-    if (
-      this._sessionData?.data.presentation.layout.qc &&
-      (this._sessionData?.data.source_info || (this._sessionData?.data.presentation.info_tabs && this._sessionData?.data.presentation.info_tabs.length > 0))
-    ) {
+    if (this._sessionData?.presentation?.layout.qc && (this._sessionData?.data.source_info || (this._sessionData?.presentation.info_tabs && this._sessionData?.presentation.info_tabs.length > 0))) {
       return true;
     } else if (
-      this._sessionData?.data.presentation.layout.segmentation ||
-      this._sessionData?.data.presentation.layout.approval ||
+      this._sessionData?.presentation?.layout.segmentation ||
+      this._sessionData?.presentation?.layout.approval ||
       this._sessionData?.session?.status ||
       this._sessionData?.session?.next ||
       this._sessionData?.session?.previous
@@ -1394,5 +1438,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     return false;
+  }
+
+  get timelineControlsUp(): boolean {
+    return this.windowService.window.outerWidth > 1000;
   }
 }

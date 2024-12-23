@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, Output, ViewChild} from '@angular/core';
-import {NgbDropdown, NgbDropdownButtonItem, NgbNav} from '@ng-bootstrap/ng-bootstrap';
+import {NgbNav} from '@ng-bootstrap/ng-bootstrap';
 import {CoreModule} from '../../../core/core.module';
 import {IconModule} from '../../../shared/components/icon/icon.module';
 import {SharedModule} from '../../../shared/shared.module';
@@ -8,19 +8,21 @@ import {InfoTab, SessionData, SourceInfo} from '../../../model/domain.model';
 import {StringUtil} from '../../../util/string-util';
 import {MetadataOffcanvasService} from '../metadata-offcanvas/metadata-offcanvas.service';
 import {MetadataExplorerService} from './metadata-explorer.service';
+import {IconName} from '../../../shared/components/icon/icon.service';
+import {DownloadService} from '../../../shared/services/download.service';
 
 @Component({
   selector: 'div[appMetadataExplorerNav]',
   standalone: true,
-  imports: [CoreModule, SharedModule, IconModule, NgbDropdownButtonItem],
+  imports: [CoreModule, SharedModule, IconModule],
   template: `
     <div class="d-flex">
       <div class="d-flex flex-grow-1 align-items-center justify-content-between" [class.d-none]="!(showInfo$ | async)" #metadataNav>
         <ul ngbNav #nav="ngbNav" class="nav-pills h-100" (activeIdChange)="onNavChange($event)" [destroyOnHide]="false" [animation]="false">
-          <li [ngbNavItem]="'sources'">
-            <button ngbNavLink>Sources</button>
-            <ng-template ngbNavContent>
-              @if (showSources$ | async) {
+          @if (showSources$ | async) {
+            <li [ngbNavItem]="'sources'">
+              <button ngbNavLink (click)="changeTab()">Sources</button>
+              <ng-template ngbNavContent>
                 @for (source_info of sessionDataFiltered!.data?.source_info; track source_info; let index = $index) {
                   <div ngbAccordion class="mb-2">
                     <div ngbAccordionItem #accordionItem="ngbAccordionItem">
@@ -43,21 +45,43 @@ import {MetadataExplorerService} from './metadata-explorer.service';
                     </div>
                   </div>
                 }
-              }
-            </ng-template>
-          </li>
+              </ng-template>
+            </li>
+          }
           @if (showInfo$ | async) {
-            @for (info_tab of sessionDataFiltered!.data!.presentation.info_tabs; track info_tab; let index = $index) {
-              @if (info_tab.type === 'json' && info_tab.visualization === 'json_tree') {
-                <li [ngbNavItem]="'info-tab-' + index">
-                  <button ngbNavLink>{{ resolveInfoTabName(info_tab, index) }}</button>
-                  <ng-template ngbNavContent>
+            @for (info_tab of sessionDataFiltered!.presentation!.info_tabs; track info_tab; let index = $index) {
+              <li [ngbNavItem]="'info-tab-' + index">
+                <button ngbNavLink (click)="changeTab(info_tab)">{{ resolveInfoTabName(info_tab, index) }}</button>
+                <ng-template ngbNavContent>
+                  @if (info_tab.type === 'json' && info_tab.visualization === 'json_tree') {
                     <div class="w-100 h-100">
                       <ngx-json-viewer #ngxJsonViewer [json]="info_tab.data" [expanded]="true"></ngx-json-viewer>
                     </div>
-                  </ng-template>
-                </li>
-              }
+                  } @else if (info_tab.type === 'file_list' && info_tab.visualization === 'list') {
+                    @for (info_tab_file of info_tab.files; track info_tab_file; let file_index = $index) {
+                      @if (info_tab_file.filename) {
+                        <div class="w-100 h-100 file-list">
+                          <div ngbAccordion>
+                            <div ngbAccordionItem #accordionItem="ngbAccordionItem" class="custom-accordion-item">
+                              <div ngbAccordionHeader class="accordion-button custom-header file-accordion">
+                                <div style="width: 70px"><i [appIcon]="getFilenameIcon(info_tab_file.filename)"></i></div>
+                                <div class="name">{{ info_tab_file.filename }}</div>
+                                <div class="description flex-grow-1">{{ info_tab_file.description }}</div>
+                                <button type="button" class="btn download-btn" [disabled]="!info_tab_file.url" (click)="downloadService.downloadFile(info_tab_file.url, info_tab_file.filename)">
+                                  <i appIcon="download"></i>
+                                </button>
+                              </div>
+                              <div ngbAccordionCollapse>
+                                <div ngbAccordionBody></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    }
+                  }
+                </ng-template>
+              </li>
             }
           }
         </ul>
@@ -81,7 +105,8 @@ export class MetadataExplorerNavComponent {
 
   constructor(
     private metadataOffcanvasService: MetadataOffcanvasService,
-    private metadataExplorerService: MetadataExplorerService
+    public metadataExplorerService: MetadataExplorerService,
+    public downloadService: DownloadService
   ) {}
 
   @HostBinding('id')
@@ -102,11 +127,11 @@ export class MetadataExplorerNavComponent {
       delete sourceInfo['name'];
     });
 
-    if (this._sessionData?.data.source_info) {
+    if (this._sessionData?.data.source_info && this._sessionData.data.source_info.length > 0) {
       this.showSources$.next(true);
     }
 
-    if (this._sessionData?.data.presentation.info_tabs && this._sessionData?.data.presentation.info_tabs.length > 0) {
+    if (this._sessionData?.presentation?.info_tabs && this._sessionData?.presentation.info_tabs.length > 0) {
       this.showInfo$.next(true);
     }
   }
@@ -132,6 +157,16 @@ export class MetadataExplorerNavComponent {
     if (mediaInfo) {
       this.metadataOffcanvasService.open(sourceInfo, mediaInfo);
     }
+  }
+
+  getFilenameIcon(filename: string): IconName | undefined {
+    const extensions = ['pdf', 'json', 'txt', 'csv'];
+
+    return extensions.includes(filename.split('.').at(-1)!.toLowerCase()) ? (filename.split('.').at(-1)!.toLowerCase() as IconName) : 'binary';
+  }
+
+  changeTab(infoTab: InfoTab | undefined = undefined) {
+    this.metadataExplorerService.infoTabHeaderActive = infoTab?.type === 'file_list' && infoTab?.visualization === 'list';
   }
 
   get sessionData(): SessionData | undefined {

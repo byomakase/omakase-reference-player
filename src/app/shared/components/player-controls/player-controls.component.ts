@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, EventEmitter, HostBinding, Input, Output, Renderer2, RendererStyleFlags2, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output, Renderer2, RendererStyleFlags2, ViewChild} from '@angular/core';
 import {NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
-import {JsonPipe} from '@angular/common';
 import {IconModule} from '../icon/icon.module';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {filter, Subject, takeUntil} from 'rxjs';
@@ -40,7 +39,7 @@ interface PlayerControlsFormGroup {
 @Component({
   selector: 'div[appPlayerControls]',
   standalone: true,
-  imports: [NgbDropdownModule, JsonPipe, IconModule, FormsModule, ReactiveFormsModule],
+  imports: [NgbDropdownModule, IconModule, FormsModule, ReactiveFormsModule],
   template: `
     <div class="col-4 d-flex justify-content-start">
       <div class="btn-group btn-group-speed" ngbDropdown role="group" [placement]="'top-start'">
@@ -96,7 +95,7 @@ interface PlayerControlsFormGroup {
         <button type="button" class="btn btn-safezone" (click)="buttonClickSafezone()" [disabled]="isDisabled">
           <i [appIcon]="safeZoneIsOn ? 'safezone-on' : 'safezone-off'"></i>
         </button>
-        <button type="button" class="btn btn-detach" (click)="buttonClickToggleAttachDetach()" [disabled]="isDisabled || isToggleAttachDetachDisabled">
+        <button type="button" class="btn btn-detach" (click)="buttonClickToggleAttachDetach()" [disabled]="isDisabled || !isToggleAttachDetachEnabled">
           <i [appIcon]="iconAttachDetach"></i>
         </button>
         <button type="button" class="btn btn-fullscreen" (click)="buttonClickFullscreen()" [disabled]="isDisabled || isFullscreenDisabled">
@@ -109,6 +108,9 @@ interface PlayerControlsFormGroup {
 export class PlayerControlsComponent {
   @ViewChild('volumeControlInput')
   volumeControlInputElementRef!: ElementRef;
+
+  @Input()
+  isVttLoading!: boolean | null;
 
   @Output()
   readonly onManifestChange: EventEmitter<MasterManifest> = new EventEmitter<MasterManifest>();
@@ -220,7 +222,7 @@ export class PlayerControlsComponent {
   }
 
   updateVolumeProgress(volume: number) {
-    this.renderer.setStyle(this.volumeControlInputElementRef.nativeElement, '--volume-control-progress-percent', `${volume * 100}%`, RendererStyleFlags2.DashCase);
+    this.renderer.setStyle(this.volumeControlInputElementRef.nativeElement, '--volume-control-progress-percent', `${Math.round(volume * 100)}%`, RendererStyleFlags2.DashCase);
   }
 
   buttonClickTogglePlayPause() {
@@ -358,8 +360,8 @@ export class PlayerControlsComponent {
     return !this.ompApiService.api || (this.ompApiService.api.video && !this.ompApiService.api.video.isVideoLoaded());
   }
 
-  get isToggleAttachDetachDisabled(): boolean {
-    return !!this.ompApiService.api && this.ompApiService.api.video.getVideoWindowPlaybackState() === 'detaching' && this.ompApiService.api.video.getVideoWindowPlaybackState() === 'attaching';
+  get isToggleAttachDetachEnabled(): boolean {
+    return !!(this.ompApiService.api && (this.ompApiService.api.video.canDetach() || this.ompApiService.api.video.canAttach()) && !this.isVttLoading);
   }
 
   get isFullscreenDisabled(): boolean {
@@ -381,5 +383,23 @@ export class PlayerControlsComponent {
 
   get showManifests(): boolean {
     return !!this._filteredMasterManifests && this._filteredMasterManifests.length > 0;
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeypress(event: KeyboardEvent) {
+    // Volume
+    if (event.code === 'Backslash' && this.ompApiService.api) {
+      let step = 10;
+      let upOrDown = event.shiftKey ? 1 : -1;
+
+      let newVolume = this.ompApiService.api.video.getVolume() * 100 + step * upOrDown;
+      if (newVolume >= 100) {
+        newVolume = 100;
+      } else if (newVolume <= 0) {
+        newVolume = 0;
+      }
+
+      this.playerControlsFormGroup.controls.volume.setValue(newVolume);
+    }
   }
 }

@@ -65,9 +65,13 @@ export class InlineEditComponent {
 
   @HostListener('document:keydown', ['$event'])
   onDocumentKeypress(event: KeyboardEvent) {
-    if (event.code === 'Enter' && this.editing && event.target === this.inputEl.nativeElement) {
-      this.edited.next(this.inputEl.nativeElement.value);
-      this.editing = false;
+    if (this.editing && event.target === this.inputEl.nativeElement) {
+      if (event.code === 'Enter') {
+        this.edited.next(this.inputEl.nativeElement.value);
+        this.editing = false;
+      } else if (event.code === 'Escape') {
+        this.editing = false;
+      }
     }
   }
 }

@@ -1,6 +1,4 @@
 import {ElementRef, Injectable} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {SessionData} from '../../../model/domain.model';
 
 interface ScrollPosition {
   top: number;
@@ -15,6 +13,7 @@ export class MetadataExplorerService {
   private navIdScrollPositionMap: Record<string, ScrollPosition> = {};
 
   private _metadataContentElementRef: ElementRef | undefined;
+  private _infoTabHeaderActive: boolean = false;
 
   onNavChange(activeId: string) {
     this.navActiveId = activeId;
@@ -43,5 +42,13 @@ export class MetadataExplorerService {
 
   set metadataContentElementRef(value: ElementRef) {
     this._metadataContentElementRef = value;
+  }
+
+  set infoTabHeaderActive(value: boolean) {
+    this._infoTabHeaderActive = value;
+  }
+
+  get infoTabHeaderActive(): boolean {
+    return this._infoTabHeaderActive;
   }
 }

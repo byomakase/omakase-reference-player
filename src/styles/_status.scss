@@ -4,7 +4,7 @@
     align-items: center;
     border-radius: 0;
     border: 0;
-    background-color: #525979;
+    background-color: $color-12;
     width: 170px;
     padding: 8px 20px 8px 20px;
     justify-content: space-between;
@@ -17,7 +17,7 @@
       width: 100%;
       border: 0;
       border-radius: 0;
-      background-color: #525979;
+      background-color: $color-12;
       padding: 0;
 
       &:focus-visible {
@@ -25,7 +25,7 @@
       }
 
       &:disabled {
-        background-color: #525979;
+        background-color: color-12;
         color: #fff;
         opacity: 1;
       }
@@ -46,25 +46,25 @@
 
       .green {
         svg {
-          color: #62c0a4;
+          color: $color-18;
         }
       }
 
       .red {
         svg {
-          color: #f54a4a;
+          color: $color-19;
         }
       }
 
       .yellow {
         svg {
-          color: #ffe790;
+          color: $color-20;
         }
       }
 
       .blue {
         svg {
-          color: #00a3e9;
+          color: $color-11;
         }
       }
 
@@ -75,7 +75,7 @@
 
     .status-menu {
       width: 170px;
-      background-color: #4c526a;
+      background-color: $color-21;
       border: 0;
       border-radius: 0px 0px 5px 5px;
       padding: 0;
@@ -101,7 +101,7 @@
         .confirm-btn {
           width: 80px;
           height: 30px;
-          background-color: #2a2c34;
+          background-color: $color-22;
           border-radius: 3px;
           font-size: 13px;
           border: 0;

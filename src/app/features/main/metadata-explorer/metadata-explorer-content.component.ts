@@ -25,8 +25,19 @@ import {MetadataExplorerService} from './metadata-explorer.service';
   standalone: true,
   imports: [CoreModule, SharedModule],
   template: `
-    <div id="metadata-content" #metadataContent (scroll)="onMetadataContentScroll($event)">
-      <div [ngbNavOutlet]="ngbNav"></div>
+    <div class="d-flex flex-column flex-grow-1" id="metadata-explorer-container">
+      @if (metadataExplorerService.infoTabHeaderActive) {
+        <div class="d-flex" style="border: 1px solid transparent">
+          <div class="d-flex flex-grow-1" style="padding: 0px 0px 8px 12px;">
+            <div style="width: 70px;"></div>
+            <div class="name-header">NAME</div>
+            <div class="description-header flex-grow-1">DESCRIPTION</div>
+          </div>
+        </div>
+      }
+      <div id="metadata-content" #metadataContent (scroll)="onMetadataContentScroll($event)">
+        <div [ngbNavOutlet]="ngbNav"></div>
+      </div>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,7 +47,7 @@ export class MetadataExplorerContentComponent {
 
   private ngbNavElement!: NgbNav;
 
-  constructor(private metadataExplorerService: MetadataExplorerService) {}
+  constructor(public metadataExplorerService: MetadataExplorerService) {}
 
   ngOnInit() {
     this.metadataExplorerService.metadataContentElementRef = this.metadataContentElementRef;
@@ -45,6 +56,11 @@ export class MetadataExplorerContentComponent {
   @HostBinding('id')
   get hostElementId(): string | undefined {
     return 'metadata-explorer';
+  }
+
+  @HostBinding('class')
+  get hostElementClass(): string | undefined {
+    return this.metadataExplorerService.infoTabHeaderActive ? 'has-header' : 'no-header';
   }
 
   @Input()

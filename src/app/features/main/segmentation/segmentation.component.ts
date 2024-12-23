@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, HostBinding, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, HostBinding, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
 import {Store} from '@ngxs/store';
@@ -25,8 +25,17 @@ import {Marker, MarkerLane} from '@byomakase/omakase-player';
 import {SegmentationService} from '../segmentation-list/segmentation.service';
 import {TimelineService} from '../../timeline/timeline.service';
 import {ModalService} from '../../../shared/components/modal/modal.service';
-import {EditModalComponent} from '../../../shared/components/edit-modal/edit-modal.component';
 import {ConfirmationModalComponent} from '../../../shared/components/modal/confirmation-modal.component';
+import {SegmentationAction} from '../../../model/domain.model';
+import {DownloadService} from '../../../shared/services/download.service';
+import {MarkerListItem} from '@byomakase/omakase-player/dist/marker-list/marker-list-item';
+import {ToastService} from '../../../shared/components/toast/toast.service';
+
+interface MarkerExportItem {
+  name?: string;
+  start: string;
+  end?: string;
+}
 
 @Component({
   selector: 'div[appSegmentation]',
@@ -40,8 +49,19 @@ import {ConfirmationModalComponent} from '../../../shared/components/modal/confi
     <div #segmentationToggle class="segmentation-menu-trigger" (click)="toggleSegmentationMenu()"></div>
     <div #segmentationMenu class="segmentation-menu" [ngClass]="{'d-none': !openSegmentationMenu}">
       <div class="segmentation-menu-item" (click)="openDeleteModal()">DELETE</div>
+      @if (this.isExportVisible()) {
+        <div class="segmentation-menu-item" (click)="downloadMarkersAsCsv()">EXPORT CSV</div>
+        <div class="segmentation-menu-item" (click)="downloadMArkersAsJson()">EXPORT JSON</div>
+      }
       <!-- <div class="segmentation-menu-item">EXPORT CSV</div>
       <div class="segmentation-menu-item">EXPORT JSON</div> -->
+      @if (segmentationActions) {
+        @for (action of segmentationActions; track action.name) {
+          @if (action.name) {
+            <div class="segmentation-menu-item" (click)="triggerSegmentationAction(action)">{{ getSegmentationActionName(action, true) }}</div>
+          }
+        }
+      }
     </div>
     <template id="segmentation-marker-list-header">
       <div class="flex-row">
@@ -66,7 +86,6 @@ import {ConfirmationModalComponent} from '../../../shared/components/modal/confi
         <div class="flex-cell flex-hide" style="width:120px;min-width:15%" slot="end"></div>
         <div class="flex-cell flex-hide" style="width:120px;min-width:15%" slot="duration"></div>
         <div class="flex-cell flex-cell-buttons" style="width:60px;text-align:center">
-          <span class="icon-edit" slot="action-edit"></span>
           <span class="icon-delete" slot="remove"></span>
         </div>
       </div>
@@ -79,6 +98,8 @@ export class SegmentationComponent implements OnInit, OnDestroy {
   @ViewChild('segmentationToggle') segmentationToggleElement!: ElementRef;
   @ViewChild('segmentationMenu') segmentationMenuElement!: ElementRef;
 
+  @Input() segmentationActions?: SegmentationAction[];
+
   private _destroyed$ = new Subject<void>();
   activeTrack$: Observable<SegmentationTrack | undefined>;
 
@@ -87,7 +108,9 @@ export class SegmentationComponent implements OnInit, OnDestroy {
     protected ompApiService: OmpApiService,
     protected segmentationService: SegmentationService,
     protected timelineService: TimelineService,
-    protected modalService: ModalService
+    protected modalService: ModalService,
+    protected downloadService: DownloadService,
+    protected toastService: ToastService
   ) {
     this.activeTrack$ = store.select(SegmentationState.activeTrack);
   }
@@ -108,27 +131,28 @@ export class SegmentationComponent implements OnInit, OnDestroy {
             this.segmentationService.markerList.destroy();
           }
           if (activeTrack) {
+            this.segmentationService.markerLane = this.timelineService.getTimelineLaneById(activeTrack.markerLaneId) as MarkerLane;
             this.ompApiService
               .api!.createMarkerList({
                 markerListHTMLElementId: 'segmentation-marker-list',
                 templateHTMLElementId: 'segmentation-marker-list-row',
                 headerHTMLElementId: 'segmentation-marker-list-header',
                 styleUrl: './assets/css/segmentation.css',
-                source: this.timelineService.getTimelineLaneById(activeTrack.markerLaneId) as MarkerLane,
+                source: this.segmentationService.markerLane,
                 thumbnailVttFile: this.timelineService.getThumbnailLane()?.vttFile,
+                nameEditable: true,
               })
               .subscribe({
                 next: (markerList) => {
                   this.segmentationService.markerList = markerList;
                   this.segmentationService.markerList.onMarkerClick$.pipe(takeUntil(this._destroyed$)).subscribe(({marker}) => this.segmentationService.toggleMarker(marker as Marker));
                   this.segmentationService.markerList.onMarkerSelected$.pipe(takeUntil(this._destroyed$)).subscribe(({marker}) => (this.segmentationService.selectedMarker = marker));
-                  this.segmentationService.markerList.onMarkerAction$.pipe(takeUntil(this._destroyed$)).subscribe({
-                    next: ({marker, action}) => {
-                      if (action === 'edit' && marker === this.segmentationService.markerList!.getSelectedMarker()) {
-                        this.openEditModal();
-                      }
-                    },
-                  });
+
+                  const selectedMarker = this.segmentationService.selectedMarker;
+                  if (selectedMarker) {
+                    this.segmentationService.markerLane!.toggleMarker(selectedMarker.id);
+                    this.segmentationService.selectMarker(selectedMarker as Marker);
+                  }
                 },
               });
           }
@@ -155,12 +179,64 @@ export class SegmentationComponent implements OnInit, OnDestroy {
     modalRef!.componentInstance.onOk$.subscribe(() => this.deleteActiveSegmentationTrack());
   }
 
+  isExportVisible() {
+    return this.segmentationService.markerList?.getMarkers().length !== 0;
+  }
+
+  downloadMarkersAsCsv() {
+    const markers = this.segmentationService.markerList?.getMarkers()! as MarkerListItem[];
+    const markersAsLists = markers.map((marker: MarkerListItem) => {
+      const row = [marker.name ?? '', '', '', ''];
+      row[1] = this.ompApiService.api!.video.formatToTimecode(marker.start!);
+
+      if (marker.end) {
+        row[2] = this.ompApiService.api!.video.formatToTimecode(marker.end!);
+        row[3] = marker.duration!.toFixed(2);
+      }
+
+      const escapedRow = row.map((elem) => `\"${elem}\"`);
+      return escapedRow;
+    });
+
+    markersAsLists.unshift(['Name', 'Start', 'End', 'Duration']);
+
+    const markersAsCsv = markersAsLists.map((row) => row.join(',')).join('\n');
+    const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
+
+    this.downloadService.downloadText(markersAsCsv, `${activeTrack!.name.replaceAll(' ', '-')}.csv`);
+  }
+
+  downloadMArkersAsJson() {
+    const markers = this.segmentationService.markerList?.getMarkers()! as MarkerListItem[];
+    const markersAsObjects = markers.map((marker: MarkerListItem) => {
+      const obj = {} as MarkerExportItem;
+      obj.name = marker.name;
+
+      obj.start = this.ompApiService.api!.video.formatToTimecode(marker.start!);
+      if (marker.end) {
+        obj.end = this.ompApiService.api!.video.formatToTimecode(marker.end!);
+      }
+
+      return obj;
+    });
+    const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
+    const jsonFile = JSON.stringify(
+      {
+        name: activeTrack!.name,
+        markers: markersAsObjects,
+      },
+      null,
+      2
+    );
+
+    this.downloadService.downloadText(jsonFile, `${activeTrack!.name.replaceAll(' ', '-')}.json`);
+  }
+
   @HostListener('document:click', ['$event.target'])
   public onClick(targetElement: HTMLElement): void {
     if (this.openSegmentationMenu) {
       const clickedInside = this.segmentationMenuElement.nativeElement.contains(targetElement) || this.segmentationToggleElement.nativeElement.contains(targetElement);
       if (!clickedInside) {
-        console.log('close');
         this.openSegmentationMenu = false;
       }
     }
@@ -170,17 +246,17 @@ export class SegmentationComponent implements OnInit, OnDestroy {
     this.openSegmentationMenu = !this.openSegmentationMenu;
   }
 
-  private openEditModal() {
-    const modalRef = this.modalService.open(EditModalComponent);
+  getSegmentationActionName(action: SegmentationAction, uppercase = false) {
+    const name = action.name.replaceAll('_', ' ').replaceAll('-', ' ');
+    return uppercase ? name.toUpperCase() : name;
+  }
 
-    if (!modalRef) {
-      return;
-    }
-
-    let selectedMarker = this.segmentationService.markerList!.getSelectedMarker()!;
-    modalRef.componentInstance.markerName = selectedMarker.name;
-    modalRef.componentInstance.onUpdate.subscribe((value: string) => {
-      this.segmentationService.markerList!.updateMarker(selectedMarker.id, {name: value});
+  triggerSegmentationAction(action: SegmentationAction) {
+    const modalRef = this.modalService.open(ConfirmationModalComponent);
+    modalRef!.componentInstance.confirmationMessage = `Proceed with ${this.getSegmentationActionName(action)}?`;
+    modalRef!.componentInstance.confirmText = 'Proceeed';
+    modalRef!.componentInstance.onOk$.subscribe(() => {
+      this.toastService.show({type: 'success', message: 'Action initiated successfully', duration: 3000});
     });
   }
 }

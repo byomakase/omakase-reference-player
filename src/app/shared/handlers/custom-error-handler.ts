@@ -48,6 +48,7 @@ export class CustomErrorHandler implements ErrorHandler {
         this.store.dispatch(new ShowInfoModal(`Please initate action in detached player window`));
       }
     } else {
+      console.error(error);
       this.store.dispatch(
         new ShowExceptionModal({
           message: error && StringUtil.isNonEmpty(error.message) ? error.message : serializeError(error, {maxDepth: 10}),
