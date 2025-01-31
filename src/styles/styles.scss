@@ -43,71 +43,20 @@
 @import "metadata-nav";
 @import "session-navigation";
 @import "status";
+@import "annotations";
 
 @import "modal";
 @import "toast";
 
+@import "layout";
+
+@import "themes";
+
+@include themify($themes);
+
 html,
 body {
   height: 100%;
-}
-
-header {
-  nav.navbar {
-    --app-dark-rgb: 42, 44, 52;
-    height: 70px;
-    padding: 0;
-
-    .container-fluid {
-      padding: 0px 0px 0px 20px;
-      justify-content: unset;
-
-      .navbar-brand {
-        img {
-          height: 36px;
-        }
-      }
-
-      #header-nav {
-        font-weight: 400;
-        font-size: 14px;
-        line-height: 20px;
-
-        ul.nav-tabs {
-          margin-top: auto;
-          border: 0;
-
-          .nav-item {
-            height: 34px;
-
-            &:first-child {
-              margin-left: 50px;
-            }
-          }
-
-          .nav-link {
-            display: flex;
-            align-items: center;
-            min-width: 80px;
-            border: 0;
-            font-weight: 400;
-            color: $color-2;
-            height: 100%;
-            border-color: $black;
-            padding: 8px 28px 6px 28px;
-            margin: 0;
-
-            &.active {
-              font-weight: 700;
-              background-color: $color-6;
-              color: $white;
-              border-right: 1px solid $black;
-            }
-          }
-        }
-      }
-    }
-  }
 }
 
 main {
@@ -115,7 +64,7 @@ main {
 }
 
 #north-pole {
-  background-color: $color-5;
+  background-color: var(--color-64);
 
   #left-section {
     min-height: 0;
@@ -127,7 +76,7 @@ main {
     }
 
     .left {
-      border-right: 1px solid $color-5;
+      border-right: 1px solid var(--color-64);
     }
 
     #metadata-content-wrapper {
@@ -153,24 +102,32 @@ main {
         flex-grow: 1;
         height: 100%;
         padding: 20px 30px;
-        border-right: 1px solid $color-5;
+        border-right: 1px solid var(--color-48);
+        background-color: var(--color-64);
 
         #metadata-explorer-container {
           overflow-y: auto;
 
           .name-header {
-            min-width: 16.5em;
+            width: 200px;
+            flex-grow: 1;
             font-size: 14px;
             font-weight: 800;
             line-height: 20px;
-            color: $color-2;
+            color: var(--color-43);
           }
 
           .description-header {
+            width: 300px;
+            flex-grow: 1;
             font-size: 14px;
             font-weight: 700;
             line-height: 20px;
-            color: $color-2;
+            color: var(--color-43);
+
+            @media (max-width: 1600px) {
+              display: none;
+            }
           }
 
           #metadata-content {
@@ -187,7 +144,8 @@ main {
         flex-grow: 1;
         overflow-y: auto;
         height: 100%;
-        border-right: 1px solid $color-5;
+        border-right: 1px solid var(--color-48);
+        background-color: var(--color-64);
 
         #segmentation-content {
           flex-grow: 1;
@@ -198,13 +156,13 @@ main {
 
     #timeline-controls-wrapper-north {
       #timeline-controls {
-        background-color: $color-6;
-        border-bottom: 1px solid $color-5;
+        background-color: var(--color-45);
+        border-bottom: 1px solid var(--color-48);
 
         @media (min-width: 1301px) {
           // up
           &.has-border {
-            border-right: 1px solid $color-5;
+            border-right: 1px solid var(--color-48);
           }
         }
       }
@@ -213,7 +171,7 @@ main {
 
   #vu-meter-wrapper,
   #telemetry-wrapper {
-    border-bottom: 1px solid $color-5;
+    border-bottom: 1px solid var(--color-48);
 
     @media (max-width: 1300px) {
       // down
@@ -224,6 +182,7 @@ main {
   #player-wrapper {
     min-height: 0;
     min-width: 600px;
+    height: fit-content;
 
     @media (min-width: 2300px) {
       // up
@@ -252,9 +211,9 @@ main {
     }
 
     #player-controls {
-      background-color: $color-1;
-      border-left: 1px solid $color-5;
-      border-bottom: 1px solid $color-5;
+      background-color: var(--color-47);
+      border-left: 1px solid var(--color-48);
+      border-bottom: 1px solid var(--color-48);
     }
   }
 }
@@ -262,8 +221,8 @@ main {
 #south-pole {
   #timeline-controls-wrapper-south {
     #timeline-controls {
-      background-color: $color-6;
-      border-bottom: 1px solid $color-5;
+      background-color: var(--color-6);
+      border-bottom: 1px solid var(--color-48);
     }
   }
 
@@ -307,22 +266,35 @@ main {
 .modal-dialog {
   &.info-modal {
     h4 {
-      color: $color-2;
+      color: var(--color-43);
     }
   }
 
   &.exception-modal {
     h4 {
-      color: #ffe790;
+      color: var(--color-93);
     }
   }
 
   .modal-content {
-    --app-modal-bg: #454853;
+    --app-modal-bg: var(--color-25);
+    border: 1px solid var(--color-4);
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.25);
 
     .modal-header {
       border: 0;
       padding-bottom: 0;
+
+      .close {
+        margin-left: auto;
+        color: var(--color-54) !important;
+        border: 0;
+
+        &:focus {
+          outline: 0;
+          border: 0;
+        }
+      }
     }
 
     .modal-body {
@@ -338,11 +310,29 @@ main {
           padding-bottom: 35px;
         }
 
+        .info-robot {
+          content: var(--url-3);
+        }
+
+        .exception-robot {
+          content: var(--url-4);
+        }
+
         h4 {
-          border-bottom: 1px solid $color-7;
+          font-size: 20px;
+          font-weight: 700;
+          line-height: 18px;
           padding-bottom: 20px;
           width: 100px;
         }
+      }
+
+      .message,
+      .exception {
+        font-size: 15px;
+        line-height: 18px;
+        font-weight: 700;
+        color: var(--color-38);
       }
     }
 

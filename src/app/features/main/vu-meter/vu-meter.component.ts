@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, ElementRef, HostBinding, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostBinding, Input, OnInit, ViewChild} from '@angular/core';
 import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
 import {animate, AnimationEvent, state, style, transition, trigger} from '@angular/animations';
 import {Select, Store} from '@ngxs/store';
-import {filter, map, Observable, Subject, take} from 'rxjs';
+import {filter, map, Observable, Subject, take, takeUntil} from 'rxjs';
 import {VuMeterState, VuMeterStateModel} from './vu-meter.state';
 import {VuMeterActions} from './vu-meter.actions';
 import {WebAudioPeakMeter} from 'web-audio-peak-meter';
@@ -27,6 +27,10 @@ import {OmpApiService} from '../../../shared/components/omakase-player/omp-api.s
 import {AudioMeterStandard} from '@byomakase/omakase-player/dist/video/model';
 import Minimize = VuMeterActions.Minimize;
 import Maximize = VuMeterActions.Maximize;
+import {LayoutService} from '../../../core/layout/layout.service';
+import {PeakMeterConfig} from 'web-audio-peak-meter/lib/config';
+import {completeSub} from '../../../util/rx-util';
+import {IconModule} from '../../../shared/components/icon/icon.module';
 
 const animateDurationMs = 300;
 const animateTimings = `${animateDurationMs}ms ease-in-out`;
@@ -34,10 +38,36 @@ const animateTimings = `${animateDurationMs}ms ease-in-out`;
 const vuMeterSingleBarWidth = 25;
 const viMeterScaleWidth = 30;
 
+const peakMeterConfigDark: PeakMeterConfig = {
+  maskTransition: '0.1s',
+  audioMeterStandard: 'peak-sample' as AudioMeterStandard,
+  peakHoldDuration: 0,
+
+  vertical: true,
+  dbTickSize: 10,
+  borderSize: 7,
+  fontSize: 12,
+  dbRangeMin: -60,
+  dbRangeMax: 0,
+
+  backgroundColor: 'rgba(0,0,0,0)', // transparent
+  tickColor: '#70849A',
+  labelColor: '#70849A',
+  gradient: ['#F3C6B3 0%', '#E2BDB2 33%', '#D5B5B2 50%', '#C2AAB1 59%', '#A499B1 78%', '#8D8BB0 93%', '#747DAF 100%'],
+};
+
+const peakMeterConfigLight: PeakMeterConfig = {
+  ...peakMeterConfigDark,
+  backgroundColor: '#F4F5F5',
+  tickColor: '#5D6B7E',
+  labelColor: '#5D6B7E',
+  gradient: ['#A2CA69 0%', '#A2CA69 33%', '#A2CA69 50%', '#A2CA69 59%', '#A2CA69 78%', '#A2CA69 93%', '#A2CA69 100%'],
+};
+
 @Component({
   selector: 'div[appVuMeter]',
   standalone: true,
-  imports: [CoreModule, SharedModule],
+  imports: [CoreModule, SharedModule, IconModule],
   template: `
     <div
       class="vu-meter-frame d-flex flex-column h-100"
@@ -53,13 +83,9 @@ const viMeterScaleWidth = 30;
       <div class="vu-meter-header">
         <div class="d-flex h-100">
           <div class="btn-group" role="group">
-            <button
-              type="button"
-              class="btn"
-              [class.btn-maximize]="(animationState | async) === 'minimized'"
-              [class.btn-minimize]="(animationState | async) === 'maximized'"
-              (click)="toggleMinimizeMaximize()"
-            ></button>
+            <button type="button" class="btn btn-maximize-minimize" (click)="toggleMinimizeMaximize()">
+              <i [appIcon]="(animationState | async) === 'minimized' ? 'double-chevron-left' : 'double-chevron-right'"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -101,6 +127,7 @@ export class VuMeterComponent implements OnInit, AfterViewInit {
   @Select(VuMeterState) state$!: Observable<VuMeterStateModel>;
 
   private _webAudioPeakMeter?: WebAudioPeakMeter;
+  private _audioSourceNode?: MediaElementAudioSourceNode;
 
   private _minimizedWidth: number = vuMeterSingleBarWidth * 2;
   private _maximizedWidth: number = this._minimizedWidth;
@@ -109,7 +136,8 @@ export class VuMeterComponent implements OnInit, AfterViewInit {
 
   constructor(
     protected store: Store,
-    protected ompApiService: OmpApiService
+    protected ompApiService: OmpApiService,
+    protected layoutService: LayoutService
   ) {}
 
   ngOnInit(): void {}
@@ -123,10 +151,19 @@ export class VuMeterComponent implements OnInit, AfterViewInit {
       .subscribe({
         next: () => {
           setTimeout(() => {
-            this.tryCreateWebAudioPeakMeter();
+            this.layoutService.presentationMode$.pipe(takeUntil(this._destroyed$)).subscribe({
+              next: (presentationMode) => {
+                let peakMeterConfig = presentationMode === 'dark' ? peakMeterConfigDark : peakMeterConfigLight;
+                this.tryCreateWebAudioPeakMeter(peakMeterConfig);
+              },
+            });
           });
         },
       });
+  }
+
+  ngOnDestroy() {
+    completeSub(this._destroyed$);
   }
 
   @HostBinding('id')
@@ -134,56 +171,60 @@ export class VuMeterComponent implements OnInit, AfterViewInit {
     return 'vu-meter';
   }
 
-  private tryCreateWebAudioPeakMeter() {
+  private tryCreateWebAudioPeakMeter(peakMeterConfig: PeakMeterConfig) {
     let channelCount = 2;
 
     this.minimizedWidth = channelCount * vuMeterSingleBarWidth;
     this.maximizedWidth = this.minimizedWidth + viMeterScaleWidth + 14;
 
+    let attachEvents = !this._webAudioPeakMeter; // we need to attach events only once
+
+    if (this._webAudioPeakMeter) {
+      this._webAudioPeakMeter.node!.port.onmessage = (event) => {};
+      this._webAudioPeakMeter.cleanup();
+      this._webAudioPeakMeter = void 0;
+    }
+
     this.ompApiService.api!.audio.createAudioRouter(channelCount).subscribe({
       next: () => {
-        let peakMeterConfig = {
-          maskTransition: '0.1s',
-          audioMeterStandard: 'peak-sample' as AudioMeterStandard,
-          peakHoldDuration: 0,
+        if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'attached') {
+          this._audioSourceNode = this.ompApiService.api!.audio.getMediaElementAudioSourceNode();
+        }
 
-          vertical: true,
-          backgroundColor: 'rgba(0,0,0,0)', // transparent
-          tickColor: '#70849A',
-          labelColor: '#70849A',
-          gradient: ['#F3C6B3 0%', '#E2BDB2 33%', '#D5B5B2 50%', '#C2AAB1 59%', '#A499B1 78%', '#8D8BB0 93%', '#747DAF 100%'],
+        this._webAudioPeakMeter = new WebAudioPeakMeter(this._audioSourceNode!, this.webAudioPeakMeterElementRef.nativeElement, peakMeterConfig);
 
-          dbTickSize: 10,
-          borderSize: 7,
-          fontSize: 12,
-          dbRangeMin: -60,
-          dbRangeMax: 0,
-        };
+        if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached') {
+          this._webAudioPeakMeter.node!.port.onmessage = (event) => {};
+        }
 
-        this._webAudioPeakMeter = new WebAudioPeakMeter(this.ompApiService.api!.audio.getMediaElementAudioSourceNode()!, this.webAudioPeakMeterElementRef.nativeElement, peakMeterConfig);
+        if (attachEvents) {
+          this.attachEvents(peakMeterConfig);
+        }
+      },
+    });
+  }
 
-        this.ompApiService.api!.video.onVideoWindowPlaybackStateChange$.subscribe({
+  private attachEvents(peakMeterConfig: PeakMeterConfig) {
+    this.ompApiService.api!.video.onVideoWindowPlaybackStateChange$.pipe(takeUntil(this._destroyed$)).subscribe({
+      next: (event) => {
+        if (event.videoWindowPlaybackState !== 'attached') {
+          this._webAudioPeakMeter!.node!.port.onmessage = (event) => {}; // stop processing metrics received from VU meter's AudioWorkletNode
+        } else {
+          this._webAudioPeakMeter!.node!.port.onmessage = (event) => {
+            this._webAudioPeakMeter!.handleNodePortMessage(event);
+          }; // resume processing metrics received from VU meter's AudioWorkletNode
+        }
+      },
+    });
+
+    this.ompApiService.api!.audio.createAudioPeakProcessorWorkletNode(peakMeterConfig.audioMeterStandard as AudioMeterStandard).subscribe({
+      next: (event) => {
+        this.ompApiService.api!.audio.onAudioPeakProcessorWorkletNodeMessage$.pipe(takeUntil(this._destroyed$)).subscribe({
           next: (event) => {
-            if (event.videoWindowPlaybackState !== 'attached') {
-              this._webAudioPeakMeter!.node!.port.onmessage = (event) => {}; // stop processing metrics received from VU meter's AudioWorkletNode
-            } else {
-              this._webAudioPeakMeter!.node!.port.onmessage = (event) => {
-                this._webAudioPeakMeter!.handleNodePortMessage(event);
-              }; // resume processing metrics received from VU meter's AudioWorkletNode
+            if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached' && this._webAudioPeakMeter) {
+              // @ts-ignore
+              this._webAudioPeakMeter.handleNodePortMessage(event);
             }
-          },
-        });
-
-        this.ompApiService.api!.audio.createAudioPeakProcessorWorkletNode(peakMeterConfig.audioMeterStandard).subscribe({
-          next: (event) => {
-            this.ompApiService.api!.audio.onAudioPeakProcessorWorkletNodeMessage$.subscribe({
-              next: (event) => {
-                if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached') {
-                  // @ts-ignore
-                  this._webAudioPeakMeter!.handleNodePortMessage(event);
-                }
-              },
-            });
           },
         });
       },

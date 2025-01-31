@@ -1,3 +1,34 @@
+.flex-table {
+  display: flex;
+  flex-direction: column;
+}
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+}
+.flex-row.bordered {
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+}
+.active.flex-row {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.flex-cell {
+  height: 60px;
+  line-height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.header-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .omakase-marker-list-wrapper {
   height: 100%;
   container-type: inline-size;
@@ -12,6 +43,8 @@
 .omakase-marker-list-wrapper .header-cell {
   font-size: 14px;
   padding-bottom: 5px;
+  font-weight: 700;
+  color: var(--color-43);
 }
 
 .omakase-marker-list-wrapper .omakase-marker-list-body {
@@ -20,29 +53,29 @@
 }
 
 .omakase-marker-list-wrapper .omakase-marker-list-body .flex-row {
-  background-color: rgba(104, 37, 153, 0.2);
-  border-bottom: 1px solid #655372;
+  background-color: var(--color-87);
+  border-bottom: 1px solid var(--color-89);
 }
 
 .omakase-marker-list-wrapper .omakase-marker-list-body .omakase-marker-list-row:first-child .flex-row {
-  border-top: 1px solid #655372;
+  border-top: 1px solid var(--color-89);
   border-radius: 0 5px 0 0;
 }
 
 .omakase-marker-list-wrapper .omakase-marker-list-body .flex-row.bordered {
-  border-left: 1px solid #655372;
-  border-right: 1px solid #655372;
+  border-left: 1px solid var(--color-89);
+  border-right: 1px solid var(--color-89);
 }
 
 .omakase-marker-list-wrapper .omakase-marker-list-body .active .flex-row {
-  background-color: rgba(0, 163, 233, 0.3);
-  border-bottom: 1px solid #00a3e9;
+  background-color: var(--color-88);
+  border-bottom: 1px solid var(--color-90);
 }
 
 .omakase-marker-list-wrapper .omakase-marker-list-body .active .flex-row.bordered {
-  border-left: 1px solid #00a3e9;
-  border-right: 1px solid #00a3e9;
-  border-top: 1px solid #00a3e9;
+  border-left: 1px solid var(--color-90);
+  border-right: 1px solid var(--color-90);
+  border-top: 1px solid var(--color-90);
   margin-top: -1px;
 }
 
@@ -53,6 +86,17 @@
 .omakase-marker-list-wrapper .omakase-marker-list-body .flex-cell {
   height: 53px;
   line-height: 53px;
+  color: var(--color-60);
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .flex-row div[slot='name'] {
+  font-weight: 700;
+  color: var(--color-43);
+}
+/* add color to timestamps */
+.omakase-marker-list-wrapper .omakase-marker-list-body .active .flex-row div[slot='name'] {
+  font-weight: 700;
+  color: var(--color-91);
 }
 
 .omakase-marker-list-wrapper .omakase-marker-list-body .flex-cell-buttons {
@@ -65,7 +109,16 @@
   height: 14px;
   margin-right: 10px;
   margin-left: 3px;
-  background-image: url(/assets/images/marker-list/delete.svg);
+  background-image: var(--url-1);
+}
+
+.omakase-marker-list-wrapper .omakase-marker-list-body .active .icon-delete {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 10px;
+  margin-left: 3px;
+  background-image: var(--url-2);
 }
 
 @container (max-width: 700px) {
@@ -75,6 +128,10 @@
 }
 
 .omakase-inline-edit-input-error {
-  border: 1px solid #FF3306;
+  border: 1px solid #ff3306;
   border-radius: 3px;
+}
+
+omakase-timecode-edit {
+  border: none !important;
 }

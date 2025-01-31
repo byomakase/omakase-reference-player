@@ -15,9 +15,9 @@
  */
 
 import {ClickEvent, ConfigWithOptionalStyle, ImageButton, LabelLane, LabelLaneConfig, Timeline, TimelineLaneApi, VideoControllerApi} from '@byomakase/omakase-player';
-import {forkJoin, map, Observable, of, take, takeUntil} from 'rxjs';
-import {Constants} from '../../../../constants/constants';
+import {forkJoin, map, Observable, of, Subject, take, takeUntil} from 'rxjs';
 import {TelemetryLane} from '../../../../../features/timeline/timeline.service';
+import {LayoutService} from '../../../../../core/layout/layout.service';
 
 export type GroupingLaneVisibility = 'minimized' | 'maximized';
 
@@ -30,15 +30,17 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
   private _timelineConfigButton: ImageButton;
 
   private _childLanes: TimelineLaneApi[] = [];
+  private _filteredLanes: Set<string> = new Set<string>();
 
   private _groupVisibility: GroupingLaneVisibility = 'maximized';
   private _minimizeMaximizeInProgress = false;
+  private _onVisbilityChange$: Subject<GroupingLaneVisibility> = new Subject<GroupingLaneVisibility>();
 
   protected constructor(config: ConfigWithOptionalStyle<C>) {
     super(config);
 
     this._groupMinimizeMaximizeButton = new ImageButton({
-      ...Constants.IMAGE_BUTTONS.chevronDown,
+      ...LayoutService.themeStyleConstants.IMAGE_BUTTONS.chevronDown,
       listening: true,
     });
 
@@ -51,7 +53,7 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
     });
 
     this._timelineConfigButton = new ImageButton({
-      ...Constants.IMAGE_BUTTONS.config,
+      ...LayoutService.themeStyleConstants.IMAGE_BUTTONS.config,
       listening: true,
     });
 
@@ -96,16 +98,15 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
 
   groupMinimizeEased(): Observable<boolean> {
     this._groupMinimizeMaximizeButton.setImage({
-      ...Constants.IMAGE_BUTTONS.chevronRight,
+      ...LayoutService.themeStyleConstants.IMAGE_BUTTONS.chevronRight,
     });
-
     let osEased$ = this._childLanes.filter((p, index) => !(p as TelemetryLane).isHidden && index <= maxLaneIndexForEasing).map((p) => p.minimizeEased());
 
     this._timeline?.minimizeTimelineLanes(this._childLanes.filter((p, index) => !(p as TelemetryLane).isHidden && index > maxLaneIndexForEasing));
 
     return forkJoin(osEased$).pipe(
       map((p) => {
-        this._groupVisibility = 'minimized';
+        this.groupVisibility = 'minimized';
         return true;
       })
     );
@@ -113,25 +114,25 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
 
   groupMinimize() {
     this._groupMinimizeMaximizeButton.setImage({
-      ...Constants.IMAGE_BUTTONS.chevronRight,
+      ...LayoutService.themeStyleConstants.IMAGE_BUTTONS.chevronRight,
     });
 
     this._timeline?.minimizeTimelineLanes(this._childLanes);
-    this._groupVisibility = 'minimized';
+    this.groupVisibility = 'minimized';
   }
 
   groupMaximizeEased(): Observable<boolean> {
     this._groupMinimizeMaximizeButton.setImage({
-      ...Constants.IMAGE_BUTTONS.chevronDown,
+      ...LayoutService.themeStyleConstants.IMAGE_BUTTONS.chevronDown,
     });
 
-    let osEased$ = this._childLanes.filter((p, index) => !(p as TelemetryLane).isHidden && index <= maxLaneIndexForEasing).map((p) => p.maximizeEased());
+    let osEased$ = this._childLanes.filter((p, index) => !(p as TelemetryLane).isHidden && index <= maxLaneIndexForEasing && !this._filteredLanes.has(p.id)).map((p) => p.maximizeEased());
 
-    this._timeline?.maximizeTimelineLanes(this._childLanes.filter((p, index) => !(p as TelemetryLane).isHidden && index > maxLaneIndexForEasing));
+    this._timeline?.maximizeTimelineLanes(this._childLanes.filter((p, index) => !(p as TelemetryLane).isHidden && index > maxLaneIndexForEasing && !this._filteredLanes.has(p.id)));
 
     return forkJoin(osEased$).pipe(
       map((p) => {
-        this._groupVisibility = 'maximized';
+        this.groupVisibility = 'maximized';
         return true;
       })
     );
@@ -139,11 +140,11 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
 
   groupMaximize() {
     this._groupMinimizeMaximizeButton.setImage({
-      ...Constants.IMAGE_BUTTONS.chevronDown,
+      ...LayoutService.themeStyleConstants.IMAGE_BUTTONS.chevronDown,
     });
 
-    this._timeline?.maximizeTimelineLanes(this._childLanes.filter((p) => !(p as TelemetryLane).isHidden));
-    this._groupVisibility = 'maximized';
+    this._timeline?.maximizeTimelineLanes(this._childLanes.filter((p) => !(p as TelemetryLane).isHidden && !this._filteredLanes.has(p.id)));
+    this.groupVisibility = 'maximized';
   }
 
   toggleHidden(visibility: GroupingLaneVisibility) {
@@ -166,6 +167,11 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
     return this._groupVisibility;
   }
 
+  private set groupVisibility(visibility: GroupingLaneVisibility) {
+    this._groupVisibility = visibility;
+    this._onVisbilityChange$.next(visibility);
+  }
+
   get childLanes(): TimelineLaneApi[] {
     return this._childLanes;
   }
@@ -176,5 +182,17 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
 
   get onConfigClick$(): Observable<ClickEvent> {
     return this._timelineConfigButton.onClick$;
+  }
+
+  get onVisibilityChange$(): Observable<GroupingLaneVisibility> {
+    return this._onVisbilityChange$;
+  }
+
+  filterLane(laneId: string) {
+    this._filteredLanes.add(laneId);
+  }
+
+  unfilterLane(laneId: string) {
+    this._filteredLanes.delete(laneId);
   }
 }

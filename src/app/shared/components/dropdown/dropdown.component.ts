@@ -1,6 +1,7 @@
 import {CommonModule} from '@angular/common';
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
+import {IconModule} from '../icon/icon.module';
 
 export interface DropdownOption<T> {
   label: string;
@@ -10,10 +11,11 @@ export interface DropdownOption<T> {
 @Component({
   selector: 'app-dropdown',
   standalone: true,
-  imports: [NgbDropdownModule, CommonModule],
+  imports: [NgbDropdownModule, CommonModule, IconModule],
   template: `<div class="app-dropdown btn-group btn-group-manifest" ngbDropdown role="group" [placement]="'bottom-start'" [ngClass]="{small: isSmall}">
     <button type="button" class="btn btn-primary btn-manifest" ngbDropdownToggle>
       <div class="dropdown-toggle-text">{{ getSelectedLabel() }}</div>
+      <i appIcon="chevron-down"></i>
     </button>
     <div class="dropdown-menu" ngbDropdownMenu>
       @for (option of options; track option.value) {

@@ -14,18 +14,29 @@
  * limitations under the License.
  */
 
+@import "themes";
+
+@include themify($themes);
+
 .accordion {
+  --app-accordion-bg: var(--color-71);
+  --app-accordion-border-color: var(--color-4);
+
   .accordion-header {
     border-radius: $accordion-border-radius;
   }
-
   .accordion-body {
     max-width: 1000px;
   }
 }
 
 .accordion-button {
+  border-color: var(--color-4);
   overflow: hidden;
+
+  &:not(.colapsed) {
+    background-color: var(--color-71);
+  }
 
   .btn-link {
     font-family: $font-family-nunito;
@@ -43,13 +54,17 @@
   }
 
   .btn-link {
-    color: #fff;
+    color: var(--color-60);
     text-decoration: none;
+
+    &:not(.colapsed) {
+      color: var(--color-60);
+    }
   }
 
   .btn-source-info-name {
     i {
-      color: $color-2;
+      color: var(--color-43);
       margin-left: 5px;
       margin-right: 5px;
     }
@@ -57,14 +72,15 @@
 
   .btn-metadata {
     text-transform: uppercase;
-    color: $color-2;
-    border-left: 1px solid $accordion-border-color;
+    color: var(--color-44) !important;
+    border-left: 1px solid var(--color-4);
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     padding-left: 20px;
     padding-right: 10px;
 
     i {
+      color: var(--color-70);
       svg {
         margin-bottom: 1px;
       }
@@ -73,14 +89,14 @@
 
   &.custom-header {
     &:after {
-      color: $color-2;
+      color: var(--color-60);
     }
   }
 }
 
 .file-list {
   &:last-child {
-    border-bottom: 1px solid $accordion-border-color;
+    border-bottom: 1px solid var(--color-4);
   }
 
   .accordion {
@@ -91,24 +107,46 @@
       .file-accordion {
         padding: 14px 20px 14px 12px;
 
+        i {
+          color: var(--color-43);
+        }
+
         .name {
-          min-width: 15.5em;
+          width: 200px;
+          flex-grow: 1;
           font-size: 15px;
           font-weight: 700;
           line-height: 18px;
-          color: $color-2;
+          color: var(--color-43);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .description {
+          width: 300px;
+          flex-grow: 1;
+          height: 18px;
           font-size: 15px;
           font-weight: 400;
           line-height: 18px;
-          color: #fff;
+          color: var(--color-60);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+
+          @media (max-width: 1600px) {
+            display: none;
+          }
         }
 
         .download-btn {
           padding: 0;
           border: 0;
+
+          .icon {
+            color: var(--color-70);
+          }
         }
       }
     }

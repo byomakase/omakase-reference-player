@@ -17,9 +17,10 @@
 import {AudioTrackLane, AudioTrackLaneConfig, ClickEvent, ConfigWithOptionalStyle, OmakaseAudioTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
 import {AudioMediaTrack, Channel, VisualReference} from '../../../../../model/domain.model';
 import {StringUtil} from '../../../../../util/string-util';
-import {Constants} from '../../../../constants/constants';
 import {merge, switchMap, takeUntil} from 'rxjs';
 import {SoundControlTextButton} from './sound-control/sound-control-text-button';
+import {Constants} from '../../../../constants/constants';
+import {LayoutService} from '../../../../../core/layout/layout.service';
 
 export interface AudioChannelLaneConfig extends AudioTrackLaneConfig {
   audioMediaTrack: AudioMediaTrack;
@@ -75,6 +76,7 @@ export class AudioChannelLane extends AudioTrackLane {
         text: channelOrderText,
         style: {
           ...Constants.TEXT_LABEL_STYLE,
+          ...LayoutService.themeStyleConstants.TEXT_LABEL_STYLE_COLORS,
           align: 'right',
         },
       });

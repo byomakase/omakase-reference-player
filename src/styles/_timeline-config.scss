@@ -1,20 +1,32 @@
+@import "themes";
+
+@include themify($themes);
+
 #timeline-configurator {
-  background-color: $color-7;
+  background-color: var(--color-7);
   height: 100%;
-  border-left: 1px solid #000;
+  border-left: 1px solid var(--color-40);
   border-radius: 5px 0 0 0;
+  color: var(--color-41);
 
   .timeline-config-header {
     padding: 0 20px;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--color-40);
+    background-color: var(--color-42);
 
     &:not(:first-child) {
-      border-top: 1px solid #000;
+      border-top: 1px solid var(--color-40);
     }
 
     .close-icon {
       line-height: 40px;
       cursor: pointer;
+
+      svg {
+        path {
+          fill: var(--color-43);
+        }
+      }
     }
   }
 
@@ -25,11 +37,19 @@
   }
 
   .timeline-config-selector {
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--color-40);
   }
 
   .timeline-config-body {
     padding: 10px 20px;
+
+    .icon-checked {
+      svg {
+        path {
+          fill: var(--color-13);
+        }
+      }
+    }
 
     .timeline-config-suboptions {
       padding: 0 30px;
@@ -61,7 +81,7 @@
     width: 164px;
 
     .dropdown-toggle {
-      border: 1px solid #000;
+      border: 1px solid var(--color-40);
     }
   }
 }

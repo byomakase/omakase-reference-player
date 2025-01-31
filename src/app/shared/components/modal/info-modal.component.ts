@@ -17,18 +17,21 @@
 import {Component} from '@angular/core';
 import {BaseModal} from './base-modal';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {IconModule} from '../icon/icon.module';
 
 @Component({
   selector: 'app-info-modal',
   standalone: true,
-  imports: [],
+  imports: [IconModule],
   template: `
     <div class="modal-header">
-      <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+      <button type="button" class="btn close" aria-label="Close" (click)="activeModal.dismiss()">
+        <i appIcon="close"></i>
+      </button>
     </div>
     <div class="modal-body">
       <div class="robot-title">
-        <img [src]="'assets/images/info-robot.svg'" alt="Error" />
+        <img class="info-robot" alt="Error" />
 
         <div class="d-flex justify-content-center">
           <h4>Info</h4>
@@ -36,7 +39,7 @@ import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
       </div>
 
       @for (message of messages; track $index) {
-        <div>{{ message }}</div>
+        <div class="message">{{ message }}</div>
       }
     </div>
     <div class="modal-footer">

@@ -30,6 +30,7 @@ import {SegmentationAction} from '../../../model/domain.model';
 import {DownloadService} from '../../../shared/services/download.service';
 import {MarkerListItem} from '@byomakase/omakase-player/dist/marker-list/marker-list-item';
 import {ToastService} from '../../../shared/components/toast/toast.service';
+import {IconModule} from '../../../shared/components/icon/icon.module';
 
 interface MarkerExportItem {
   name?: string;
@@ -40,25 +41,25 @@ interface MarkerExportItem {
 @Component({
   selector: 'div[appSegmentation]',
   standalone: true,
-  imports: [CoreModule, SharedModule],
+  imports: [CoreModule, SharedModule, IconModule],
   template: `<div class="segmentation-wrapper">
     @if (!(activeTrack$ | async)) {
       <div>No segmentation tracks defined</div>
     }
     <div id="segmentation-marker-list" class="h-100"></div>
-    <div #segmentationToggle class="segmentation-menu-trigger" (click)="toggleSegmentationMenu()"></div>
+    <div #segmentationToggle class="segmentation-menu-trigger" (click)="toggleSegmentationMenu()">
+      <i appIcon="menu"></i>
+    </div>
     <div #segmentationMenu class="segmentation-menu" [ngClass]="{'d-none': !openSegmentationMenu}">
       <div class="segmentation-menu-item" (click)="openDeleteModal()">DELETE</div>
       @if (this.isExportVisible()) {
         <div class="segmentation-menu-item" (click)="downloadMarkersAsCsv()">EXPORT CSV</div>
         <div class="segmentation-menu-item" (click)="downloadMArkersAsJson()">EXPORT JSON</div>
-      }
-      <!-- <div class="segmentation-menu-item">EXPORT CSV</div>
-      <div class="segmentation-menu-item">EXPORT JSON</div> -->
-      @if (segmentationActions) {
-        @for (action of segmentationActions; track action.name) {
-          @if (action.name) {
-            <div class="segmentation-menu-item" (click)="triggerSegmentationAction(action)">{{ getSegmentationActionName(action, true) }}</div>
+        @if (segmentationActions) {
+          @for (action of segmentationActions; track action.name) {
+            @if (action.name) {
+              <div class="segmentation-menu-item" (click)="triggerSegmentationAction(action)">{{ getSegmentationActionName(action, true) }}</div>
+            }
           }
         }
       }
@@ -101,6 +102,7 @@ export class SegmentationComponent implements OnInit, OnDestroy {
   @Input() segmentationActions?: SegmentationAction[];
 
   private _destroyed$ = new Subject<void>();
+  private _lastActiveTrack?: SegmentationTrack;
   activeTrack$: Observable<SegmentationTrack | undefined>;
 
   constructor(
@@ -126,35 +128,16 @@ export class SegmentationComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._destroyed$))
       .subscribe({
         next: (activeTrack) => {
+          if (activeTrack?.id === this._lastActiveTrack?.id && activeTrack?.color === this._lastActiveTrack?.color) {
+            return;
+          }
+          this._lastActiveTrack = activeTrack;
           if (this.segmentationService.markerList) {
             this.segmentationService.unselectActiveMarker();
             this.segmentationService.markerList.destroy();
           }
           if (activeTrack) {
-            this.segmentationService.markerLane = this.timelineService.getTimelineLaneById(activeTrack.markerLaneId) as MarkerLane;
-            this.ompApiService
-              .api!.createMarkerList({
-                markerListHTMLElementId: 'segmentation-marker-list',
-                templateHTMLElementId: 'segmentation-marker-list-row',
-                headerHTMLElementId: 'segmentation-marker-list-header',
-                styleUrl: './assets/css/segmentation.css',
-                source: this.segmentationService.markerLane,
-                thumbnailVttFile: this.timelineService.getThumbnailLane()?.vttFile,
-                nameEditable: true,
-              })
-              .subscribe({
-                next: (markerList) => {
-                  this.segmentationService.markerList = markerList;
-                  this.segmentationService.markerList.onMarkerClick$.pipe(takeUntil(this._destroyed$)).subscribe(({marker}) => this.segmentationService.toggleMarker(marker as Marker));
-                  this.segmentationService.markerList.onMarkerSelected$.pipe(takeUntil(this._destroyed$)).subscribe(({marker}) => (this.segmentationService.selectedMarker = marker));
-
-                  const selectedMarker = this.segmentationService.selectedMarker;
-                  if (selectedMarker) {
-                    this.segmentationService.markerLane!.toggleMarker(selectedMarker.id);
-                    this.segmentationService.selectMarker(selectedMarker as Marker);
-                  }
-                },
-              });
+            this.segmentationService.createMarkerList(activeTrack, this._destroyed$);
           }
         },
       });
@@ -177,6 +160,7 @@ export class SegmentationComponent implements OnInit, OnDestroy {
     const modalRef = this.modalService.open(ConfirmationModalComponent);
     modalRef!.componentInstance.confirmationMessage = `Delete the Segmentation ${activeTrack.name}?`;
     modalRef!.componentInstance.onOk$.subscribe(() => this.deleteActiveSegmentationTrack());
+    this.openSegmentationMenu = false;
   }
 
   isExportVisible() {
@@ -191,7 +175,9 @@ export class SegmentationComponent implements OnInit, OnDestroy {
 
       if (marker.end) {
         row[2] = this.ompApiService.api!.video.formatToTimecode(marker.end!);
-        row[3] = marker.duration!.toFixed(2);
+        const startFrame = this.ompApiService.api!.video.calculateTimeToFrame(marker.start!);
+        const endFrame = this.ompApiService.api!.video.calculateTimeToFrame(marker.end);
+        row[3] = this.ompApiService.api!.video.calculateFrameToTime(endFrame - startFrame).toFixed(2);
       }
 
       const escapedRow = row.map((elem) => `\"${elem}\"`);
@@ -258,5 +244,6 @@ export class SegmentationComponent implements OnInit, OnDestroy {
     modalRef!.componentInstance.onOk$.subscribe(() => {
       this.toastService.show({type: 'success', message: 'Action initiated successfully', duration: 3000});
     });
+    this.openSegmentationMenu = false;
   }
 }

@@ -1,10 +1,14 @@
+@import "themes";
+
+@include themify($themes);
+
 .chart-legend-container {
   position: fixed;
   height: auto;
   z-index: 1000;
   padding: 10px 20px;
-  background-color: $color-15;
-  border: 1px solid $color-16;
+  background-color: var(--color-62);
+  border: 1px solid var(--color-63);
   border-radius: 3px;
   pointer-events: none;
   font-size: 13px;
@@ -19,6 +23,7 @@
       height: 18px;
       border-radius: 3px;
       margin-top: 4px;
+      border: 1px solid var(--color-111);
     }
 
     .chart-legend-label {
@@ -26,6 +31,16 @@
       line-height: 29px;
       margin-left: 10px;
       text-transform: capitalize;
+      color: var(--color-2);
+      text-shadow:
+        -1px -1px 0 var(--color-111),
+        1px -1px 0 var(--color-111),
+        -1px 1px 0 var(--color-111),
+        1px 1px 0 var(--color-111),
+        0 -1px 0 var(--color-111),
+        0 1px 0 var(--color-111),
+        -1px 0 0 var(--color-111),
+        1px 0 0 var(--color-111);
     }
   }
 }

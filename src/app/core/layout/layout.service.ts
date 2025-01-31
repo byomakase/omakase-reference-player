@@ -16,19 +16,49 @@
 
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
+import {LocalStorageService} from '../../shared/storage/local-storage.service';
+import {ThemeStyleConstantsType} from '../../shared/constants/theming';
+import {DarkThemeStyleConstants} from '../../shared/constants/dark-theming';
+import {LightThemeStyleConstants} from '../../shared/constants/light-theming';
 
-export type LayoutTab = 'qc' | 'segmentation';
+export type LayoutTab = 'info' | 'audio' | 'annotation' | 'segmentation';
+
+export type PresentationMode = 'light' | 'dark';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LayoutService {
-  private _title: string | undefined;
-
-  private _activeTab: LayoutTab = 'qc';
   showTabs$ = new BehaviorSubject<boolean>(false);
+  disableSwitchModeButton$ = new BehaviorSubject<boolean>(true);
+  presentationMode$: BehaviorSubject<PresentationMode>;
 
-  constructor() {}
+  private _title: string | undefined;
+  private _activeTab: LayoutTab = 'info';
+
+  static themeStyleConstants: ThemeStyleConstantsType;
+
+  constructor() {
+    const presentationMode = LocalStorageService.getItem('presentationMode') as PresentationMode | undefined;
+    this.presentationMode$ = new BehaviorSubject<PresentationMode>(!presentationMode ? 'dark' : presentationMode);
+
+    this.presentationMode$.subscribe({
+      next: (presentationMode) => {
+        document.documentElement.setAttribute('data-bs-theme', presentationMode);
+        document.body.setAttribute('class', `theme-${presentationMode}`);
+        LayoutService.themeStyleConstants = presentationMode === 'dark' ? DarkThemeStyleConstants : LightThemeStyleConstants;
+      },
+    });
+  }
+
+  set presentationMode(presentationMode: PresentationMode) {
+    LocalStorageService.setItem('presentationMode', presentationMode);
+    this.presentationMode$.next(presentationMode);
+  }
+
+  togglePresentationMode() {
+    this.presentationMode = this.presentationMode$.value === 'dark' ? 'light' : 'dark';
+  }
 
   get title(): string | undefined {
     return this._title;

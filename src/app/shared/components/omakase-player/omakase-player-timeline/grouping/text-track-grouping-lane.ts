@@ -15,12 +15,13 @@
  */
 
 import {ClickEvent, ConfigWithOptionalStyle, SubtitlesApi, SubtitlesVttTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
-import {Constants} from '../../../../constants/constants';
 import {BaseGroupingLane, BaseGroupingLaneConfig} from './base-grouping-lane';
 import {TextMediaTrack} from '../../../../../model/domain.model';
 import {SubtitlesControlImageButton} from './subtitles-control/subtitles-control-image-button';
 import {takeUntil} from 'rxjs';
 import {StringUtil} from '../../../../../util/string-util';
+import {Constants} from '../../../../constants/constants';
+import {LayoutService} from '../../../../../core/layout/layout.service';
 
 export interface TextTrackGroupingLaneConfig extends BaseGroupingLaneConfig {
   textMediaTrack: TextMediaTrack;
@@ -42,6 +43,7 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
       ...config,
       style: {
         ...Constants.LABEL_LANE_STYLE,
+        ...LayoutService.themeStyleConstants.LABEL_LANE_STYLE_COLORS,
       },
     });
 
@@ -52,9 +54,9 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
 
     this._subtitlesControlButton = new SubtitlesControlImageButton({
       disabled: this.isDisabled,
-      srcDefault: `${Constants.IMAGES_ROOT}/icon-chatbox.svg`,
-      srcActive: `${Constants.IMAGES_ROOT}/icon-chatbox-active.svg`,
-      srcDisabled: `${Constants.IMAGES_ROOT}/icon-chatbox-disabled.svg`,
+      srcDefault: LayoutService.themeStyleConstants.IMAGE_BUTTONS.chatbox.src,
+      srcActive: LayoutService.themeStyleConstants.IMAGE_BUTTONS.chatboxActive.src,
+      srcDisabled: LayoutService.themeStyleConstants.IMAGE_BUTTONS.chatboxDisabled.src,
       width: 22,
       height: 22,
     });
@@ -69,6 +71,7 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
         text: languageLabel.substring(0, 2).toUpperCase(),
         style: {
           ...Constants.TEXT_LABEL_STYLE_2,
+          ...LayoutService.themeStyleConstants.TEXT_LABEL_STYLE_2_COLORS,
           align: 'left',
         },
       });
@@ -131,11 +134,13 @@ export class TextTrackGroupingLane extends BaseGroupingLane<TextTrackGroupingLan
       if (this.isActive) {
         this.style = {
           ...Constants.LABEL_LANE_STYLE_ACTIVE,
+          ...LayoutService.themeStyleConstants.LABEL_LANE_STYLE_ACTIVE_COLORS,
         };
         this._subtitlesControlButton.state = 'active';
       } else {
         this.style = {
           ...Constants.LABEL_LANE_STYLE,
+          ...LayoutService.themeStyleConstants.LABEL_LANE_STYLE_COLORS,
         };
         this._subtitlesControlButton.state = 'default';
       }

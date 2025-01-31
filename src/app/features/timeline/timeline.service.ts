@@ -23,33 +23,23 @@ import {VideoGroupingLane} from '../../shared/components/omakase-player/omakase-
 import {AudioGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/audio-grouping-lane';
 import {TextTrackGroupingLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/text-track-grouping-lane';
 import {Injectable} from '@angular/core';
-import {
-  LineChartLane,
-  LineChartLaneStyle,
-  MarkerLane,
-  MarkerLaneStyle,
-  MarkerVttCue,
-  MomentMarker,
-  OmakaseVttFile,
-  PeriodMarker,
-  SubtitlesVttTrack,
-  ThumbnailLane,
-  TimelineLaneApi,
-} from '@byomakase/omakase-player';
+import {LineChartLaneStyle, MarkerLane, MarkerLaneStyle, MarkerVttCue, MomentMarker, OmakaseVttFile, PeriodMarker, SubtitlesVttTrack, ThumbnailLane, TimelineLaneApi} from '@byomakase/omakase-player';
 import {Analysis, ChartAnalysis, TimelineLaneWithOptionalGroup, VisualReference} from '../../model/domain.model';
-import {Constants} from '../../shared/constants/constants';
 import {ColorUtil} from '../../util/color-util';
 import {CustomSubtitlesLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/custom-subtitles-lane';
 import {Store} from '@ngxs/store';
 import {TelemetryActions} from '../main/telemetry/telemetry.actions';
 import {ChartLegendActions} from '../main/chart-legend/chart-legend.actions';
 import {TelemetryState} from '../main/telemetry/telemetry.state';
-import {Observable, Subject} from 'rxjs';
+import {Observable, Subject, takeUntil} from 'rxjs';
 import {OmpApiService} from '../../shared/components/omakase-player/omp-api.service';
 import SelectLane = TelemetryActions.SelectLane;
 import ShowLegend = ChartLegendActions.Show;
 import HideLegend = ChartLegendActions.Hide;
 import {AudioChannelLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/audio-channel-lane';
+import {Constants} from '../../shared/constants/constants';
+import {LayoutService} from '../../core/layout/layout.service';
+import {completeSub} from '../../util/rx-util';
 
 export type TelemetryLane = TelemetryLineChartLane | TelemetryBarChartLane | TelemetryOgChartLane | TelemetryMarkerLane;
 
@@ -65,10 +55,16 @@ export class TimelineService {
   private _markerLaneStyleByName: Map<string, Partial<MarkerLaneStyle>> = new Map<string, Partial<MarkerLaneStyle>>();
   private _lineChartLaneStyleByName: Map<string, Partial<LineChartLaneStyle>> = new Map<string, Partial<LineChartLaneStyle>>();
 
+  private _destroyed = new Subject<void>();
+
   constructor(
     protected store: Store,
     protected ompApiService: OmpApiService
   ) {}
+
+  ngOnDestroy() {
+    completeSub(this._destroyed);
+  }
 
   createLaneByVisualReference(visualReference: VisualReference): TimelineLaneApi {
     switch (visualReference.type) {
@@ -135,6 +131,7 @@ export class TimelineService {
             style: {
               ...style.markerStyle,
               ...Constants.PERIOD_MARKER_STYLE,
+              ...LayoutService.themeStyleConstants.PERIOD_MARKER_STYLE_COLORS,
             },
           });
         } else if (analysis.visualization === 'point') {
@@ -147,6 +144,7 @@ export class TimelineService {
             style: {
               ...style.markerStyle,
               ...Constants.MOMENT_MARKER_STYLE,
+              ...LayoutService.themeStyleConstants.MOMENT_MARKER_STYLE_COLORS,
             },
           });
         } else {
@@ -181,6 +179,7 @@ export class TimelineService {
       yMin: chartAnalysis.y_min,
       style: {
         ...Constants.LINE_CHART_LANE_STYLE,
+        ...LayoutService.themeStyleConstants.LINE_CHART_LANE_STYLE_COLORS,
       },
       lineStyleFn: (index, count) => {
         if (count > 1) {
@@ -213,6 +212,7 @@ export class TimelineService {
         description: ``,
         style: {
           ...Constants.SUBTITLES_LANE_STYLE,
+          ...LayoutService.themeStyleConstants.SUBTITLES_LANE_STYLE_COLORS,
         },
       },
       this.ompApiService.api!.subtitles
@@ -290,6 +290,7 @@ export class TimelineService {
     let timelineLane = new ThumbnailLane({
       style: {
         ...Constants.THUMBNAIL_LANE_STYLE,
+        ...LayoutService.themeStyleConstants.THUMBNAIL_LANE_STYLE_COLORS,
       },
       vttUrl: visualReference.url,
     });
@@ -318,6 +319,7 @@ export class TimelineService {
 
     let style: Partial<LineChartLaneStyle> = {
       ...Constants.LINE_CHART_LANE_STYLE,
+      ...LayoutService.themeStyleConstants.LINE_CHART_LANE_STYLE_COLORS,
       fill: color,
       pointFill: ColorUtil.changeShade(color, 30),
     };
@@ -332,10 +334,11 @@ export class TimelineService {
   }
 
   private resolveMultiLineChartLaneStyle(analysis: Analysis, index: number): Partial<LineChartLaneStyle> {
-    const color = Constants.VARIABLES.lineColors[index % Constants.VARIABLES.lineColors.length];
+    const color = LayoutService.themeStyleConstants.COLORS.LINE_COLORS[index % LayoutService.themeStyleConstants.COLORS.LINE_COLORS.length];
 
     let style: Partial<LineChartLaneStyle> = {
       ...Constants.LINE_CHART_LANE_STYLE,
+      ...LayoutService.themeStyleConstants.LINE_CHART_LANE_STYLE_COLORS,
       fill: color,
       pointFill: ColorUtil.changeShade(color, 30),
     };
@@ -348,6 +351,7 @@ export class TimelineService {
 
     let style: Partial<MarkerLaneStyle> = {
       ...Constants.MARKER_LANE_STYLE,
+      ...LayoutService.themeStyleConstants.MARKER_LANE_STYLE_COLORS,
       markerStyle: {
         color: color,
       },
@@ -359,11 +363,17 @@ export class TimelineService {
       this._markerLaneStyleByName.set(analysis.name, style);
     }
 
+    style = {
+      ...style,
+      ...Constants.MARKER_LANE_STYLE,
+      ...LayoutService.themeStyleConstants.MARKER_LANE_STYLE_COLORS,
+    };
+
     return style;
   }
 
   private resolveHeuristicColor(index: number): string {
-    return Constants.VARIABLES.entitiesColors[index % Constants.VARIABLES.entitiesColors.length];
+    return LayoutService.themeStyleConstants.COLORS.ENTITIES_COLORS[index % LayoutService.themeStyleConstants.COLORS.ENTITIES_COLORS.length];
   }
 
   private createBarOrLedChart(type: 'bar' | 'led', analysis: Analysis): TelemetryBarChartLane | TelemetryOgChartLane {
@@ -388,7 +398,16 @@ export class TimelineService {
       }
     }
 
-    const style = type === 'bar' ? Constants.BAR_CHART_LANE_STYLE : Constants.OG_CHART_LANE_STYLE;
+    const style =
+      type === 'bar'
+        ? {
+            ...Constants.BAR_CHART_LANE_STYLE,
+            ...LayoutService.themeStyleConstants.BAR_CHART_LANE_STYLE_COLORS,
+          }
+        : {
+            ...Constants.OG_CHART_LANE_STYLE,
+            ...LayoutService.themeStyleConstants.BAR_CHART_LANE_STYLE_COLORS,
+          };
     const config: any = {
       vttUrl: analysis.url,
       description: analysis.name,

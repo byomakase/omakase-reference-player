@@ -31,6 +31,7 @@ import {VuMeterState} from './features/main/vu-meter/vu-meter.state';
 import {TelemetryState} from './features/main/telemetry/telemetry.state';
 import {ChartLegendState} from './features/main/chart-legend/chart-legend.state';
 import {SegmentationState} from './features/main/segmentation/segmentation.state';
+import {AnnotationState} from './features/main/annotation/annotation.state';
 
 function initializeApp(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -53,7 +54,7 @@ export const appConfig: ApplicationConfig = {
     },
     // https://angular.io/guide/standalone-components
     importProvidersFrom([
-      NgxsModule.forRoot([AppState, TimelineConfiguratorState, VuMeterState, TelemetryState, ChartLegendState, SegmentationState], {
+      NgxsModule.forRoot([AppState, TimelineConfiguratorState, VuMeterState, TelemetryState, ChartLegendState, SegmentationState, AnnotationState], {
         developmentMode: true,
       }),
       NgxsReduxDevtoolsPluginModule.forRoot(),

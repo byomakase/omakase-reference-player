@@ -1,9 +1,9 @@
 import {AfterViewInit, Component, HostBinding, Input, OnDestroy, OnInit} from '@angular/core';
-import {Constants} from '../../../constants/constants';
 import {CryptoUtil} from '../../../../util/crypto-util';
 import {Subject, takeUntil} from 'rxjs';
 import {OmakasePlayerConfig} from '@byomakase/omakase-player';
 import {OmpApiService} from '../omp-api.service';
+import {Constants} from '../../../constants/constants';
 
 @Component({
   selector: 'div[appOmakasePlayerVideoDetached]',
@@ -13,11 +13,13 @@ import {OmpApiService} from '../omp-api.service';
 })
 export class OmakasePlayerVideoDetachedComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input('config')
-  config: Partial<OmakasePlayerConfig> | undefined = Constants.OMAKASE_PLAYER_DETACHED_CONFIG;
+  config: Partial<OmakasePlayerConfig> | undefined;
 
   private _onDestroy$ = new Subject<void>();
 
-  constructor(protected ompApiService: OmpApiService) {}
+  constructor(protected ompApiService: OmpApiService) {
+    this.config = Constants.OMAKASE_PLAYER_DETACHED_CONFIG;
+  }
 
   ngOnInit(): void {
     let possibleConfig: Partial<OmakasePlayerConfig> = {

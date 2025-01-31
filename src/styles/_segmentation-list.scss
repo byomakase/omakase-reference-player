@@ -1,3 +1,7 @@
+@import "themes";
+
+@include themify($themes);
+
 .segmentation-list-container {
   flex-wrap: wrap;
 
@@ -7,9 +11,18 @@
     font-size: 14px;
     font-weight: 400;
     position: relative;
+    animation: fadeIn 1s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    color: var(--color-92);
 
     &.active {
       font-weight: 800;
+      color: var(--color-38);
+    }
+
+    &:first-child {
+      padding-left: 0;
     }
 
     &:last-child {
@@ -39,6 +52,12 @@
       position: absolute;
       top: 20px;
       z-index: 1;
+    }
+  }
+
+  @for $i from 1 through 10 {
+    .segmentation-list-item.initial:nth-child(#{$i}n) {
+      animation-delay: #{$i * 0.2}s;
     }
   }
 }

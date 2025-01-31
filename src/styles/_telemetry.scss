@@ -14,33 +14,56 @@
  * limitations under the License.
  */
 
+@import "themes";
+
+@include themify($themes);
+
 #telemetry {
-  border-top: 1px solid $color-5;
+  border-top: 1px solid var(--color-48);
 
   &.has-vu-meter {
-    border-right: 1px solid $color-5;
+    border-right: 1px solid var(--color-48);
   }
 
   // expandable frame
   .telemetry-frame {
     .telemetry-header {
-      height: 40px;
-      background-color: $color-7;
-      border-bottom: 1px solid $color-5;
+      background-color: var(--color-42);
+      border-bottom: 1px solid var(--color-48);
+
+      .icon {
+        svg {
+          path {
+            fill: var(--color-43);
+          }
+        }
+      }
+
+      .telemetry-placeholder {
+        font-size: 13px;
+        line-height: 18px;
+        font-weight: 700;
+        color: var(--color-60);
+      }
+    }
+
+    .telemetry-content {
+      background-color: var(--color-61);
+      font-size: 13px;
+      color: var(--color-60);
+      font-weight: 400;
+      overflow-y: auto;
 
       .telemetry-title {
-        color: $color-2;
+        color: var(--color-69);
         font-size: 13px;
-        padding: 11px;
-        padding-left: 20px;
+        font-weight: 700;
+        padding: 4px 10px;
+        align-items: center;
 
         .telemetry-icon {
           margin-right: 8px;
           color: $color-11;
-        }
-
-        .close-icon {
-          cursor: pointer;
         }
 
         .telemetry-title-text {
@@ -48,14 +71,6 @@
           vertical-align: middle;
         }
       }
-    }
-
-    .telemetry-content {
-      background-color: $color-6;
-      font-size: 13px;
-      color: #fff;
-      font-weight: 400;
-      overflow-y: auto;
 
       .telemetry-cue {
         animation: fadeIn 1s;
@@ -67,12 +82,12 @@
       }
 
       .telemetry-cue-header {
-        background-color: $color-9;
+        background-color: var(--color-9);
         height: 25px;
         padding: 3px 10px;
 
         .telemetry-cue-title {
-          color: $color-2;
+          color: var(--color-2);
           font-weight: 700;
           display: inline;
           padding: 0 10px;
@@ -84,8 +99,8 @@
       }
 
       .telemetry-cue-footer {
-        background-color: $color-10;
-        color: rgba(255, 255, 255, 0.5);
+        background-color: var(--color-10);
+        color: var(--color-9);
         font-size: 11px;
         padding: 2.5px 20px;
         line-height: 15px;
@@ -98,24 +113,23 @@
       }
     }
 
-    .telemetry-placeholder {
-      writing-mode: tb;
-      text-align: center;
-      padding: 13px;
-      background-color: $color-7;
-    }
-
     &.minimized {
-      .telemetry-title,
+      .telemetry-header {
+        height: 100%;
+        border-bottom: 0;
+
+        .telemetry-placeholder {
+          display: none !important;
+        }
+      }
       .telemetry-content {
         display: none !important;
       }
     }
 
     &.maximized {
-      .expand-button,
-      .telemetry-placeholder {
-        display: none !important;
+      .telemetry-header {
+        height: 40px;
       }
     }
   }
@@ -132,14 +146,6 @@
     .btn-maximize {
       width: 50px;
       background-size: 30px 30px;
-    }
-
-    .btn-maximize {
-      background: $color-7 url("/assets/images/timeline/icon-double-chevron-left.svg") no-repeat center;
-    }
-
-    .btn-minimize {
-      background: $color-7 url("/assets/images/timeline/icon-double-chevron-right.svg") no-repeat center;
     }
   }
 }

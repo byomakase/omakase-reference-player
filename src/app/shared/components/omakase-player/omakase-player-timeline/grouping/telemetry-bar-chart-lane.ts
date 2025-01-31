@@ -19,10 +19,12 @@ import {TelemetryAdapter} from './telemetry-adapter';
 import {TelemetryApi} from './telemetry-api';
 
 export class TelemetryBarChartLane extends BarChartLane implements TelemetryApi {
-  private _adapter: TelemetryAdapter = new TelemetryAdapter(this);
+  private _adapter: TelemetryAdapter;
 
   constructor(config: ConfigWithOptionalStyle<BarChartLaneConfig>) {
     super(config);
+
+    this._adapter = new TelemetryAdapter(this);
   }
 
   get telemetryButton() {

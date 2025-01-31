@@ -1,3 +1,7 @@
+@import "themes";
+
+@include themify($themes);
+
 .toast-container {
   position: fixed;
   right: 0;
@@ -49,22 +53,48 @@
   border-style: solid;
   padding: 1.5em 1em 1.5em 2em;
 
-  color: $color-37;
+  color: var(--color-38);
 
   margin-bottom: 5px;
+
+  box-shadow: 0 -5px 12px #000;
 }
 
 .toast-success {
-  background-color: $color-31;
-  border-color: $color-32;
+  background-color: var(--color-31);
+  border-color: var(--color-32);
+
+  .icon {
+    svg {
+      path {
+        fill: var(--color-56);
+      }
+    }
+  }
 }
 
 .toast-warning {
-  background-color: $color-33;
-  border-color: $color-34;
+  background-color: var(--color-33);
+  border-color: var(--color-34);
+
+  .icon {
+    svg {
+      path {
+        fill: var(--color-57);
+      }
+    }
+  }
 }
 
 .toast-error {
-  background-color: $color-35;
-  border-color: $color-36;
+  background-color: var(--color-35);
+  border-color: var(--color-36);
+
+  .icon {
+    svg {
+      path {
+        fill: var(--color-58);
+      }
+    }
+  }
 }

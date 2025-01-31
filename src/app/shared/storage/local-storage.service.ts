@@ -27,4 +27,14 @@ const composeKey = (key: string) => {
 })
 export class LocalStorageService {
   constructor() {}
+
+  static setItem(key: string, value: string): void {
+    localStorage.setItem(key, value);
+  }
+
+  static getItem(key: string): string | undefined {
+    const item = localStorage.getItem(key);
+
+    return item ? item : undefined;
+  }
 }

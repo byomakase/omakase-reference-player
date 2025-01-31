@@ -2,9 +2,10 @@ app-inline-edit {
   position: relative;
 
   .inline-edit-input {
-    height: 20px;
-    padding: 0 5px;
+    padding: 4px;
     outline: none;
+
+    line-height: 1;
   }
 
   .inline-edit-text {

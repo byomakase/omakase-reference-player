@@ -15,48 +15,48 @@
   -->
 
 <app-layout>
-  <main class="d-flex flex-column" [ngSwitch]="activeTab">
-    @if (navBarAboveVideo) {
-      <div id="metadata-nav-wrapper" class="d-flex" #metadataExplorerNavWrapper>
-        @if (showMetadata$ | async) {
-          <div *ngSwitchCase="'qc'" class="d-flex flex-grow-1">
-            <div appMetadataExplorerNav [sessionData]="sessionData" (getNgbNav)="setNgbNav($event)"></div>
-            <div
-              appSessionNavigation
-              [sessionData]="sessionData"
-              [disableSessionButtons]="disableSessionButtons"
-              (onPreviousSession)="handleSessionChange($event)"
-              (onNextSession)="handleSessionChange($event)"></div>
-            <div appStatus [sessionData]="sessionData"></div>
-          </div>
-        }
-        <!-- this will be replaced with segmentation list -->
-        <div *ngSwitchCase="'segmentation'" class="d-flex flex-grow-1">
-          <div id="segmentation-list" appSegmentationList></div>
-          <div
-            appSessionNavigation
-            [sessionData]="sessionData"
-            [disableSessionButtons]="disableSessionButtons"
-            (onPreviousSession)="handleSessionChange($event)"
-            (onNextSession)="handleSessionChange($event)"></div>
-          <div appStatus [sessionData]="sessionData"></div>
-        </div>
+  <div header class="d-flex flex-grow-1">
+    <div id="header-nav" class="h-100 d-flex" [class.d-none]="!showTabs">
+      <ul ngbNav class="nav-tabs" [activeId]="layoutService.activeTab" (activeIdChange)="onNavChange($event)">
+        <li [ngbNavItem]="'info'" *ngIf="isInfoModeVisible">
+          <button ngbNavLink><i appIcon="mode-info"></i></button>
+        </li>
+        <li [ngbNavItem]="'audio'" *ngIf="false">
+          <button ngbNavLink><i appIcon="mode-audio"></i></button>
+        </li>
+        <li [ngbNavItem]="'annotation'" *ngIf="isAnnotationModeVisible">
+          <button ngbNavLink><i appIcon="mode-annotation"></i></button>
+        </li>
+        <li [ngbNavItem]="'segmentation'" *ngIf="isSegmentationModeVisible">
+          <button ngbNavLink><i appIcon="mode-segmentation"></i></button>
+        </li>
+      </ul>
+    </div>
+    <div id="metadata-nav-wrapper" class="d-flex left" #metadataExplorerNavWrapper>
+      @if (showMetadata$ | async) {
+        <div appMetadataExplorerNav *ngIf="activeTab === 'info'" [sessionData]="sessionData" (getNgbNav)="setNgbNav($event)"></div>
+      }
+      <div *ngIf="activeTab === 'segmentation'" id="segmentation-list" appSegmentationList></div>
+      <div *ngIf="activeTab === 'annotation'" id="annotation-header">
+        <span>Annotations</span>
       </div>
-    }
+    </div>
+    <div class="flex-grow-1"></div>
+    <div
+      appSessionNavigation
+      [sessionData]="sessionData"
+      [disableSessionButtons]="disableSessionButtons"
+      (onPreviousSession)="handleSessionChange($event)"
+      (onNextSession)="handleSessionChange($event)"></div>
+    <div appStatus [sessionData]="sessionData"></div>
+  </div>
+  <main body class="d-flex flex-column" [ngSwitch]="activeTab">
     <div id="north-pole" class="d-flex" #northPole>
       <div id="left-section" class="d-flex flex-column flex-grow-1" #leftSection>
-        @if (!navBarAboveVideo) {
-          <div id="metadata-nav-wrapper" class="d-flex left" #metadataExplorerNavWrapper>
-            @if (showMetadata$ | async) {
-              <div appMetadataExplorerNav *ngSwitchCase="'qc'" [sessionData]="sessionData" (getNgbNav)="setNgbNav($event)"></div>
-            }
-            <div *ngSwitchCase="'segmentation'" id="segmentation-list" appSegmentationList></div>
-          </div>
-        }
         <div id="metadata-content-wrapper" class="d-flex flex-grow-1" #metadataExplorerContentWrapper>
           @if (showMetadata$ | async) {
             @if (ngbNav) {
-              <div *ngSwitchCase="'qc'" appMetadataExplorerContent [ngbNav]="ngbNav"></div>
+              <div *ngSwitchCase="'info'" appMetadataExplorerContent [ngbNav]="ngbNav"></div>
             }
           }
           <div *ngSwitchCase="'segmentation'" id="segmentation">
@@ -66,6 +66,7 @@
               [segmentationActions]="sessionData?.presentation?.segmentation_actions"
               appSegmentation></div>
           </div>
+          <div *ngSwitchCase="'annotation'" appAnnotation [isThreadingSupported]="!!sessionData?.presentation?.layout?.annotation_threading"></div>
         </div>
         @if (timelineControlsUp) {
           <div id="timeline-controls-wrapper-north" #timelineControlsWrapperNorth>
@@ -76,6 +77,7 @@
               [activeTab]="activeTab"
               [disabled]="!groupingLanes"
               [analysisGroups]="analysisGroups"
+              [isSegmentationEnabled]="isSegmentationModeVisible"
               (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
               (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
               [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
@@ -121,6 +123,7 @@
             [activeTab]="activeTab"
             [disabled]="!groupingLanes"
             [analysisGroups]="analysisGroups"
+            [isSegmentationEnabled]="isSegmentationModeVisible"
             (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
             (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
             [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
@@ -128,7 +131,7 @@
       }
       <div id="timeline-container" class="d-flex">
         <div id="timeline">
-          <div appOmakasePlayerTimeline [config]="OmakasePlayerConstants.TIMELINE_CONFIG" (onReady)="onOmakasePlayerTimelineReady($event)">
+          <div appOmakasePlayerTimeline (onReady)="onOmakasePlayerTimelineReady($event)">
             <div class="h-100 d-flex flex-column">
               <div class="flex-grow-1">
                 @for (index of [0, 1, 2]; track index) {

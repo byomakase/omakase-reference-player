@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
+@import "themes";
+
+@include themify($themes);
+
 #vu-meter {
-  border-top: 1px solid $color-5;
+  border-top: 1px solid var(--color-48);
 
   // expandable frame
   .vu-meter-frame {
     .vu-meter-header {
       height: 40px;
-      background-color: $color-7;
-      border-bottom: 1px solid $color-5;
+      background-color: var(--color-42);
+      border-bottom: 1px solid var(--color-48);
     }
 
     .vu-meter-eq {
-      background-color: $color-6;
+      background-color: var(--color-61);
 
       .web-audio-peak-meter {
         > div {
@@ -126,18 +130,17 @@
       border: 0;
     }
 
-    .btn-minimize,
-    .btn-maximize {
+    .btn-maximize-minimize {
       width: 50px;
       background-size: 30px 30px;
-    }
 
-    .btn-maximize {
-      background: $color-7 url("/assets/images/timeline/icon-double-chevron-left.svg") no-repeat center;
-    }
-
-    .btn-minimize {
-      background: $color-7 url("/assets/images/timeline/icon-double-chevron-right.svg") no-repeat center;
+      .icon {
+        svg {
+          path {
+            fill: var(--color-43);
+          }
+        }
+      }
     }
   }
 }

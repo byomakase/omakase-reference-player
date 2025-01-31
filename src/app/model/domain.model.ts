@@ -203,7 +203,6 @@ export interface InfoTabFile {
 }
 
 export interface Layout {
-  qc?: boolean;
   segmentation?: boolean;
   approval?: boolean;
   annotations?: boolean;
@@ -216,7 +215,7 @@ export interface SegmentationAction {
 }
 
 export interface Presentation {
-  layout: Layout;
+  layout?: Layout;
   info_tabs: InfoTab[];
   timeline_configuration: {
     track_ordering?: string[];
@@ -269,8 +268,8 @@ export interface SessionData {
     };
   };
   data: {
-    source_info: SourceInfo[];
-    media_info: MediaInfo[];
+    source_info?: SourceInfo[];
+    media_info?: MediaInfo[];
     master_manifests: MasterManifest[];
     media_tracks: MediaTracks;
   };

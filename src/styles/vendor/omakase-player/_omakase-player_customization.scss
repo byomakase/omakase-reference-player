@@ -67,23 +67,23 @@
 
         .omakase-help-menu {
           .omakase-help-group-title {
-            background: rgba(41, 45, 67, 1);
+            background: var(--color-42);
             text-transform: uppercase;
             font-size: 12px;
             line-height: 17px;
-            color: #cacfea;
+            color: var(--color-69);
           }
 
           .omakase-help-group {
-            background: rgba(58, 61, 75, 0.9);
+            background: var(--color-61);
             border-radius: 3px;
 
             .omakase-help-item {
-              border-bottom: 1px solid $color-7;
-              color: #cacfea;
+              border-bottom: 1px solid var(--color-42);
+              color: var(--color-69);
 
               &:hover {
-                background: rgba(82, 89, 121, 1);
+                background: var(--color-73);
               }
             }
           }

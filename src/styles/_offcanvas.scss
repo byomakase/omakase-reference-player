@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+@import "themes";
+
+@include themify($themes);
+
 .offcanvas {
   --app-offcanvas-width: 1000px;
 }
@@ -24,13 +28,14 @@
   flex-direction: column;
 
   .offcanvas-header {
-    background-color: $color-3;
-    border-bottom: 1px solid $color-4;
+    background-color: var(--color-72);
+    border-bottom: 1px solid var(--color-4);
 
     .offcanvas-title {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: var(--color-69);
     }
 
     #tech-metadata {
@@ -38,7 +43,17 @@
     }
 
     .text-reset {
-      padding-right: 16px;
+      padding: 0 0 0 8px;
+      border: 0;
+      margin-left: auto;
+
+      .icon {
+        color: var(--color-43) !important;
+
+        svg {
+          width: 20px;
+        }
+      }
     }
   }
 }

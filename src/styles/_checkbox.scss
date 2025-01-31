@@ -15,9 +15,19 @@
   &:not(.disabled) {
     cursor: pointer;
 
+    svg {
+      path {
+        fill: $color-2;
+      }
+    }
+
     i {
       &.icon-checked {
-        color: $color-13;
+        svg {
+          path {
+            fill: $color-13;
+          }
+        }
       }
     }
   }

@@ -222,7 +222,7 @@ export class PlayerControlsComponent {
   }
 
   updateVolumeProgress(volume: number) {
-    this.renderer.setStyle(this.volumeControlInputElementRef.nativeElement, '--volume-control-progress-percent', `${Math.round(volume * 100)}%`, RendererStyleFlags2.DashCase);
+    this.renderer.setStyle(this.volumeControlInputElementRef.nativeElement, '--app-volume-control-progress-percent', `${Math.round(volume * 100)}%`, RendererStyleFlags2.DashCase);
   }
 
   buttonClickTogglePlayPause() {

@@ -1,3 +1,10 @@
+@import "themes";
+
+@include themify($themes);
+
+$hover-color-1: var(--color-30);
+$hover-color-2: var(--color-29);
+
 .modal-dialog {
   width: 450px;
 
@@ -7,9 +14,9 @@
 
   .custom-modal {
     border-radius: 5px;
-    border: 1px solid $color-24;
-    background-color: $color-25;
-    filter: drop-shadow(0 4px 5px #000);
+    border: 1px solid var(--color-24);
+    background-color: var(--color-25);
+    box-shadow: 0 4px 5px var(--color-59);
     font-family: $font-family-nunito;
 
     .modal-header {
@@ -19,7 +26,7 @@
         font-size: 15px;
         line-height: 18px;
         font-weight: 700;
-        color: $color-2;
+        color: var(--color-43);
       }
     }
 
@@ -35,6 +42,7 @@
         text-align: left;
         text-underline-position: from-font;
         text-decoration-skip-ink: none;
+        color: var(--color-38);
       }
 
       .input-body {
@@ -45,20 +53,21 @@
         label {
           font-size: 13px;
           font-weight: 700;
-          color: #ffff;
+          color: var(--color-38);
           line-height: 18px;
         }
 
         input {
           width: 200px;
           height: 40px;
-          border: 1px solid $color-4;
+          border: 1px solid var(--color-4);
           border-radius: 5px;
           padding: 8px 30px 8px 20px;
-          background-color: $color-6;
+          background-color: var(--color-53);
           font-weight: 400;
           font-size: 13px;
           line-height: 18px;
+          color: var(--color-38);
 
           &:focus {
             outline: 0;
@@ -85,22 +94,22 @@
         }
 
         .action-button {
-          background-color: $color-30;
-          border-color: $color-27;
+          background-color: var(--color-30);
+          border-color: var(--color-27);
           color: #fff;
 
           &:hover {
-            background-color: darken($color: $color-30, $amount: 5);
+            filter: brightness(85%);
           }
         }
 
         .close-button {
-          background-color: $color-29;
-          border-color: $color-28;
-          color: #fff;
+          background-color: var(--color-29);
+          border-color: var(--color-28);
+          color: var(--color-54);
 
           &:hover {
-            background-color: darken($color: $color-29, $amount: 5);
+            filter: brightness(85%);
           }
         }
       }

@@ -1,6 +1,11 @@
+@import "themes";
+
+@include themify($themes);
+
 .segmentation-wrapper {
   position: relative;
   height: 100%;
+  color: var(--color-2);
 
   #segmentation-marker-list > omakase-marker-list {
     animation: fadeIn 2s;
@@ -15,9 +20,19 @@
     display: inline-block;
     width: 18px;
     height: 18px;
-    background-image: url(/assets/images/marker-list/menu.svg);
     background-position-y: center;
     background-repeat: no-repeat;
+
+    .icon {
+      svg {
+        width: 18px;
+        height: 18px;
+
+        ellipse {
+          fill: var(--color-43);
+        }
+      }
+    }
   }
 
   .segmentation-menu {
@@ -25,7 +40,8 @@
     top: 20px;
     right: 10px;
     padding: 10px 20px;
-    background-color: $color-15;
+    background-color: var(--color-85);
+    border: 1px solid var(--color-86);
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
     border-radius: 5px;
 
@@ -34,6 +50,12 @@
       font-size: 14px;
       font-weight: 600;
       line-height: 28px;
+    }
+  }
+
+  .segmentation-marker-list {
+    .header-cell {
+      color: var(--color-43);
     }
   }
 }

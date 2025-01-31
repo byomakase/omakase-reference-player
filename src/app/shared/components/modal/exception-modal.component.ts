@@ -18,18 +18,21 @@ import {Component} from '@angular/core';
 import {BaseModal} from './base-modal';
 import {Exception} from '../../../core/exception/exception.model';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {IconModule} from '../icon/icon.module';
 
 @Component({
   selector: 'app-exception-modal',
   standalone: true,
-  imports: [],
+  imports: [IconModule],
   template: `
     <div class="modal-header">
-      <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+      <button type="button" class="btn close" aria-label="Close" (click)="activeModal.dismiss()">
+        <i appIcon="close"></i>
+      </button>
     </div>
     <div class="modal-body">
       <div class="robot-title">
-        <img [src]="'assets/images/confused-robot.svg'" alt="Error" />
+        <img class="exception-robot" alt="Error" />
 
         <div class="d-flex justify-content-center">
           <h4>Error</h4>
@@ -37,7 +40,7 @@ import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
       </div>
 
       @for (exception of exceptions; track $index) {
-        <div>{{ exception?.message }}</div>
+        <div class="exception">{{ exception?.message }}</div>
       }
     </div>
     <div class="modal-footer">

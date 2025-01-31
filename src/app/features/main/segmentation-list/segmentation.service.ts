@@ -15,11 +15,10 @@
  */
 
 import {Injectable} from '@angular/core';
-import {Subject, Subscription, take} from 'rxjs';
+import {Subject, Subscription, take, takeUntil} from 'rxjs';
 import {TimelineService} from '../../timeline/timeline.service';
-import {Marker, MarkerLane, MarkerLaneStyle, MarkerListApi, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation} from '@byomakase/omakase-player';
+import {Marker, MarkerLane, MarkerLaneConfig, MarkerLaneStyle, MarkerListApi, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation} from '@byomakase/omakase-player';
 import {Store} from '@ngxs/store';
-import {Constants} from '../../../shared/constants/constants';
 import {SegmentationState, SegmentationTrack} from '../segmentation/segmentation.state';
 import {SegmentationActions} from '../segmentation/segmentation.actions';
 import {CryptoUtil} from '../../../util/crypto-util';
@@ -31,6 +30,9 @@ import SetActiveTrack = SegmentationActions.SetActiveTrack;
 import UpdateTrack = SegmentationActions.UpdateTrack;
 import SetTracks = SegmentationActions.SetTracks;
 import {LayoutService} from '../../../core/layout/layout.service';
+import {Constants} from '../../../shared/constants/constants';
+import {AnnotationService} from '../annotation/annotation.service';
+import {AnnotationState} from '../annotation/annotation.state';
 
 interface MarkerRecolorData {
   marker: MarkerApi;
@@ -50,14 +52,45 @@ export class SegmentationService {
   private _initSubscription?: Subscription;
   private _markerLane?: MarkerLane;
 
+  private _trackMarkersStorage: Map<SegmentationTrack, Marker[]> = new Map<SegmentationTrack, Marker[]>();
+
   onMarkerUpdate$ = new Subject<MarkerApi>();
+  onAnnotationSelected$ = new Subject<boolean>();
 
   constructor(
     private timelineService: TimelineService,
     private store: Store,
     private ompApiService: OmpApiService,
-    private layoutService: LayoutService
-  ) {}
+    private layoutService: LayoutService,
+    private annotationService: AnnotationService
+  ) {
+    this.annotationService.onMarkerSelected$.subscribe((marker) => {
+      if (this.selectedMarker && this.markerLane !== this.annotationService.annotationLane) {
+        this.markerLane!.toggleMarker(this.selectedMarker.id);
+      }
+      if (this.selectedMarker === marker) {
+        const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
+        if (activeTrack) {
+          this.markerLane = this.timelineService.getTimelineLaneById(activeTrack.markerLaneId) as MarkerLane;
+        } else {
+          this.markerLane = undefined;
+        }
+        this.onAnnotationSelected$.next(false);
+        this.selectedMarker = undefined;
+      } else {
+        this.markerLane = this.annotationService.annotationLane;
+        this.onAnnotationSelected$.next(true);
+        this.selectedMarker = marker;
+        this.layoutService.activeTab = 'annotation';
+      }
+      this.annotationService.annotationLane!.toggleMarker(marker.id);
+    });
+    this.annotationService.onMarkerRemove$.subscribe((markerId) => {
+      if (this.selectedMarker?.id === markerId) {
+        this.selectedMarker = undefined;
+      }
+    });
+  }
 
   initSegmentationMode() {
     if (this._isInitialized) {
@@ -86,9 +119,98 @@ export class SegmentationService {
     delete this._incompleteMarker;
   }
 
+  connectSegmentationMode(activeTrack: SegmentationTrack, destroyed$: Subject<void>) {
+    let index = this.annotationService.annotationLane ? 2 : 1;
+    this.trackMarkersStorage.forEach((markers, track) => {
+      let style: Partial<MarkerLaneStyle> = {
+        ...Constants.MARKER_LANE_STYLE,
+        ...LayoutService.themeStyleConstants.MARKER_LANE_STYLE_COLORS,
+        markerStyle: {
+          color: track.color,
+        },
+      };
+
+      const markerLane = this.createMarkerLaneForSegmentationTrack(
+        {
+          id: track.markerLaneId,
+          description: track.name,
+          style: {
+            ...(style as MarkerLaneStyle),
+          },
+        },
+        index
+      );
+
+      markers.forEach((marker) => {
+        let m;
+        if (marker instanceof PeriodMarker) {
+          m = new PeriodMarker({
+            id: marker.id,
+            text: marker.text,
+            timeObservation: marker.timeObservation,
+            style: marker.style,
+            editable: marker.editable,
+          });
+        } else {
+          m = new MomentMarker({
+            id: marker.id,
+            text: marker.text,
+            timeObservation: (marker as MomentMarker).timeObservation,
+            style: {
+              ...marker.style,
+              lineOpacity: 0.2,
+            },
+            editable: marker.editable,
+          });
+          m.style.lineOpacity = 0;
+        }
+        this.addMarkerClickHandler(m, track);
+        markerLane.addMarker(m);
+      });
+      index++;
+    });
+
+    this.markerLane = this.timelineService.getTimelineLaneById(activeTrack.markerLaneId) as MarkerLane;
+
+    if (this.layoutService.activeTab === 'segmentation') {
+      this.createMarkerList(activeTrack, destroyed$);
+    }
+
+    this.trackMarkersStorage.clear();
+  }
+
+  createMarkerList(activeTrack: SegmentationTrack, destroyed$: Subject<void>) {
+    this.markerLane = this.timelineService.getTimelineLaneById(activeTrack.markerLaneId) as MarkerLane;
+    this.selectedMarker && this.selectMarker(this.selectedMarker as Marker);
+    this.ompApiService
+      .api!.createMarkerList({
+        markerListHTMLElementId: 'segmentation-marker-list',
+        templateHTMLElementId: 'segmentation-marker-list-row',
+        headerHTMLElementId: 'segmentation-marker-list-header',
+        styleUrl: './assets/css/segmentation.css',
+        source: this.markerLane,
+        thumbnailVttFile: this.timelineService.getThumbnailLane()?.vttFile,
+        nameEditable: true,
+        timeEditable: true,
+      })
+      .subscribe({
+        next: (markerList) => {
+          this.markerList = markerList;
+          this.markerList.onMarkerClick$.pipe(takeUntil(destroyed$)).subscribe(({marker}) => {
+            this.unselectAnnotationMarker();
+            this.toggleMarker(marker as Marker);
+          });
+          this.markerList.onMarkerSelected$.pipe(takeUntil(destroyed$)).subscribe(({marker}) => (this.selectedMarker = marker));
+        },
+      });
+  }
+
   createSegmentationTrack(name?: string) {
     if (this._incompleteMarker) {
       return;
+    }
+    if (!this._isInitialized) {
+      this._isInitialized = true;
     }
     const segmentationTrackCount = this.store.selectSnapshot(SegmentationState.tracks).length;
     if (!name) {
@@ -98,22 +220,22 @@ export class SegmentationService {
     let color = this.resolveHeuristicColor();
     let style: Partial<MarkerLaneStyle> = {
       ...Constants.MARKER_LANE_STYLE,
+      ...LayoutService.themeStyleConstants.MARKER_LANE_STYLE_COLORS,
       markerStyle: {
         color,
       },
     };
-    const markerLane = new MarkerLane({
-      description: name,
-      style: {
-        ...style,
+
+    const markerLane = this.createMarkerLaneForSegmentationTrack(
+      {
+        description: name,
+        style: {
+          ...(style as MarkerLaneStyle),
+        },
       },
-    });
-    markerLane.onMarkerUpdate$.subscribe({
-      next: (event) => {
-        this.onMarkerUpdate$.next(event.marker);
-      },
-    });
-    this.timelineService.addTimelineLaneAtIndex(markerLane, segmentationTrackCount + 1);
+      segmentationTrackCount + (this.annotationService.annotationLane ? 2 : 1)
+    );
+
     const segmentationTrack: SegmentationTrack = {
       id: CryptoUtil.uuid(),
       name,
@@ -169,7 +291,11 @@ export class SegmentationService {
     this.deleteSegmentationTrack(segmentationTrack);
   }
 
-  addPeriodMarker(timeObservation?: PeriodObservation): PeriodMarker {
+  addPeriodMarker(timeObservation?: PeriodObservation, isSplit = false): PeriodMarker {
+    if (isSplit && this.markerLane && this.markerLane === this.annotationService.annotationLane) {
+      const currentAnnotation = this.store.selectSnapshot(AnnotationState.selectedAnnotation);
+      return this.annotationService.addPeriodMarker(timeObservation, {body: currentAnnotation?.body});
+    }
     const {segmentationTrack, markerLane} = this.getActiveTrackAndLane();
     const marker = new PeriodMarker({
       text: this.resolveHeuristicName(),
@@ -179,6 +305,7 @@ export class SegmentationService {
       },
       style: {
         ...Constants.PERIOD_MARKER_STYLE,
+        ...LayoutService.themeStyleConstants.PERIOD_MARKER_STYLE_COLORS,
         symbolType: 'triangle',
         selectedAreaOpacity: 0.2,
         color: segmentationTrack.color,
@@ -187,14 +314,21 @@ export class SegmentationService {
     });
     this.addMarkerClickHandler(marker, segmentationTrack);
     markerLane.addMarker(marker);
-    this.markerList!.toggleMarker(marker.id);
+    if (this.selectedMarker && this.annotationService.annotationLane?.getMarker(this.selectedMarker.id)) {
+      this.annotationService.annotationLane.toggleMarker(this.selectedMarker.id);
+      this.onAnnotationSelected$.next(false);
+    }
+    markerLane.toggleMarker(marker.id);
     if (!timeObservation?.end) {
       this._incompleteMarker = marker;
     }
     return marker;
   }
 
-  updatePeriodMarker(markerId: string, timeObservation?: Partial<PeriodObservation>) {
+  updatePeriodMarker(markerId: string, timeObservation?: Partial<PeriodObservation>, isSplit = false) {
+    if (isSplit && this.markerLane && this.markerLane === this.annotationService.annotationLane) {
+      return this.annotationService.updatePeriodMarker(markerId, timeObservation);
+    }
     if (this._incompleteMarker?.id === markerId) {
       delete this._incompleteMarker;
     }
@@ -216,6 +350,7 @@ export class SegmentationService {
       },
       style: {
         ...Constants.MOMENT_MARKER_STYLE,
+        ...LayoutService.themeStyleConstants.MOMENT_MARKER_STYLE_COLORS,
         lineStrokeWidth: 2,
         lineOpacity: 0.2,
         color: segmentationTrack.color,
@@ -224,15 +359,25 @@ export class SegmentationService {
     });
     this.addMarkerClickHandler(marker, segmentationTrack);
     markerLane.addMarker(marker);
+    if (this.selectedMarker && this.annotationService.annotationLane?.getMarker(this.selectedMarker.id)) {
+      this.annotationService.annotationLane.toggleMarker(this.selectedMarker.id);
+      this.onAnnotationSelected$.next(false);
+    }
     this.markerList!.toggleMarker(marker.id);
     return marker;
   }
 
   deleteMarker() {
-    const marker = this._markerList?.getSelectedMarker();
+    const marker = this.markerLane?.getSelectedMarker();
     if (marker) {
-      this._markerList!.removeMarker(marker.id);
-      console.log(this._markerList?.getSelectedMarker());
+      if (this.annotationService.annotationLane?.getMarker(marker.id)) {
+        this.annotationService.deleteMarker(marker.id);
+      } else {
+        this.markerLane!.removeMarker(marker.id);
+        if (this.selectedMarker?.id === marker.id) {
+          this.selectedMarker = undefined;
+        }
+      }
     }
   }
 
@@ -244,18 +389,7 @@ export class SegmentationService {
   }
 
   selectMarker(marker: Marker) {
-    if (this.layoutService.activeTab === 'segmentation') {
-      if (!this.markerList || this._incompleteMarker) {
-        return;
-      }
-      const selectedMarker = this.markerList.getSelectedMarker();
-      if (marker.id !== selectedMarker?.id) {
-        this.markerList.toggleMarker(marker.id);
-      }
-    } else {
-      this.markerLane!.toggleMarker(marker.id);
-      this.selectedMarker = marker;
-    }
+    this.markerLane!.toggleMarker(marker.id);
   }
 
   splitMarker(selectedMarker: PeriodMarker) {
@@ -270,20 +404,23 @@ export class SegmentationService {
 
     const newMarkerStart = selectedMarkerNewEnd + 1 / this.ompApiService.api!.video.getFrameRate();
 
-    this.updatePeriodMarker(selectedMarker.id, selectedMarkerNewTimeObservation);
+    this.updatePeriodMarker(selectedMarker.id, selectedMarkerNewTimeObservation, true);
 
-    let newPeriodMarker = this.addPeriodMarker({
-      start: newMarkerStart,
-      end: selectedMarkerTimeObservation.end,
-    });
+    let newPeriodMarker = this.addPeriodMarker(
+      {
+        start: newMarkerStart,
+        end: selectedMarkerTimeObservation.end,
+      },
+      true
+    );
 
     const oldColor = newPeriodMarker.style.color;
     const firstSelectStyle = {
       ...newPeriodMarker.style,
-      color: Constants.VARIABLES.segmentationColors.at(-1)!,
+      color: LayoutService.themeStyleConstants.COLORS.SEGMENTATION_COLORS.at(-1)!,
     };
 
-    this.markerList!.updateMarker(newPeriodMarker.id, {style: firstSelectStyle});
+    this.markerLane!.updateMarker(newPeriodMarker.id, {style: firstSelectStyle});
 
     this._recoloredSplitMarker = {
       marker: newPeriodMarker,
@@ -296,21 +433,57 @@ export class SegmentationService {
     if (activeMarker) {
       this.markerList!.toggleMarker(activeMarker.id);
 
-      if (this.layoutService.activeTab === 'qc') {
+      if (this.layoutService.activeTab !== 'segmentation') {
         this.markerLane!.toggleMarker(activeMarker.id);
-        this.selectedMarker = activeMarker;
       }
     }
   }
 
+  isAnnotationMarkerSelected() {
+    return this.selectedMarker && this.annotationService.annotationLane?.getMarker(this.selectedMarker.id);
+  }
+
+  unselectAnnotationMarker() {
+    if (this.isAnnotationMarkerSelected()) {
+      this.annotationService.annotationLane!.toggleMarker(this.selectedMarker!.id);
+      this.onAnnotationSelected$.next(false);
+    }
+  }
+
+  private createMarkerLaneForSegmentationTrack(markerLaneConfig: Partial<MarkerLaneConfig>, index = 1) {
+    const markerLane = new MarkerLane({
+      ...markerLaneConfig,
+    });
+    markerLane.onMarkerUpdate$.subscribe({
+      next: (event) => {
+        this.onMarkerUpdate$.next(event.marker);
+      },
+    });
+    markerLane.onMarkerSelected$.subscribe({
+      next: ({marker}) => {
+        if (marker) {
+          this.selectedMarker = marker;
+          this.markerLane = markerLane;
+        } else {
+          this.selectedMarker = undefined;
+        }
+      },
+    });
+    this.ompApiService.api!.timeline!.addTimelineLaneAtIndex(markerLane, index);
+
+    return markerLane;
+  }
+
   private recolorSplitMarker() {
     if (this._recoloredSplitMarker) {
-      const newStyle = {
+      const newStyle: any = {
         ...this._recoloredSplitMarker.marker.style,
         color: this._recoloredSplitMarker.oldColor,
       };
-      if (this.markerList?.getMarkers().find((marker) => marker.id === this._recoloredSplitMarker!.marker.id)) {
-        this.markerList!.updateMarker(this._recoloredSplitMarker.marker.id, {style: newStyle});
+      if (this.annotationService.annotationLane?.getMarker(this._recoloredSplitMarker.marker.id)) {
+        this.annotationService.annotationLane!.updateMarker(this._recoloredSplitMarker.marker.id, {style: newStyle});
+      } else if (this.markerLane?.getMarkers().find((marker) => marker.id === this._recoloredSplitMarker!.marker.id)) {
+        this.markerLane!.updateMarker(this._recoloredSplitMarker.marker.id, {style: newStyle});
       }
 
       delete this._recoloredSplitMarker;
@@ -351,8 +524,11 @@ export class SegmentationService {
   }
 
   private resolveHeuristicColor(): string {
-    const segmentationTracks = this.store.selectSnapshot(SegmentationState.tracks);
-    const segmentationColors = Constants.VARIABLES.segmentationColors;
+    const segmentationTracks: {color: string}[] = [...this.store.selectSnapshot(SegmentationState.tracks)];
+    const segmentationColors = LayoutService.themeStyleConstants.COLORS.SEGMENTATION_COLORS;
+    if (this.annotationService.annotationLane) {
+      segmentationTracks.push({color: this.annotationService.annotationColor!});
+    }
     const minColorUsage = segmentationColors.reduce((min, color) => Math.min(min, segmentationTracks.filter((track) => track.color === color).length), Infinity);
     return segmentationColors.find((color) => segmentationTracks.filter((track) => track.color === color).length === minColorUsage) ?? segmentationColors[0];
   }
@@ -372,12 +548,17 @@ export class SegmentationService {
   private addMarkerClickHandler(marker: Marker, segmentationTrack: SegmentationTrack) {
     marker.onClick$.subscribe(() => {
       const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
-      if (this.layoutService.activeTab === 'qc' && activeTrack && this.selectedMarker) {
+      if (this.layoutService.activeTab !== 'segmentation' && activeTrack && this.selectedMarker && this.selectedMarker.id !== marker.id && this.markerLane !== this.annotationService.annotationLane) {
         this.markerLane!.toggleMarker(this.selectedMarker.id);
+      }
+      this.unselectAnnotationMarker();
+      if (this.markerLane && this.markerLane === this.annotationService.annotationLane) {
+        this.markerLane = this.timelineService.getTimelineLaneById(segmentationTrack.markerLaneId) as MarkerLane;
       }
       if (activeTrack?.id !== segmentationTrack.id) {
         this.markerLane = this.timelineService.getTimelineLaneById(segmentationTrack.markerLaneId) as MarkerLane;
-        this.store.dispatch(new SetActiveTrack(segmentationTrack));
+        const tracks = this.store.selectSnapshot(SegmentationState.tracks);
+        this.store.dispatch(new SetActiveTrack(tracks.find((t) => t.id === segmentationTrack.id)));
         // timeout is needed to propagate the SetActiveTrack event
         setTimeout(() => {
           this.selectMarker(marker);
@@ -394,5 +575,9 @@ export class SegmentationService {
 
   get markerLane(): MarkerLane | undefined {
     return this._markerLane;
+  }
+
+  get trackMarkersStorage(): Map<SegmentationTrack, Marker[]> {
+    return this._trackMarkersStorage;
   }
 }

@@ -15,9 +15,9 @@
  */
 
 import {ImageButton} from '@byomakase/omakase-player';
-import {Constants} from '../../../../constants/constants';
 import {TelemetryLane} from '../../../../../features/timeline/timeline.service';
 import {TelemetryApi} from './telemetry-api';
+import {LayoutService} from '../../../../../core/layout/layout.service';
 
 export class TelemetryAdapter implements TelemetryApi {
   private _telemetryButton?: ImageButton;
@@ -34,15 +34,15 @@ export class TelemetryAdapter implements TelemetryApi {
   }
 
   activateTelemetryIcon() {
-    this._telemetryButton?.setImage(Constants.IMAGE_BUTTONS.telemetryActive);
+    this._telemetryButton?.setImage(LayoutService.themeStyleConstants.IMAGE_BUTTONS.telemetryActive);
   }
 
   deactivateTelemetryIcon() {
-    this._telemetryButton?.setImage(Constants.IMAGE_BUTTONS.telemetryInactive);
+    this._telemetryButton?.setImage(LayoutService.themeStyleConstants.IMAGE_BUTTONS.telemetryInactive);
   }
 
   addTelemetryButton(listening: boolean) {
-    const icon = listening ? Constants.IMAGE_BUTTONS.telemetryInactive : Constants.IMAGE_BUTTONS.telemetryDisabled;
+    const icon = listening ? LayoutService.themeStyleConstants.IMAGE_BUTTONS.telemetryInactive : LayoutService.themeStyleConstants.IMAGE_BUTTONS.telemetryDisabled;
     this._telemetryButton = new ImageButton({
       ...icon,
       listening,

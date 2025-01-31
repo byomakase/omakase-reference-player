@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+@import "themes";
+
+@include themify($themes);
+
 #player-controls {
   padding-left: 5px;
   padding-right: 5px;
@@ -26,6 +30,7 @@
   .btn {
     border-radius: 0;
     border: none;
+    color: var(--color-44);
   }
 
   .dropdown-item {
@@ -111,6 +116,8 @@
       font-weight: 700;
       text-align: left;
 
+      color: var(--color-44);
+
       &:after {
         display: none;
       }
@@ -154,15 +161,17 @@
   $volume-control-width: 97px;
 
   $volume-control-track-width: 55px;
-  $volume-control-track-color: #000000;
+  $volume-control-track-color: var(--color-66);
   $volume-control-track-disabled-color: #000000;
-  $volume-control-track-progress-color: #3e44fe;
+  $volume-control-track-progress-color: var(--color-26);
   $volume-control-track-disabled-progress-color: #464646;
 
-  $volume-control-track-height: 5px;
+  $volume-control-track-height: 6px;
   $volume-control-track-border-radius: 5px;
+  $volume-control-track-border-color: var(--color-68);
 
   $volume-control-thumb-color: #ffffff;
+  $volume-control-thumb-border-color: var(--color-67);
   $volume-control-thumb-disabled-color: #a8a8a8;
   $volume-control-thumb-width: 10px;
   $volume-control-thumb-height: 10px;
@@ -210,7 +219,6 @@
       --app-volume-control-track-color: #{$volume-control-track-color};
       --app-volume-control-track-progress-color: #{$volume-control-track-progress-color};
       --app-volume-control-thumb-color: #{$volume-control-thumb-color};
-
       overflow: hidden;
       -webkit-appearance: none;
       appearance: none;
@@ -246,6 +254,7 @@
         background-color: var(--app-volume-control-track-color);
         border-radius: $volume-control-track-border-radius;
         height: $volume-control-track-height;
+        border: 1px solid $volume-control-track-border-color;
       }
 
       // slider thumb
@@ -257,6 +266,9 @@
         border-radius: $volume-control-thumb-border-radius;
         height: $volume-control-thumb-height;
         width: $volume-control-thumb-width;
+        border: 1px solid $volume-control-thumb-border-color;
+        // bottom: 1px;
+        // position: relative;
       }
 
       &::-webkit-slider-runnable-track {

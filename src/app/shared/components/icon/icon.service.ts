@@ -69,11 +69,32 @@ import {IconBinary} from './svg/icon-binary';
 import {IconToastError} from './svg/icon-toast-error';
 import {IconToastWarning} from './svg/icon-toast-warning';
 import {IconToastSuccess} from './svg/icon-toast-success';
+import {IconDoubleChevronDown} from './svg/icon-double-chevron-down';
+import {IconDoubleChevronUp} from './svg/icon-double-chevron-up';
+import {IconHamburgerMenu} from './svg/icon-hamburger-menu';
+import {IconLightMode} from './svg/icon-light-mode';
+import {IconDarkMode} from './svg/icon-dark-mode';
+import {IconDoubleChevronLeft} from './svg/icon-double-chevron-left';
+import {IconDoubleChevronRight} from './svg/icon-double-chevron-right';
+import {IconModeInfo} from './svg/icon-mode-info';
+import {IconModeAudio} from './svg/icon-mode-audio';
+import {IconModeAnnotation} from './svg/icon-mode-annotation';
+import {IconModeSegmentation} from './svg/icon-mode-segmentation';
+import {IconMenu} from './svg/icon-menu';
+import {IconFlyOut} from './svg/icon-fly-out';
+import {IconUser} from './svg/icon-user';
+import {IconEdit} from './svg/icon-edit';
+import {IconDelete} from './svg/icon-delete';
+import {IconSend} from './svg/icon-send';
 
 export type IconName =
   | 'arrow-down'
   | 'arrow-up'
   | 'chevron-down'
+  | 'double-chevron-down'
+  | 'double-chevron-up'
+  | 'double-chevron-left'
+  | 'double-chevron-right'
   | 'chevron-right'
   | 'code'
   | 'corners'
@@ -124,7 +145,20 @@ export type IconName =
   | 'download'
   | 'toast-success'
   | 'toast-warning'
-  | 'toast-error';
+  | 'toast-error'
+  | 'hamburger-menu'
+  | 'light-mode'
+  | 'dark-mode'
+  | 'fly-out'
+  | 'user'
+  | 'edit'
+  | 'delete'
+  | 'send'
+  | 'mode-info'
+  | 'mode-audio'
+  | 'mode-annotation'
+  | 'mode-segmentation'
+  | 'menu';
 
 @Injectable({
   providedIn: 'root',
@@ -134,6 +168,10 @@ export class IconService {
     'arrow-down': IconArrowDown,
     'arrow-up': IconArrowUp,
     'chevron-down': IconChevronDown,
+    'double-chevron-down': IconDoubleChevronDown,
+    'double-chevron-up': IconDoubleChevronUp,
+    'double-chevron-left': IconDoubleChevronLeft,
+    'double-chevron-right': IconDoubleChevronRight,
     'chevron-right': IconChevronRight,
     'code': IconCode,
     'corners': IconCorners,
@@ -143,6 +181,9 @@ export class IconService {
     'csv': IconCsv,
     'binary': IconBinary,
     'download': IconDownload,
+    'hamburger-menu': IconHamburgerMenu,
+    'light-mode': IconLightMode,
+    'dark-mode': IconDarkMode,
 
     'volume': IconVolume,
     'volume-zero': IconVolumeZero,
@@ -187,10 +228,22 @@ export class IconService {
     'status': IconStatus,
     'confirm': IconConfirm,
     'reject': IconReject,
+    'fly-out': IconFlyOut,
+    'user': IconUser,
+    'edit': IconEdit,
+    'delete': IconDelete,
+    'send': IconSend,
 
     'toast-error': IconToastError,
     'toast-warning': IconToastWarning,
     'toast-success': IconToastSuccess,
+
+    'mode-info': IconModeInfo,
+    'mode-audio': IconModeAudio,
+    'mode-annotation': IconModeAnnotation,
+    'mode-segmentation': IconModeSegmentation,
+
+    'menu': IconMenu,
   };
 
   constructor() {}

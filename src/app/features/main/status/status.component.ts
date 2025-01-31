@@ -19,11 +19,11 @@ interface StatusItem {
   imports: [CoreModule, SharedModule, IconModule],
   template: `
     <div id="status">
-      <div class="status-btn-group" ngbDropdown role="group" #dropdown="ngbDropdown" [class.d-none]="!isStatusVisible" [class]="approval ? 'interactive' : 'read-only'">
+      <div class="status-btn-group" ngbDropdown role="group" #dropdown="ngbDropdown" [class.d-none]="!isStatusVisible" [class.read-only]="!approval" [class]="statusColor">
         <button type="button" class="btn btn-primary btn-status" ngbDropdownToggle [disabled]="!approval">
           <div class="status d-flex align-items-center">
             <i appIcon="status" [class]="statusColor"></i>
-            <a>{{ status }}</a>
+            <a [class]="statusColor">{{ status }}</a>
           </div>
           @if (approval) {
             <i appIcon="arrow-down-light" [class]="statusColor" [class.rotate]="isDropdownOpen()"></i>
@@ -31,7 +31,13 @@ interface StatusItem {
         </button>
         <div class="status-menu" ngbDropdownMenu>
           @for (statusItem of statusItems; track statusItem) {
-            <button type="button" class="d-flex justify-content-between btn status-item" [class.d-none]="isStatusPresented(statusItem.action)" (click)="onDropdownItemClick(statusItem.action)">
+            <button
+              type="button"
+              class="d-flex justify-content-between btn status-item"
+              [class]="statusItemColor(statusItem.action)"
+              [class.d-none]="isStatusPresented(statusItem.action)"
+              (click)="onDropdownItemClick(statusItem.action)"
+            >
               {{ statusItem.action }}
               <i appIcon="arrow-down-light" [class.rotate]="isConfirmationOpen(statusItem.action)"></i>
             </button>
@@ -70,7 +76,7 @@ export class StatusComponent {
       this._status = undefined;
     }
 
-    if (this._sessionData?.presentation?.layout.approval) {
+    if (this._sessionData?.presentation?.layout?.approval) {
       this._approval = true;
 
       if (!this.statusItems.find((statusItem) => statusItem.status === this._status)) {
@@ -126,6 +132,10 @@ export class StatusComponent {
     this.resetConfirmationOpen();
 
     this.ngbDropdown?.close();
+  }
+
+  statusItemColor(statusItemAction: string): string {
+    return this.statusItems.find((statusItem) => statusItem.action === statusItemAction)!.color;
   }
 
   get approval(): boolean {

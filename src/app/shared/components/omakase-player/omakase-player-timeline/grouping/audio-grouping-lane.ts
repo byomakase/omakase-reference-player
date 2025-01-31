@@ -15,12 +15,13 @@
  */
 
 import {ClickEvent, ConfigWithOptionalStyle, OmakaseAudioTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
-import {Constants} from '../../../../constants/constants';
 import {AudioMediaTrack} from '../../../../../model/domain.model';
 import {merge, switchMap, takeUntil} from 'rxjs';
 import {BaseGroupingLane, BaseGroupingLaneConfig} from './base-grouping-lane';
 import {SoundControlImageButton} from './sound-control/sound-control-image-button';
 import {DomainUtil} from '../../../../../util/domain-util';
+import {Constants} from '../../../../constants/constants';
+import {LayoutService} from '../../../../../core/layout/layout.service';
 
 export interface AudioGroupingLaneConfig extends BaseGroupingLaneConfig {
   audioMediaTrack: AudioMediaTrack;
@@ -38,9 +39,9 @@ export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig>
       ...config,
       style: {
         ...Constants.LABEL_LANE_STYLE,
+        ...LayoutService.themeStyleConstants.LABEL_LANE_STYLE_COLORS,
       },
     });
-
     this._audioMediaTrack = config.audioMediaTrack;
   }
 
@@ -49,10 +50,10 @@ export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig>
 
     this._soundControlButton = new SoundControlImageButton({
       state: 'disabled',
-      srcDefault: `${Constants.IMAGES_ROOT}/icon-sound-horn.svg`,
-      srcActive: `${Constants.IMAGES_ROOT}/icon-sound-horn-active.svg`,
-      srcDisabled: `${Constants.IMAGES_ROOT}/icon-sound-horn-disabled.svg`,
-      srcMuted: `${Constants.IMAGES_ROOT}/icon-sound-horn-muted.svg`,
+      srcDefault: LayoutService.themeStyleConstants.IMAGE_BUTTONS.soundHorn.src,
+      srcActive: LayoutService.themeStyleConstants.IMAGE_BUTTONS.soundHornActive.src,
+      srcDisabled: LayoutService.themeStyleConstants.IMAGE_BUTTONS.soundHornDisabled.src,
+      srcMuted: LayoutService.themeStyleConstants.IMAGE_BUTTONS.soundHornMuted.src,
       width: 26,
       height: 26,
     });
@@ -63,6 +64,7 @@ export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig>
         text: DomainUtil.resolveSoundFieldLabel(this._audioMediaTrack),
         style: {
           ...Constants.SOUND_LABEL_BUTTON_STYLE,
+          ...LayoutService.themeStyleConstants.SOUND_LABEL_BUTTON_STYLE_COLORS,
         },
       });
     }
@@ -73,6 +75,7 @@ export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig>
         text: text,
         style: {
           ...Constants.TEXT_LABEL_STYLE_2,
+          ...LayoutService.themeStyleConstants.TEXT_LABEL_STYLE_2_COLORS,
         },
       });
     }
@@ -142,15 +145,18 @@ export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig>
       if (isMuted) {
         this.style = {
           ...Constants.LABEL_LANE_STYLE,
+          ...LayoutService.themeStyleConstants.LABEL_LANE_STYLE_COLORS,
         };
       } else {
         this.style = {
           ...Constants.LABEL_LANE_STYLE_ACTIVE,
+          ...LayoutService.themeStyleConstants.LABEL_LANE_STYLE_ACTIVE_COLORS,
         };
       }
     } else {
       this.style = {
         ...Constants.LABEL_LANE_STYLE,
+        ...LayoutService.themeStyleConstants.LABEL_LANE_STYLE_COLORS,
       };
     }
 
@@ -158,6 +164,7 @@ export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig>
       if (this._soundLabelButton) {
         this._soundLabelButton.style = {
           ...Constants.SOUND_LABEL_BUTTON_ACTIVE_STYLE,
+          ...LayoutService.themeStyleConstants.SOUND_LABEL_BUTTON_ACTIVE_STYLE_COLORS,
         };
       }
 
@@ -168,6 +175,7 @@ export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig>
       if (this._soundLabelButton) {
         this._soundLabelButton.style = {
           ...Constants.SOUND_LABEL_BUTTON_STYLE,
+          ...LayoutService.themeStyleConstants.SOUND_LABEL_BUTTON_STYLE_COLORS,
         };
       }
       if (this._soundControlButton) {

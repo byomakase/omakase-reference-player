@@ -28,10 +28,11 @@ import {MetadataExplorerService} from './metadata-explorer.service';
     <div class="d-flex flex-column flex-grow-1" id="metadata-explorer-container">
       @if (metadataExplorerService.infoTabHeaderActive) {
         <div class="d-flex" style="border: 1px solid transparent">
-          <div class="d-flex flex-grow-1" style="padding: 0px 0px 8px 12px;">
+          <div class="d-flex flex-grow-1" style="padding: 0px 20px 8px 12px;">
             <div style="width: 70px;"></div>
             <div class="name-header">NAME</div>
             <div class="description-header flex-grow-1">DESCRIPTION</div>
+            <div style="width: 24px;"></div>
           </div>
         </div>
       }

@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, OnDestroy, Output} from '@angular/core';
-import {ConfigWithOptionalStyle, TimelineApi, TimelineConfig} from '@byomakase/omakase-player';
+import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, OnDestroy, Output} from '@angular/core';
+import {ConfigWithOptionalStyle, MarkerLane, TimelineApi, TimelineConfig} from '@byomakase/omakase-player';
 import {Subject, take, takeUntil} from 'rxjs';
 import {CryptoUtil} from '../../../../util/crypto-util';
 import {OmpApiService} from '../omp-api.service';
+import {LayoutService} from '../../../../core/layout/layout.service';
+import {Store} from '@ngxs/store';
+import {SegmentationState} from '../../../../features/main/segmentation/segmentation.state';
+import {SegmentationService} from '../../../../features/main/segmentation-list/segmentation.service';
+import {Constants} from '../../../constants/constants';
+import {TimelineConfiguratorState} from '../../../../features/main/timeline-configurator/timeline-configurator.state';
+import {BaseGroupingLane} from './grouping/base-grouping-lane';
 
 @Component({
   selector: 'div[appOmakasePlayerTimeline]',
@@ -29,19 +36,38 @@ import {OmpApiService} from '../omp-api.service';
 })
 export class OmakasePlayerTimelineComponent implements OnDestroy {
   @Output()
-  readonly onReady: EventEmitter<TimelineApi> = new EventEmitter<TimelineApi>();
+  readonly onReady: EventEmitter<{
+    timelineApi: TimelineApi;
+    baseGroupingLanes: BaseGroupingLane<any>[];
+  }> = new EventEmitter<{
+    timelineApi: TimelineApi;
+    baseGroupingLanes: BaseGroupingLane<any>[];
+  }>();
+
+  private _baseGroupingLanes: BaseGroupingLane<any>[] = [];
 
   private _config: Partial<ConfigWithOptionalStyle<TimelineConfig>> | undefined;
   private _presetConfig: Partial<ConfigWithOptionalStyle<TimelineConfig>>;
 
   private _onDestroy$ = new Subject<void>();
 
-  constructor(protected ompApiService: OmpApiService) {
+  constructor(
+    protected ompApiService: OmpApiService,
+    protected layoutService: LayoutService,
+    protected store: Store,
+    protected segmentationService: SegmentationService
+  ) {
     this._presetConfig = {
       timelineHTMLElementId: CryptoUtil.uuid(),
     };
 
-    this._config = this._presetConfig;
+    this._config = {
+      ...this._presetConfig,
+      style: {
+        ...Constants.TIMELINE_CONFIG.style,
+        ...LayoutService.themeStyleConstants.TIMELINE_CONFIG_STYLE_COLORS.style,
+      },
+    };
 
     this.ompApiService.onCreate$.pipe(takeUntil(this._onDestroy$)).subscribe({
       next: (omakasePlayerApi) => {
@@ -52,6 +78,49 @@ export class OmakasePlayerTimelineComponent implements OnDestroy {
         }
       },
       error: (err) => {},
+    });
+
+    this.layoutService.presentationMode$.pipe(takeUntil(this._onDestroy$)).subscribe({
+      next: (presentationMode) => {
+        if (this.ompApiService.api?.timeline) {
+          const tracks = this.store.selectSnapshot(SegmentationState.tracks);
+          const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
+          const marker = this.segmentationService.selectedMarker;
+          tracks.forEach((track) => {
+            const lane = this.ompApiService.api!.timeline!.getTimelineLane(track.markerLaneId) as MarkerLane;
+            const markers = [...lane.getMarkers()];
+
+            if (activeTrack?.id === track.id && this.layoutService.activeTab === 'segmentation') {
+              this.segmentationService.markerList?.destroy();
+            }
+
+            this.segmentationService.trackMarkersStorage.set(track, markers);
+          });
+
+          this._config = {
+            ...this.config,
+            style: {
+              ...Constants.TIMELINE_CONFIG.style,
+              ...LayoutService.themeStyleConstants.TIMELINE_CONFIG_STYLE_COLORS.style,
+            },
+          };
+
+          const laneOptions = this.store.selectSnapshot(TimelineConfiguratorState.laneOptions);
+          laneOptions.forEach((laneOption) => {
+            const baseGroupingLane = this.ompApiService
+              .api!.timeline!.getTimelineLanes()
+              .find((lane) => lane instanceof BaseGroupingLane && lane.description.split(' ')[0] === laneOption.label.split(' - ')[0]) as BaseGroupingLane<any>;
+
+            if (baseGroupingLane) {
+              this._baseGroupingLanes.push(baseGroupingLane);
+            }
+          });
+
+          this.ompApiService.api!.timeline.destroy();
+          this.segmentationService.selectedMarker = marker;
+          this.createTimeline();
+        }
+      },
     });
   }
 
@@ -80,7 +149,10 @@ export class OmakasePlayerTimelineComponent implements OnDestroy {
         next: (timeline) => {
           timeline.onReady$.pipe(take(1)).subscribe({
             next: () => {
-              this.onReady.emit(timeline);
+              this.onReady.emit({
+                timelineApi: timeline,
+                baseGroupingLanes: this._baseGroupingLanes,
+              });
             },
           });
         },
@@ -93,14 +165,6 @@ export class OmakasePlayerTimelineComponent implements OnDestroy {
   //     this.ompApiService.api.timeline.destroy();
   //   }
   // }
-
-  @Input('config')
-  set config(value: Partial<ConfigWithOptionalStyle<TimelineConfig>> | undefined) {
-    this._config = {
-      ...this._presetConfig,
-      ...value,
-    };
-  }
 
   get config(): Partial<ConfigWithOptionalStyle<TimelineConfig>> | undefined {
     return this._config;

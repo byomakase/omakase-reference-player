@@ -19,10 +19,12 @@ import {TelemetryAdapter} from './telemetry-adapter';
 import {TelemetryApi} from './telemetry-api';
 
 export class TelemetryMarkerLane extends MarkerLane implements TelemetryApi {
-  private _adapter: TelemetryAdapter = new TelemetryAdapter(this);
+  private _adapter: TelemetryAdapter;
 
   constructor(config: ConfigWithOptionalStyle<MarkerLaneConfig>) {
     super(config);
+
+    this._adapter = new TelemetryAdapter(this);
   }
 
   get telemetryButton() {

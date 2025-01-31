@@ -344,7 +344,7 @@ export class OmakasePlayerUtil {
             omakasePlayer.video.pause();
           }
 
-          omakasePlayer.video.seekFromCurrentFrame(amount * upOrDown).subscribe();
+          omakasePlayer.video.seekFromCurrentFrame(amount * upOrDown);
 
           return true;
         }
@@ -358,8 +358,11 @@ export class OmakasePlayerUtil {
 
         // Playhead Position to End
         if ((event.code === 'Digit1' && event.ctrlKey) || event.code === 'End') {
-          omakasePlayer.video.pause().subscribe(() => omakasePlayer.video.seekToFrame(omakasePlayer.video.getTotalFrames()));
-
+          if (omakasePlayer.video.isPlaying()) {
+            omakasePlayer.video.pause().subscribe(() => omakasePlayer.video.seekToEnd());
+          } else {
+            omakasePlayer.video.seekToEnd()
+          }
           return true;
         }
       }
@@ -372,19 +375,19 @@ export class OmakasePlayerUtil {
 
       // Zoom 100%
       if (event.code === 'Digit0') {
-        omakasePlayer.timeline!.zoomToEased(100).subscribe();
+        omakasePlayer.timeline!.zoomToEased(100);
         return true;
       }
 
       // Zoom in
       if (event.key === '=') {
-        omakasePlayer.timeline!.zoomInEased().subscribe();
+        omakasePlayer.timeline!.zoomInEased();
         return true;
       }
 
       // Zoom Out
       if (event.key === '-') {
-        omakasePlayer.timeline!.zoomOutEased().subscribe();
+        omakasePlayer.timeline!.zoomOutEased();
         return true;
       }
     }

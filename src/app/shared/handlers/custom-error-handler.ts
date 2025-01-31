@@ -35,6 +35,7 @@ export class CustomErrorHandler implements ErrorHandler {
   }
 
   handleError(error: any): void {
+    console.debug(error);
     if (error.name === 'OmpBroadcastChannelTimeoutError') {
       console.debug(error);
     } else if ((error.name === 'TypeError' || error.name === 'NotAllowedError') && this.ompApiService.api?.video.getVideoWindowPlaybackState() === 'detached') {

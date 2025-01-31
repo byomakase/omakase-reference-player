@@ -27,7 +27,7 @@
   }
 
   .segment-key {
-    color: $color-2 !important;
+    color: var(--color-2) !important;
   }
 
   .segment-type-boolean > .segment-main > .segment-value {
@@ -35,11 +35,11 @@
   }
 
   .segment-type-string > .segment-main > .segment-value {
-    color: lightgreen !important;
+    color: var(--color-84) !important;
   }
 
   .segment-type-number > .segment-main > .segment-value {
-    color: lightcoral !important;
+    color: $color-19 !important;
   }
 
   .segment-main {

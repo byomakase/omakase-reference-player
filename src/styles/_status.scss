@@ -1,14 +1,20 @@
+@import "themes";
+
+@include themify($themes);
+
 #status {
   .status-btn-group {
     display: flex;
     align-items: center;
     border-radius: 0;
     border: 0;
-    background-color: $color-12;
     width: 170px;
     padding: 8px 20px 8px 20px;
-    justify-content: space-between;
-    height: 40px;
+    height: 60px;
+
+    &.read-only {
+      width: 146px;
+    }
 
     .btn-status {
       display: flex;
@@ -17,7 +23,7 @@
       width: 100%;
       border: 0;
       border-radius: 0;
-      background-color: $color-12;
+      background-color: inherit;
       padding: 0;
 
       &:focus-visible {
@@ -25,7 +31,8 @@
       }
 
       &:disabled {
-        background-color: color-12;
+        background-color: inherit;
+        justify-content: center;
         color: #fff;
         opacity: 1;
       }
@@ -35,36 +42,50 @@
         font-size: 14px;
         font-style: normal;
         font-weight: 800;
-        color: #fff;
       }
 
       .white {
+        text-decoration: none;
+        color: var(--color-38);
+
         svg {
-          color: #fff;
+          color: var(--color-38);
         }
       }
 
       .green {
+        text-decoration: none;
+        color: $color-37;
+
         svg {
-          color: $color-18;
+          color: var(--color-18);
         }
       }
 
       .red {
+        text-decoration: none;
+        color: $color-37;
+
         svg {
-          color: $color-19;
+          color: var(--color-19);
         }
       }
 
       .yellow {
+        text-decoration: none;
+        color: var(--color-38);
+
         svg {
-          color: $color-20;
+          color: var(--color-20);
         }
       }
 
       .blue {
+        text-decoration: none;
+        color: $color-37;
+
         svg {
-          color: $color-11;
+          color: var(--color-11);
         }
       }
 
@@ -79,29 +100,68 @@
       border: 0;
       border-radius: 0px 0px 5px 5px;
       padding: 0;
-      transform: translate(0px, 40px) !important;
+      margin: 0;
+      transform: translate(0px, 0px) !important;
 
       .status-item {
         align-items: center;
         width: 100%;
         border-radius: 0;
         border: 0;
-        border-top: 2px solid $color-6;
+        border-top: 1px solid var(--color-78);
         padding: 8px 16px 8px 20px;
         height: 38px;
         font-size: 14px;
         font-style: normal;
         font-weight: 800;
+
+        &.green {
+          background-color: var(--color-79);
+          color: $color-37;
+
+          .icon {
+            color: $color-37;
+          }
+        }
+
+        &.red {
+          background-color: var(--color-82);
+          color: $color-37;
+
+          .icon {
+            color: $color-37;
+          }
+        }
+
+        &.yellow {
+          background-color: var(--color-80);
+          color: var(--color-38);
+
+          .icon {
+            color: var(--color-38);
+          }
+        }
+
+        &.blue {
+          background-color: var(--color-81);
+          color: $color-37;
+          border-radius: 0px 0px 5px 5px;
+
+          .icon {
+            color: $color-37;
+          }
+        }
       }
 
       .confirm-window {
-        background-color: $color-6;
+        background-color: var(--color-78);
         padding: 20px 70px 18px 20px;
 
         .confirm-btn {
           width: 80px;
           height: 30px;
-          background-color: $color-22;
+          background-color: var(--color-83);
+          color: #ffffff;
           border-radius: 3px;
           font-size: 13px;
           border: 0;
@@ -128,7 +188,23 @@
     }
   }
 
-  .read-only {
-    width: 146px;
+  .white {
+    background-color: var(--color-12);
+  }
+
+  .green {
+    background-color: var(--color-49);
+  }
+
+  .red {
+    background-color: var(--color-52);
+  }
+
+  .yellow {
+    background-color: var(--color-50);
+  }
+
+  .blue {
+    background-color: var(--color-51);
   }
 }

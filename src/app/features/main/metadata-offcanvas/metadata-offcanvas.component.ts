@@ -21,16 +21,19 @@ import {SharedModule} from '../../../shared/shared.module';
 import {BaseOffcanvas} from '../../../shared/components/offcanvas/base-offcanvas';
 import {NgbActiveOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {NgxJsonViewerComponent} from 'ngx-json-viewer';
+import {IconModule} from '../../../shared/components/icon/icon.module';
 
 @Component({
   selector: 'div[appMetadataOffcanvas]',
   standalone: true,
-  imports: [CoreModule, SharedModule],
+  imports: [CoreModule, SharedModule, IconModule],
   template: `
     <div class="offcanvas-header">
       <h5 class="offcanvas-title">{{ sourceInfo.name }}&nbsp;</h5>
       <h5 class="offcanvas-title" id="tech-metadata">| Tech Metadata</h5>
-      <button type="button" class="btn-close text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss()"></button>
+      <button type="button" class="btn text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss()">
+        <i appIcon="close"></i>
+      </button>
     </div>
     <div class="offcanvas-body">
       <div class="d-flex flex-column h-100">

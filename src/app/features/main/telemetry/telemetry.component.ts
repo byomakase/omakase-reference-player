@@ -53,19 +53,27 @@ const sampleTimeSyncVideoMetadata: number = 100;
       (@toggleMinimizeMaximize.done)="onAnimationEventDone($event)"
     >
       <div class="telemetry-header">
-        <div class="d-flex h-100">
+        <div class="d-flex h-100 align-items-center">
           <div class="btn-group expand-button" role="group">
-            <button type="button" class="btn btn-maximize" (click)="maximize()"></button>
+            <button
+              type="button"
+              class="btn"
+              [class.btn-maximize]="(animationState | async) === 'minimized'"
+              [class.btn-minimize]="(animationState | async) === 'maximized'"
+              (click)="toggleMinimizeMaximize()"
+            >
+              <i [appIcon]="(animationState | async) === 'minimized' ? 'double-chevron-left' : 'double-chevron-right'"></i>
+            </button>
           </div>
-          <div class="telemetry-title d-flex w-100">
-            <div><i appIcon="telemetry" class="telemetry-icon"></i></div>
-            <div class="telemetry-title-text flex-grow-1">{{ selectedLaneTitle }}</div>
-            <div><i appIcon="close" class="close-icon" (click)="minimize()"></i></div>
-          </div>
+          <div class="telemetry-placeholder flex-grow-1">TELEMETRY</div>
         </div>
       </div>
 
       <div class="telemetry-content flex-grow-1">
+        <div class="telemetry-title d-flex w-100">
+          <div><i appIcon="telemetry" class="telemetry-icon"></i></div>
+          <div class="telemetry-title-text flex-grow-1">{{ selectedLaneTitle }}</div>
+        </div>
         @for (cue of cues | async; track cue.id) {
           <div class="telemetry-cue" [ngClass]="{'fade-out': cue.fadeOut}">
             <!-- <div class="telemetry-cue-header">
@@ -84,7 +92,6 @@ const sampleTimeSyncVideoMetadata: number = 100;
           </div>
         }
       </div>
-      <div class="telemetry-placeholder flex-grow-1">TELEMETRY</div>
     </div>
   `,
   animations: [

@@ -15,49 +15,52 @@
  */
 
 import {Component, EventEmitter, HostBinding, HostListener, Input, Output} from '@angular/core';
-import {NgbDropdown, NgbDropdownButtonItem, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import {GroupingLaneVisibility} from '../omakase-player/omakase-player-timeline/grouping/base-grouping-lane';
 import {BehaviorSubject, filter, first, Subject, takeUntil} from 'rxjs';
 import {IconModule} from '../icon/icon.module';
 import {completeSub} from '../../../util/rx-util';
 import {OmpApiService} from '../omakase-player/omp-api.service';
-import {Marker, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation, TimeObservation} from '@byomakase/omakase-player';
+import {Marker, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation, TimeObservation, VideoLoadedEvent, VideoTimeChangeEvent} from '@byomakase/omakase-player';
 import {SegmentationService} from '../../../features/main/segmentation-list/segmentation.service';
 import {MarkerApi} from '@byomakase/omakase-player/dist/api/marker-api';
-import {DropdownComponent, DropdownOption} from '../dropdown/dropdown.component';
+import {DropdownOption} from '../dropdown/dropdown.component';
 import {CommonModule} from '@angular/common';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
+import {IconName} from '../icon/icon.service';
+import {ColorPickerComponent} from '../color-picker/color-picker.component';
+import {Store} from '@ngxs/store';
+import {SegmentationState, SegmentationTrack} from '../../../features/main/segmentation/segmentation.state';
+import {LayoutService} from '../../../core/layout/layout.service';
+import {AnnotationService} from '../../../features/main/annotation/annotation.service';
+
+const INACTIVE_SEGMENTATION_COLOR = '#cccccc';
 
 @Component({
   selector: 'div[appTimelineControls]',
   standalone: true,
-  imports: [NgbDropdown, NgbDropdownButtonItem, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, DropdownComponent, CommonModule, IconModule, CheckboxComponent],
+  imports: [NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, CommonModule, IconModule, CheckboxComponent, ColorPickerComponent],
   template: `
     <div>
       <div class="btn-group" role="group">
-        <button
-          type="button"
-          class="btn"
-          [class.btn-minimize]="visibilityToToggle === 'minimized'"
-          [class.btn-maximize]="visibilityToToggle === 'maximized'"
-          [disabled]="isDisabled"
-          (click)="buttonClickChangeVisibility()"
-        ></button>
+        <button type="button" class="btn btn-minimize-maximize" [disabled]="isDisabled" (click)="buttonClickChangeVisibility()">
+          <i [appIcon]="iconName"></i>
+        </button>
         <button type="button" class="btn play-back-forward" (click)="moveCTIToMarker('start')" [disabled]="!segmentationService.selectedMarker">
           <i appIcon="bracket-double-left"></i>
         </button>
         <button type="button" class="btn play-back-forward" (click)="moveCTIToMarker('end')" [disabled]="!segmentationService.selectedMarker">
           <i appIcon="bracket-double-right"></i>
         </button>
-        @if (activeTab === 'segmentation') {
+        @if (isSegmentationEnabled) {
           <button type="button" class="btn play-back-forward" (click)="setSelectedMarkerStartToCTI()" [disabled]="!isMarkerStartToCTIValid">
             <i appIcon="bracket-left"></i>
           </button>
           <button type="button" class="btn play-back-forward" (click)="setSelectedMarkerEndToCTI()" [disabled]="!isMarkerEndToCTIValid">
             <i appIcon="bracket-right"></i>
           </button>
-          <button type="button" class="btn marker-add" (click)="addMarker()">
-            <i [appIcon]="incompleteMarker ? 'marker-end' : 'marker-start'"></i>
+          <button type="button" class="btn marker-add" (click)="addMarker()" [disabled]="!isSegmentationActive() && !isAnnotationActive()">
+            <i [appIcon]="hasIncompleteMarker() ? 'marker-end' : 'marker-start'"></i>
           </button>
           <button type="button" class="btn marker-delete" (click)="deleteMarker()" [disabled]="!segmentationService.selectedMarker">
             <i appIcon="marker-delete"></i>
@@ -65,16 +68,17 @@ import {CheckboxComponent} from '../checkbox/checkbox.component';
           <button type="button" class="btn marker-delete" (click)="splitMarker()" [disabled]="!isMarkerSplitValid">
             <i appIcon="marker-split"></i>
           </button>
-          <button type="button" class="btn marker-add" (click)="addPoint()" [disabled]="incompleteMarker">
+          <button type="button" class="btn marker-add" (click)="addPoint()" [disabled]="!isSegmentationActive() && !isAnnotationActive()">
             <i appIcon="point"></i>
           </button>
         }
-        <button type="button" class="btn play-back-forward" (click)="playLastNSeconds(3)" [disabled]="isVideoAtStart">
+        <button type="button" class="btn play-back-forward" (click)="playLastNSeconds(3)" [disabled]="!playLastNSecondsEnabled">
           <i appIcon="play-back-3"></i>
         </button>
-        <button type="button" class="btn play-back-forward" (click)="playNextNSeconds(3)" [disabled]="isVideoAtEnd">
+        <button type="button" class="btn play-back-forward" (click)="playNextNSeconds(3)" [disabled]="!playNextNSecondsEnabled">
           <i appIcon="play-forward-3"></i>
         </button>
+
         <button type="button" class="btn loop" (click)="loopMarker()" [disabled]="!isLoopEnabled">
           <i appIcon="loop"></i>
         </button>
@@ -82,7 +86,7 @@ import {CheckboxComponent} from '../checkbox/checkbox.component';
       @if (timelineLanesAdded$ | async) {
         @if (dropdownGroupOptions?.length) {
           <div class="btn-group limit-group" ngbDropdown role="group" [autoClose]="'outside'" (openChange)="handleGroupDropdownOpenChange($event)">
-            <button type="button " [class.group-dropdown-active]="numberOfSelected" class="btn-dropdown btn-primary " ngbDropdownToggle>
+            <button type="button" [class.group-dropdown-active]="numberOfSelected" [class.border-right]="!isSegmentationEnabled" class="btn-dropdown btn-primary " ngbDropdownToggle>
               Limit to
               @if (numberOfSelected) {
                 {{ numberOfSelected }}
@@ -103,12 +107,67 @@ import {CheckboxComponent} from '../checkbox/checkbox.component';
           </div>
         }
       }
+      @if (isSegmentationEnabled) {
+        <div class="segmentation-controls">
+          <div
+            class="segmentation-list-item-color"
+            [ngStyle]="{'background-color': isAnnotationSelected ? annotationService.annotationColor : getSegmentationColor()}"
+            (click)="!editingSegmentationColor ? openColorPicker() : closeColorPicker()"
+          ></div>
+          @if (editingSegmentationColor) {
+            <div class="segmentation-color-dropdown">
+              @if (isAnnotationSelected) {
+                <app-color-picker
+                  [colors]="segmentationColors"
+                  [activeColor]="annotationService.annotationColor"
+                  (selectedColor)="setAnnotationColor($event)"
+                  (clickOutside)="closeColorPicker()"
+                ></app-color-picker>
+              } @else {
+                <app-color-picker
+                  [colors]="segmentationColors"
+                  [activeColor]="getSegmentationColor()"
+                  (selectedColor)="setSegmentationColor($event)"
+                  (clickOutside)="closeColorPicker()"
+                ></app-color-picker>
+              }
+            </div>
+          }
+        </div>
+        <div class="segmentation-add" (click)="addSegmentationTrack()">
+          <i appIcon="add" title="Create segmentation track"></i>
+          NEW SEGMENTATION
+        </div>
+      }
     </div>
   `,
   //changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimelineControlsComponent {
-  public incompleteMarker?: PeriodMarker;
+  groupingDropdownOpened = false;
+  selectedGroupsMap: Map<string, boolean> = new Map();
+
+  segmentationColor = INACTIVE_SEGMENTATION_COLOR;
+  editingSegmentationColor = false;
+  segmentationColors = LayoutService.themeStyleConstants.COLORS.SEGMENTATION_COLORS;
+  segmentationTrack?: SegmentationTrack;
+  isAnnotationSelected = false;
+
+  private _analysisGroups?: Map<string, string[]>;
+
+  @Input()
+  set analysisGroups(value: Map<string, string[]>) {
+    this._analysisGroups = value;
+  }
+
+  @Input() activeTab!: string;
+  @Input() timelineLanesAdded$: BehaviorSubject<boolean> | undefined = undefined;
+  @Input() isSegmentationEnabled = false;
+
+  dropdownGroupOptions: DropdownOption<string>[] | undefined = undefined;
+
+  private _videoLoadedEvent: VideoLoadedEvent | undefined;
+  private _videoTimeChangeEvent: VideoTimeChangeEvent | undefined;
 
   private _visibility: GroupingLaneVisibility = 'maximized';
   private _disabled: boolean = false;
@@ -117,26 +176,12 @@ export class TimelineControlsComponent {
   private _onEndedBreaker$ = new Subject<void>();
   private _destroyed$ = new Subject<void>();
 
-  groupingDropdownOpened = false;
-  selectedGroupsMap: Map<string, boolean> = new Map();
-  @Input()
-  analysisGroups!: Map<string, string[]>;
-  selectedGroupsMapChanged: boolean = false;
-
-  get numberOfSelected() {
-    let numberOfTrue = [...this.selectedGroupsMap.values()].reduce<number>((previousValue, currentValue) => {
-      if (currentValue) {
-        previousValue++;
-      }
-      return previousValue;
-    }, 0);
-
-    return numberOfTrue;
-  }
-
   constructor(
     protected ompApiService: OmpApiService,
-    protected segmentationService: SegmentationService
+    protected segmentationService: SegmentationService,
+    public annotationService: AnnotationService,
+    protected layoutService: LayoutService,
+    protected store: Store
   ) {
     this.ompApiService.onCreate$
       .pipe(
@@ -144,11 +189,35 @@ export class TimelineControlsComponent {
         takeUntil(this._destroyed$)
       )
       .subscribe({
-        next: () => {},
-      });
-  }
+        next: () => {
+          this.ompApiService.api!.video.onVideoLoaded$.pipe(takeUntil(this._destroyed$)).subscribe({
+            next: (event) => {
+              this._videoLoadedEvent = event;
+            },
+          });
 
-  @Input() activeTab!: string;
+          this.ompApiService.api!.video.onVideoTimeChange$.pipe(takeUntil(this._destroyed$)).subscribe({
+            next: (event) => {
+              this._videoTimeChangeEvent = event;
+            },
+          });
+        },
+      });
+    this.store
+      .select(SegmentationState.activeTrack)
+      .pipe(takeUntil(this._destroyed$))
+      .subscribe({
+        next: (track) => {
+          this.segmentationColor = track?.color ?? INACTIVE_SEGMENTATION_COLOR;
+          this.segmentationTrack = track;
+        },
+      });
+    this.segmentationService.onAnnotationSelected$.pipe(takeUntil(this._destroyed$)).subscribe({
+      next: (isAnnotationSelected) => {
+        this.isAnnotationSelected = isAnnotationSelected;
+      },
+    });
+  }
 
   @Input()
   set visibility(value: GroupingLaneVisibility) {
@@ -160,9 +229,6 @@ export class TimelineControlsComponent {
     this._disabled = value;
   }
 
-  @Input()
-  timelineLanesAdded$: BehaviorSubject<boolean> | undefined = undefined;
-
   @Output()
   readonly groupingLanesVisibilityTrigger: EventEmitter<GroupingLaneVisibility> = new EventEmitter<GroupingLaneVisibility>();
 
@@ -173,8 +239,6 @@ export class TimelineControlsComponent {
   get hostElementId(): string | undefined {
     return 'timeline-controls';
   }
-
-  dropdownGroupOptions: DropdownOption<string>[] | undefined = undefined;
 
   @HostBinding('class')
   get hostElementClass(): string | undefined {
@@ -193,11 +257,7 @@ export class TimelineControlsComponent {
   }
 
   handleGroupDropdownOpenChange(isOpened: boolean) {
-    if (isOpened) {
-      this.groupingDropdownOpened = true;
-    } else {
-      this.groupingDropdownOpened = false;
-    }
+    this.groupingDropdownOpened = isOpened;
   }
 
   handleDropdownClick(id: string) {
@@ -208,21 +268,18 @@ export class TimelineControlsComponent {
   }
 
   private analysisGroupsToDropdownOptions() {
-    let groups = [...this.analysisGroups.keys()];
+    let groups = [...this._analysisGroups!.keys()];
     groups.sort();
-    let dropwdownGroupOptions = groups.map((group: string) => {
+    return groups.map((group: string) => {
       let label = group.replaceAll('-', ' ').replaceAll('_', ' ');
       let value = group;
 
       return {label: label, value: value} as DropdownOption<string>;
     });
-
-    return dropwdownGroupOptions;
   }
 
   private dropdownOptionsToMap(dropdownoptions: DropdownOption<string>[]) {
-    const map = new Map(dropdownoptions.map((option) => [option.value, false]));
-    return map;
+    return new Map(dropdownoptions.map((option) => [option.value, false]));
   }
 
   buttonClickChangeVisibility() {
@@ -373,19 +430,26 @@ export class TimelineControlsComponent {
     });
   }
 
+  hasIncompleteMarker() {
+    if (this.activeTab === 'annotation') {
+      return !!this.annotationService.incompleteMarker;
+    } else {
+      return !!this.segmentationService.incompleteMarker;
+    }
+  }
+
   addMarker() {
-    if (this.incompleteMarker) {
+    if (this.hasIncompleteMarker()) {
       const timeObservation = {
-        start: this.incompleteMarker.timeObservation.start,
+        start: this.getCurrentModeService().incompleteMarker!.timeObservation.start,
         end: this.ompApiService.api!.video.getCurrentTime(),
       };
-      this.segmentationService.updatePeriodMarker(this.incompleteMarker.id, timeObservation);
-      this.incompleteMarker = undefined;
+      this.getCurrentModeService().updatePeriodMarker(this.getCurrentModeService().incompleteMarker!.id, timeObservation);
     } else {
       const timeObservation = {
         start: this.ompApiService.api!.video.getCurrentTime(),
       };
-      this.incompleteMarker = this.segmentationService.addPeriodMarker(timeObservation);
+      this.getCurrentModeService().addPeriodMarker(timeObservation);
     }
   }
 
@@ -397,7 +461,7 @@ export class TimelineControlsComponent {
     const timeObservation = {
       time: this.ompApiService.api!.video.getCurrentTime(),
     };
-    this.segmentationService.addMomentMarker(timeObservation);
+    this.getCurrentModeService().addMomentMarker(timeObservation);
   }
 
   splitMarker() {
@@ -430,10 +494,18 @@ export class TimelineControlsComponent {
 
       if (this.isPeriodObservation(oldTimeObservation)) {
         let newTimeObservation = {...oldTimeObservation, start: this.ompApiService.api?.video.getCurrentTime()};
-        this.segmentationService.updatePeriodMarker(selectedMarker.id, newTimeObservation);
+        if (this.segmentationService.isAnnotationMarkerSelected()) {
+          this.annotationService.updatePeriodMarker(selectedMarker.id, newTimeObservation);
+        } else {
+          this.segmentationService.updatePeriodMarker(selectedMarker.id, newTimeObservation);
+        }
       } else if (this.isMomentObservation(oldTimeObservation)) {
         let newTimeObservation = {...oldTimeObservation, time: this.ompApiService.api?.video.getCurrentTime()!};
-        this.segmentationService.updateMomentMarker(selectedMarker.id, newTimeObservation);
+        if (this.segmentationService.isAnnotationMarkerSelected()) {
+          this.annotationService.updateMomentMarker(selectedMarker.id, newTimeObservation);
+        } else {
+          this.segmentationService.updateMomentMarker(selectedMarker.id, newTimeObservation);
+        }
       }
     }
   }
@@ -445,18 +517,78 @@ export class TimelineControlsComponent {
 
       if (this.isPeriodObservation(oldTimeObservation)) {
         let newTimeObservation = {...oldTimeObservation, end: this.ompApiService.api?.video.getCurrentTime()};
-        this.segmentationService.updatePeriodMarker(selectedMarker.id, newTimeObservation);
+        if (this.segmentationService.isAnnotationMarkerSelected()) {
+          this.annotationService.updatePeriodMarker(selectedMarker.id, newTimeObservation);
+        } else {
+          this.segmentationService.updatePeriodMarker(selectedMarker.id, newTimeObservation);
+        }
       } else if (this.isMomentObservation(oldTimeObservation)) {
         let newTimeObservation = {...oldTimeObservation, time: this.ompApiService.api?.video.getCurrentTime()};
-        this.segmentationService.updateMomentMarker(selectedMarker.id, newTimeObservation);
+        if (this.segmentationService.isAnnotationMarkerSelected()) {
+          this.annotationService.updateMomentMarker(selectedMarker.id, newTimeObservation);
+        } else {
+          this.segmentationService.updateMomentMarker(selectedMarker.id, newTimeObservation);
+        }
       }
     }
+  }
+
+  getSegmentationColor(): string {
+    if (this.activeTab === 'segmentation') {
+      return this.segmentationColor;
+    } else if (this.segmentationService.selectedMarker && this.segmentationService.markerLane?.id === this.segmentationTrack?.markerLaneId) {
+      return this.segmentationColor;
+    } else {
+      return INACTIVE_SEGMENTATION_COLOR;
+    }
+  }
+
+  setSegmentationColor(color: string) {
+    if (!this.segmentationTrack) {
+      return;
+    }
+    this.segmentationService.updateSegmentationTrackColor(this.segmentationTrack, color);
+  }
+
+  setAnnotationColor(color: string) {
+    this.annotationService.annotationColor = color;
+  }
+
+  openColorPicker() {
+    if (!this.isAnnotationSelected && this.getSegmentationColor() === INACTIVE_SEGMENTATION_COLOR) {
+      return;
+    }
+    // timeout is needed to prevent closing the color picker before it is opened
+    setTimeout(() => {
+      this.editingSegmentationColor = true;
+    });
+  }
+
+  closeColorPicker() {
+    this.editingSegmentationColor = false;
+  }
+
+  addSegmentationTrack() {
+    this.segmentationService.createSegmentationTrack();
+    this.layoutService.activeTab = 'segmentation';
+  }
+
+  isSegmentationActive() {
+    return this.activeTab === 'segmentation' && this.segmentationTrack;
+  }
+
+  isAnnotationActive() {
+    return this.activeTab === 'annotation';
   }
 
   get isMarkerSplitValid(): boolean {
     const selectedMarker = this.segmentationService.selectedMarker;
 
     if (selectedMarker && this.isPeriodMarker(selectedMarker) && selectedMarker.timeObservation.end) {
+      if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'attaching' || this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detaching') {
+        return false;
+      }
+
       const startFrame = this.ompApiService.api!.video.calculateTimeToFrame(selectedMarker.timeObservation.start!);
       const minimalEndTime = this.ompApiService.api!.video.calculateFrameToTime(startFrame + 2);
 
@@ -512,6 +644,14 @@ export class TimelineControlsComponent {
     return false;
   }
 
+  private getCurrentModeService(): AnnotationService | SegmentationService {
+    if (this.activeTab === 'annotation') {
+      return this.annotationService;
+    } else {
+      return this.segmentationService;
+    }
+  }
+
   private isPeriodMarker(marker: MarkerApi): marker is PeriodMarker {
     return this.isPeriodObservation(marker.timeObservation);
   }
@@ -546,25 +686,29 @@ export class TimelineControlsComponent {
     return !this.ompApiService.api || (this.ompApiService.api && !this.ompApiService.api!.video.isVideoLoaded());
   }
 
-  get isVideoAtStart(): boolean {
-    if (this.isVideoLoaded) {
-      return true;
-    }
-
-    const currentFrame = this.ompApiService.api!.video.getCurrentFrame();
-
-    return currentFrame ? currentFrame <= 10 : true;
+  get numberOfSelected() {
+    return [...this.selectedGroupsMap.values()].reduce<number>((previousValue, currentValue) => {
+      if (currentValue) {
+        previousValue++;
+      }
+      return previousValue;
+    }, 0);
   }
 
-  get isVideoAtEnd(): boolean {
-    if (this.isVideoLoaded) {
-      return true;
+  get playLastNSecondsEnabled(): boolean {
+    if (this._videoLoadedEvent) {
+      return !!this._videoTimeChangeEvent && this._videoTimeChangeEvent.frame > 10;
+    } else {
+      return false;
     }
+  }
 
-    const currentFrame = this.ompApiService.api!.video.getCurrentFrame();
-    const totalFrames = this.ompApiService.api!.video.getTotalFrames();
-
-    return totalFrames && currentFrame !== undefined ? totalFrames - currentFrame <= 10 : true;
+  get playNextNSecondsEnabled(): boolean {
+    if (this._videoLoadedEvent) {
+      return !this._videoTimeChangeEvent || this.ompApiService.api!.video.getTotalFrames() - this._videoTimeChangeEvent.frame > 10;
+    } else {
+      return false;
+    }
   }
 
   get isLoopEnabled(): boolean {
@@ -579,6 +723,10 @@ export class TimelineControlsComponent {
     return false;
   }
 
+  get iconName(): IconName {
+    return this.visibilityToToggle === 'maximized' ? 'double-chevron-up' : 'double-chevron-down';
+  }
+
   @HostListener('document:keydown', ['$event'])
   onDocumentKeypress(event: KeyboardEvent) {
     const targetElement = event.target as HTMLElement;
@@ -587,7 +735,7 @@ export class TimelineControlsComponent {
       return;
     }
 
-    if (this.activeTab === 'segmentation') {
+    if (this.activeTab === 'segmentation' || this.activeTab === 'annotation') {
       // Mark In / Out - m
       if (event.code === 'KeyM') {
         if (!this.ompApiService.api || !this.ompApiService.api.video.isVideoLoaded()) {
@@ -606,64 +754,16 @@ export class TimelineControlsComponent {
         this.addPoint();
       }
 
-      if (this.segmentationService.markerList!.getSelectedMarker()) {
-        const activeMarker = this.segmentationService.markerList!.getSelectedMarker();
-
-        // Split Active Marker - .
-        if (event.key === '.') {
-          this.splitMarker();
-        }
-
-        // Delete Active Marker - n
-        if (event.code === 'KeyN') {
-          this.deleteMarker();
-        }
-
-        // Set Start of Active Marker to Playhead Position
-        if (event.code === 'KeyI') {
-          if (this.isMomentMarker(activeMarker!)) {
-            const timeObservation = {
-              time: this.ompApiService.api!.video.getCurrentTime(),
-            };
-            this.segmentationService.updateMomentMarker(activeMarker.id, timeObservation);
-          } else if (this.isPeriodMarker(activeMarker!)) {
-            const timeObservation = {
-              start:
-                activeMarker.timeObservation.end && this.ompApiService.api!.video.getCurrentTime() > activeMarker.timeObservation.end
-                  ? activeMarker.timeObservation.end
-                  : this.ompApiService.api!.video.getCurrentTime(),
-              end: activeMarker.timeObservation.end,
-            };
-            this.segmentationService.updatePeriodMarker(activeMarker.id, timeObservation);
-          }
-        }
-
-        // Set End of Active Marker to Playhead Position
-        if (event.code === 'KeyO') {
-          if (this.isMomentMarker(activeMarker!)) {
-            const timeObservation = {
-              time: this.ompApiService.api!.video.getCurrentTime(),
-            };
-            this.segmentationService.updateMomentMarker(activeMarker.id, timeObservation);
-          } else if (this.isPeriodMarker(activeMarker!)) {
-            const timeObservation = {
-              start: activeMarker.timeObservation.start,
-              end: this.ompApiService.api!.video.getCurrentTime() < activeMarker.timeObservation.start! ? activeMarker.timeObservation.start : this.ompApiService.api!.video.getCurrentTime(),
-            };
-            this.segmentationService.updatePeriodMarker(activeMarker.id, timeObservation);
-          }
-        }
-      }
-
       // Toggle Previous / Next Marker - / | Shift + /
       if (event.code === 'Slash') {
-        const markers = this.segmentationService.markerList!.getMarkers();
+        const markerList = this.segmentationService.isAnnotationMarkerSelected() ? this.annotationService.annotationLane! : this.segmentationService.markerList!;
+        const markers = markerList.getMarkers();
         if (!markers.length) {
           return;
         }
         let nextOrPrevious = event.shiftKey ? 1 : -1;
 
-        const newActiveMarkerIndex = this.segmentationService.markerList!.getSelectedMarker() ? markers.indexOf(this.segmentationService.markerList!.getSelectedMarker()!) + nextOrPrevious : 0;
+        const newActiveMarkerIndex = markerList.getSelectedMarker() ? markers.indexOf(markerList.getSelectedMarker()! as Marker) + nextOrPrevious : 0;
         let newActiveMarker;
 
         if (newActiveMarkerIndex < 0) {
@@ -679,6 +779,8 @@ export class TimelineControlsComponent {
     }
 
     if (this.segmentationService.selectedMarker) {
+      const activeMarker = this.segmentationService.selectedMarker;
+
       // Set Playhead to Start of Active Marker
       if (event.key === '[') {
         this.moveCTIToMarker('start');
@@ -687,6 +789,67 @@ export class TimelineControlsComponent {
       // Set Playhead to End of Active Marker
       if (event.key === ']') {
         this.moveCTIToMarker('end');
+      }
+
+      // Split Active Marker - .
+      if (event.key === '.') {
+        this.splitMarker();
+      }
+
+      // Delete Active Marker - n
+      if (event.code === 'KeyN') {
+        this.deleteMarker();
+      }
+
+      // Set Start of Active Marker to Playhead Position
+      if (event.code === 'KeyI') {
+        if (this.isMomentMarker(activeMarker!)) {
+          const timeObservation = {
+            time: this.ompApiService.api!.video.getCurrentTime(),
+          };
+          if (this.segmentationService.isAnnotationMarkerSelected()) {
+            this.annotationService.updateMomentMarker(activeMarker.id, timeObservation);
+          } else {
+            this.segmentationService.updateMomentMarker(activeMarker.id, timeObservation);
+          }
+        } else if (this.isPeriodMarker(activeMarker!)) {
+          const timeObservation = {
+            start:
+              activeMarker.timeObservation.end && this.ompApiService.api!.video.getCurrentTime() > activeMarker.timeObservation.end
+                ? activeMarker.timeObservation.end
+                : this.ompApiService.api!.video.getCurrentTime(),
+            end: activeMarker.timeObservation.end,
+          };
+          if (this.segmentationService.isAnnotationMarkerSelected()) {
+            this.annotationService.updatePeriodMarker(activeMarker.id, timeObservation);
+          } else {
+            this.segmentationService.updatePeriodMarker(activeMarker.id, timeObservation);
+          }
+        }
+      }
+
+      // Set End of Active Marker to Playhead Position
+      if (event.code === 'KeyO') {
+        if (this.isMomentMarker(activeMarker!)) {
+          const timeObservation = {
+            time: this.ompApiService.api!.video.getCurrentTime(),
+          };
+          if (this.segmentationService.isAnnotationMarkerSelected()) {
+            this.annotationService.updateMomentMarker(activeMarker.id, timeObservation);
+          } else {
+            this.segmentationService.updateMomentMarker(activeMarker.id, timeObservation);
+          }
+        } else if (this.isPeriodMarker(activeMarker!)) {
+          const timeObservation = {
+            start: activeMarker.timeObservation.start,
+            end: this.ompApiService.api!.video.getCurrentTime() < activeMarker.timeObservation.start! ? activeMarker.timeObservation.start : this.ompApiService.api!.video.getCurrentTime(),
+          };
+          if (this.segmentationService.isAnnotationMarkerSelected()) {
+            this.annotationService.updatePeriodMarker(activeMarker.id, timeObservation);
+          } else {
+            this.segmentationService.updatePeriodMarker(activeMarker.id, timeObservation);
+          }
+        }
       }
     }
 
@@ -700,15 +863,13 @@ export class TimelineControlsComponent {
       event.preventDefault();
       let rewindOrPlay = event.key === 'ArrowRight' ? 1 : 0;
       if (rewindOrPlay) {
-        if (this.isVideoAtEnd) {
-          return;
+        if (this.playNextNSecondsEnabled) {
+          this.playNextNSeconds(3);
         }
-        this.playNextNSeconds(3);
       } else {
-        if (this.isVideoAtStart) {
-          return;
+        if (this.playLastNSecondsEnabled) {
+          this.playLastNSeconds(3);
         }
-        this.playLastNSeconds(3);
       }
     }
   }

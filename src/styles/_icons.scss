@@ -33,16 +33,18 @@
     opacity: $btn-disabled-opacity;
   }
 
-  svg {
-    height: 1.5em;
-    width: 1.5em;
+  &:not(.icon-colored) {
+    svg {
+      height: 1.5em;
+      width: 1.5em;
 
-    path {
-      fill: currentColor;
-    }
+      path {
+        fill: currentColor;
+      }
 
-    path[fill="white"] {
-      fill: $white;
+      path[fill="white"] {
+        fill: $white;
+      }
     }
   }
 

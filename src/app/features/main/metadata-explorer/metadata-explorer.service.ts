@@ -9,7 +9,7 @@ interface ScrollPosition {
   providedIn: 'root',
 })
 export class MetadataExplorerService {
-  private navActiveId: string | undefined;
+  private _navActiveId: string = 'sources';
   private navIdScrollPositionMap: Record<string, ScrollPosition> = {};
 
   private _metadataContentElementRef: ElementRef | undefined;
@@ -50,5 +50,13 @@ export class MetadataExplorerService {
 
   get infoTabHeaderActive(): boolean {
     return this._infoTabHeaderActive;
+  }
+
+  set navActiveId(value: string) {
+    this._navActiveId = value;
+  }
+
+  get navActiveId(): string {
+    return this._navActiveId;
   }
 }

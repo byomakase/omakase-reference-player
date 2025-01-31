@@ -36,6 +36,7 @@ export class ColorPickerComponent implements OnInit {
 
   selectColor(color: string) {
     this.selectedColor.emit(color);
+    this.clickOutside.emit();
   }
 
   @HostListener('document:click', ['$event.target'])

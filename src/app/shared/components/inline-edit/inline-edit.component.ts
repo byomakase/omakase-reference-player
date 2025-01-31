@@ -1,6 +1,7 @@
 import {CommonModule} from '@angular/common';
-import {Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {SharedModule} from '../../shared.module';
+import {Observable, Subject, takeUntil} from 'rxjs';
 
 @Component({
   selector: 'app-inline-edit',
@@ -8,7 +9,7 @@ import {SharedModule} from '../../shared.module';
   imports: [CommonModule, SharedModule],
   template: `
     @if (editing) {
-      <input #input class="inline-edit-input" [value]="displayText" />
+      <input #input class="inline-edit-input" [value]="displayText" (click)="$event.stopPropagation()" />
       <div class="inline-edit-actions">
         <span (click)="edited.emit(input.value); editing = false"><i appIcon="confirm"></i></span>
         <span (click)="editing = false"><i appIcon="reject"></i></span>
@@ -18,8 +19,9 @@ import {SharedModule} from '../../shared.module';
     }
   `,
 })
-export class InlineEditComponent {
+export class InlineEditComponent implements OnInit, OnDestroy {
   @Input() displayText!: string;
+  @Input() edit$?: Observable<void>;
 
   @Output() clicked: EventEmitter<void> = new EventEmitter();
   @Output() edited: EventEmitter<string> = new EventEmitter();
@@ -30,19 +32,30 @@ export class InlineEditComponent {
 
   private _clicked = false;
   private _doubleClickTime = 200;
+  private _destroyed$ = new Subject<void>();
 
   constructor(private elementRef: ElementRef) {}
 
+  ngOnInit() {
+    if (this.edit$) {
+      this.edit$.pipe(takeUntil(this._destroyed$)).subscribe(() => {
+        this.openEdit();
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    this._destroyed$.next();
+  }
+
   handleClick() {
+    if (this.edit$) {
+      return;
+    }
     if (this._clicked) {
       // double click
       this._clicked = false;
-      requestAnimationFrame(() => {
-        this.editing = true;
-        requestAnimationFrame(() => {
-          this.inputEl.nativeElement.focus();
-        });
-      });
+      this.openEdit();
     } else {
       this._clicked = true;
       setTimeout(() => {
@@ -53,6 +66,15 @@ export class InlineEditComponent {
         }
       }, this._doubleClickTime);
     }
+  }
+
+  openEdit() {
+    requestAnimationFrame(() => {
+      this.editing = true;
+      requestAnimationFrame(() => {
+        this.inputEl.nativeElement.focus();
+      });
+    });
   }
 
   @HostListener('document:click', ['$event.target'])

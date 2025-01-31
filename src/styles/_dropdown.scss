@@ -1,6 +1,10 @@
+@import "themes";
+
+@include themify($themes);
+
 .app-dropdown {
   width: 100%;
-  background-color: $color-12;
+  background-color: var(--color-12);
   border-radius: 0;
   height: 35px;
 
@@ -30,13 +34,18 @@
     }
 
     &::after {
-      border: none !important;
-      background-image: url(/assets/images/timeline/icon-chevron-down.svg);
-      width: 18px;
-      height: 18px;
-      float: right;
-      background-size: 100%;
-      margin-right: 2px;
+      display: none;
+    }
+
+    .icon {
+      svg {
+        height: 18px;
+        width: 24px;
+
+        path {
+          fill: var(--color-43);
+        }
+      }
     }
   }
 

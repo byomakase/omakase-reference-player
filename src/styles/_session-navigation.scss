@@ -1,8 +1,12 @@
+@import "themes";
+
+@include themify($themes);
+
 #session-navigation {
-  background-color: $color-6;
+  background-color: var(--color-22);
 
   .btn-group {
-    height: 40px;
+    height: 60px;
     padding-right: 10px;
     gap: 10px;
 
@@ -19,6 +23,7 @@
         svg {
           path {
             fill: none;
+            stroke: var(--color-2);
           }
         }
       }

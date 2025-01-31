@@ -16,9 +16,10 @@
 
 import {Dimension, TextLabel, TimelineNode} from '@byomakase/omakase-player';
 import {SoundControl, SoundControlState} from './sound-control';
-import {Constants} from '../../../../../constants/constants';
 import {CanvasUtil} from '../../../../../../util/canvas-util';
 import {TextLabelStyle} from '@byomakase/omakase-player/dist/timeline/timeline-component';
+import {Constants} from '../../../../../constants/constants';
+import {LayoutService} from '../../../../../../core/layout/layout.service';
 
 export interface SoundControlTextButtonConfig {
   state: SoundControlState;
@@ -63,14 +64,17 @@ export class SoundControlTextButton implements SoundControl {
       case 'active':
         return {
           ...Constants.TEXT_LABEL_BUTTON_ACTIVE_STYLE,
+          ...LayoutService.themeStyleConstants.TEXT_LABEL_BUTTON_ACTIVE_STYLE_COLORS,
         };
       case 'disabled':
         return {
           ...Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE,
+          ...LayoutService.themeStyleConstants.TEXT_LABEL_BUTTON_DISABLED_STYLE_COLORS,
         };
       default:
         return {
           ...Constants.TEXT_LABEL_BUTTON_STYLE,
+          ...LayoutService.themeStyleConstants.TEXT_LABEL_BUTTON_STYLE_COLORS,
         };
     }
   }

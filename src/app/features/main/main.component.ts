@@ -16,9 +16,8 @@
 
 import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 import {OmakasePlayerVideoComponent} from '../../shared/components/omakase-player/omakase-player-video/omakase-player-video.component';
-import {ImageButton, ImageButtonConfig, OmakaseAudioTrack, SubtitlesVttTrack, ThumbnailLane, TimelineApi, TimelineLaneApi} from '@byomakase/omakase-player';
+import {ImageButton, ImageButtonConfig, OmakaseAudioTrack, SubtitlesVttTrack, ThumbnailLane, TimelineApi, TimelineLaneApi, Video} from '@byomakase/omakase-player';
 import {BehaviorSubject, combineLatest, filter, forkJoin, fromEvent, map, Observable, of, Subject, take, takeUntil} from 'rxjs';
-import {Constants} from '../../shared/constants/constants';
 import {CoreModule} from '../../core/core.module';
 import {SharedModule} from '../../shared/shared.module';
 import {TimelineConfiguratorComponent} from './timeline-configurator/timeline-configurator.component';
@@ -62,7 +61,7 @@ import {TimelineConfiguratorActions} from './timeline-configurator/timeline-conf
 import {OmpApiService} from '../../shared/components/omakase-player/omp-api.service';
 import {MetadataExplorerNavComponent} from './metadata-explorer/metadata-explorer-nav.component';
 import {NgbNav} from '@ng-bootstrap/ng-bootstrap';
-import {LayoutService} from '../../core/layout/layout.service';
+import {LayoutService, LayoutTab} from '../../core/layout/layout.service';
 import {SegmentationListComponent} from './segmentation-list/segmentation-list.component';
 import {SegmentationComponent} from './segmentation/segmentation.component';
 import {SegmentationService} from './segmentation-list/segmentation.service';
@@ -70,7 +69,6 @@ import ShowExceptionModal = AppActions.ShowExceptionModal;
 import SelectConfigLane = TimelineConfiguratorActions.SelectLane;
 import SetLaneOptions = TimelineConfiguratorActions.SetLaneOptions;
 import Minimize = TimelineConfiguratorActions.Minimize;
-import ToggleMinimizeMaximize = TimelineConfiguratorActions.ToggleMinimizeMaximize;
 import SelectLane = TimelineConfiguratorActions.SelectLane;
 import {SessionNavigationComponent} from './session-navigation/session-navigation.component';
 import {StatusComponent} from './status/status.component';
@@ -80,6 +78,13 @@ import {TelemetryOgChartLane} from '../../shared/components/omakase-player/omaka
 import {TelemetryMarkerLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/telemetry-marker-lane';
 import {ToastService} from '../../shared/components/toast/toast.service';
 import {ToastComponent} from '../../shared/components/toast/toast.component';
+import {CryptoUtil} from '../../util/crypto-util';
+import {MetadataExplorerService} from './metadata-explorer/metadata-explorer.service';
+import {SegmentationState} from './segmentation/segmentation.state';
+import {Constants} from '../../shared/constants/constants';
+import {AnnotationService} from './annotation/annotation.service';
+import {AnnotationComponent} from './annotation/annotation.component';
+import {AnnotationState} from './annotation/annotation.state';
 
 type GroupingLane = VideoGroupingLane | AudioGroupingLane | TextTrackGroupingLane;
 
@@ -101,6 +106,7 @@ type GroupingLane = VideoGroupingLane | AudioGroupingLane | TextTrackGroupingLan
     SegmentationListComponent,
     SegmentationComponent,
     ToastComponent,
+    AnnotationComponent,
   ],
 })
 export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -113,9 +119,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('vuMeterWrapper') vuMeterWrapperElementRef!: ElementRef;
   @ViewChild('playerWrapperInner') playerWrapperInnerElementRef!: ElementRef;
 
-  private ngbNavElement!: NgbNav;
-
   OmakasePlayerConstants = Constants;
+
+  private ngbNavElement!: NgbNav;
 
   showMetadata$ = new BehaviorSubject<boolean>(false);
   showPlayer$ = new BehaviorSubject<boolean>(false);
@@ -135,7 +141,6 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   private _collapsedGroups: string[] = [];
 
   private _disableSessionButtons$ = new BehaviorSubject<boolean>(true);
-
   /**
    * Last video time before video load, undefined on first load
    *
@@ -160,21 +165,30 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private _analysisGroups: Map<string, string[]> = new Map<string, string[]>();
   private _analysisWithoutGroup: string[] = [];
+  private _analysisGroupsVisibility?: Map<string, boolean>;
+  private _analysisLaneParent: Map<string, GroupingLane> = new Map<string, GroupingLane>();
 
   private _manifestLoadBreaker$ = new Subject<void>();
+
+  private videoLoaded$ = new Subject<void>();
+  private timelineReloaded$ = new Subject<void>();
+
+  private _video?: Video;
 
   constructor(
     protected route: ActivatedRoute,
     protected ompApiService: OmpApiService,
     protected mainService: MainService,
-    protected timelineService: TimelineService,
+    public timelineService: TimelineService,
     protected windowService: WindowService,
     protected renderer: Renderer2,
     protected store: Store,
     protected router: Router,
     protected layoutService: LayoutService,
     protected segmentationService: SegmentationService,
-    protected toastService: ToastService
+    protected toastService: ToastService,
+    protected metadataExplorerService: MetadataExplorerService,
+    protected annotationService: AnnotationService
   ) {
     this.ompApiService.onCreate$
       .pipe(
@@ -194,8 +208,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     this._timelineComponentReady$
       .pipe(
         takeUntil(this._destroyed$),
-        filter((p) => p),
-        take(1)
+        filter((p) => p)
       )
       .subscribe({
         next: () => {
@@ -213,7 +226,13 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit() {
     this.route.queryParams.pipe(takeUntil(this._destroyed$)).subscribe((queryParams) => {
-      this._disableSessionButtons$.next(true);
+      if (this.videoLoaded$) {
+        completeSub(this.videoLoaded$);
+        this.videoLoaded$ = new Subject<void>();
+      }
+
+      this.resetMetadataNav();
+      this.resetPlayer();
       this.performSessionCleanup();
 
       let sessionUrl = queryParams['session'];
@@ -237,16 +256,24 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             this._sessionData = sessionData;
             this._masterManifests = this._sessionData.data.master_manifests.filter((p) => this.isManifestSupported(p));
 
-            if (this._sessionData.presentation?.layout.qc && this._sessionData.presentation.layout.segmentation) {
-              this.layoutService.showTabs$.next(true);
-              this.layoutService.activeTab = 'qc';
+            if (this.isInfoModeVisible) {
+              this.layoutService.activeTab = 'info';
+            } else if (this.isAnnotationModeVisible) {
+              this.layoutService.activeTab = 'annotation';
+            } else if (this.isSegmentationModeVisible) {
+              this.layoutService.activeTab = 'segmentation';
             } else {
-              this.layoutService.showTabs$.next(false);
-              if (this._sessionData.presentation?.layout.segmentation) {
-                this.layoutService.activeTab = 'segmentation';
-              } else {
-                this.layoutService.activeTab = 'qc';
-              }
+              this.layoutService.activeTab = 'info';
+            }
+
+            // this.layoutService.activeTab = 'annotation';
+
+            if (this.isAnnotationModeVisible) {
+              this.annotationService.initAnnotationMode();
+            }
+
+            if (sessionData.presentation?.info_tabs?.length && !sessionData.data.source_info?.length) {
+              this.metadataExplorerService.navActiveId = 'info-tab-0';
             }
 
             this.showMetadata$.next(true);
@@ -292,18 +319,62 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     completeSub(this._manifestLoadBreaker$);
     completeSub(this._destroyed$);
+    this.layoutService.disableSwitchModeButton$.complete();
     this._disableSessionButtons$.complete();
   }
 
-  onOmakasePlayerTimelineReady(timelineApi: TimelineApi) {
+  onOmakasePlayerTimelineReady(value: {timelineApi: TimelineApi; baseGroupingLanes: BaseGroupingLane<any>[]}) {
     this._timelineComponentReady$.next(true);
+    if (this._video) {
+      this.resetPlayer();
+
+      this.videoLoaded$ = new Subject<void>();
+      this.populateTimeline();
+      completeSub(this.videoLoaded$);
+
+      this.timelineReloaded$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
+        next: () => {
+          this.connectAnnotations();
+
+          const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
+          if (activeTrack) {
+            this.segmentationService.connectSegmentationMode(activeTrack, this._destroyed$);
+          }
+
+          const activeTimelineLaneId = this.store.selectSnapshot(TimelineConfiguratorState.selectedLaneId);
+          let activeTimelineLane;
+
+          value.baseGroupingLanes.forEach((baseGroupingLane) => {
+            const lane = value.timelineApi.getTimelineLanes().find((lane) => lane instanceof BaseGroupingLane && lane.description === baseGroupingLane.description) as BaseGroupingLane<any>;
+
+            if (lane) {
+              lane.groupVisibility !== baseGroupingLane.groupVisibility ? lane.toggleMinimizeMaximize() : void 0;
+
+              baseGroupingLane.childLanes.forEach((childLane) => {
+                if (this.timelineService.isAnalyticsLane(childLane)) {
+                  const analyticsLane = lane.childLanes.find((lane) => (lane as TelemetryLane).description === (childLane as TelemetryLane).description) as TelemetryLane;
+
+                  analyticsLane?.isHidden !== (childLane as TelemetryLane).isHidden ? analyticsLane.toggleHidden() : void 0;
+                }
+              });
+            }
+
+            if (baseGroupingLane.id === activeTimelineLaneId) {
+              activeTimelineLane = lane;
+            }
+          });
+
+          if (activeTimelineLane) {
+            this.store.dispatch(new SelectLane((activeTimelineLane as BaseGroupingLane<any>).id));
+          }
+        },
+      });
+    }
   }
 
   private loadVideo(): Observable<void> {
-    console.log('load video');
     return new Observable<void>((o$) => {
       let frameRate = DomainUtil.resolveFrameRate(this._currentMasterManifest!, this._videoMediaTracks);
-      console.log('load', this._currentMasterManifest!.url);
       this.ompApiService
         .api!.loadVideo(this._currentMasterManifest!.url, frameRate, {
           dropFrame: isNullOrUndefined(this._currentMasterManifest!.drop_frame) ? false : this._currentMasterManifest!.drop_frame,
@@ -312,8 +383,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(take(1))
         .subscribe({
           next: (video) => {
-            console.log('video', video);
             this.populateVideoHelpMenu();
+            this._video = video;
 
             try {
               if (this.ompApiService.api!.video.getHls()) {
@@ -360,6 +431,15 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           analysisLanes.forEach((lane) => {
             lanes.push(lane);
             groupingLane.addChildLane(lane);
+            this._analysisLaneParent.set(lane.id, groupingLane);
+          });
+
+          groupingLane.onVisibilityChange$.subscribe({
+            next: () => {
+              if (this._analysisGroupsVisibility) {
+                this.handleAnalysisGroupsVisibleChanged(this._analysisGroupsVisibility);
+              }
+            },
           });
 
           this.extendAnalysisGroups(analysisLanes);
@@ -431,6 +511,14 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           analysisLanes.forEach((lane) => {
             lanes.push(lane);
             audioGroupingLane.addChildLane(lane);
+            this._analysisLaneParent.set(lane.id, audioGroupingLane);
+          });
+          audioGroupingLane.onVisibilityChange$.subscribe({
+            next: () => {
+              if (this._analysisGroupsVisibility) {
+                this.handleAnalysisGroupsVisibleChanged(this._analysisGroupsVisibility);
+              }
+            },
           });
 
           this.extendAnalysisGroups(analysisLanes);
@@ -474,6 +562,15 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           analysisLanes.forEach((lane) => {
             lanes.push(lane);
             textTrackGroupingLane.addChildLane(lane);
+            this._analysisLaneParent.set(lane.id, textTrackGroupingLane);
+          });
+
+          textTrackGroupingLane.onVisibilityChange$.subscribe({
+            next: () => {
+              if (this._analysisGroupsVisibility) {
+                this.handleAnalysisGroupsVisibleChanged(this._analysisGroupsVisibility);
+              }
+            },
           });
 
           this.extendAnalysisGroups(analysisLanes);
@@ -488,42 +585,27 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     return lanes;
   }
 
-  private loadManifest(manifestId: string | undefined = void 0) {
-    completeSub(this._manifestLoadBreaker$);
-    this._manifestLoadBreaker$ = new Subject<void>();
+  private matchesManifest = (obj: {manifest_ids: string[]}): boolean => {
+    return !!obj.manifest_ids.find((p) => p === this._currentMasterManifest!.id);
+  };
 
-    if (!this.ompApiService.onCreate$.value) {
-      throw new Error('Omakase Player API not ready, cannot load manifest');
-    }
-
-    if (manifestId) {
-      console.debug(`Selecting manifest with id: ${manifestId}`);
-    }
-
-    this._currentMasterManifest = manifestId ? this._masterManifests!.find((p) => p.id === manifestId) : this._masterManifests![0];
-
-    console.debug('Manifest selected: ', this._currentMasterManifest);
-
-    if (!this._currentMasterManifest) {
-      throw new Error(`Could not select master manifest with id: ${manifestId}`);
-    }
-
-    let matchesManifest = (obj: {manifest_ids: string[]}): boolean => {
-      return !!obj.manifest_ids.find((p) => p === this._currentMasterManifest!.id);
-    };
-
-    this._videoMediaTracks = this._sessionData!.data.media_tracks.video ? this._sessionData!.data.media_tracks.video.filter((p) => matchesManifest(p)) : void 0;
-    this._audioMediaTracks = this._sessionData!.data.media_tracks.audio;
-    this._textMediaTracks = this._sessionData!.data.media_tracks.text;
+  private populateTimeline() {
+    this._videoMediaTracks = this.populateWithIds(this._sessionData!.data.media_tracks.video ? this._sessionData!.data.media_tracks.video.filter((p) => this.matchesManifest(p)) : void 0);
+    this._audioMediaTracks = this.populateWithIds(this._sessionData!.data.media_tracks.audio);
+    this._textMediaTracks = this.populateWithIds(this._sessionData!.data.media_tracks.text);
 
     // start video & timeline load
-    let videoLoaded$ = new Subject<void>();
     let subtitlesLoaded$ = new Subject<void>();
     let appAudioLoaded$ = new Subject<void>();
     let timelineExceptTextTracksCreated$ = new Subject<TimelineLaneApi[]>();
     let timelineTextTracksCreated$ = new Subject<TimelineLaneApi[]>();
     let timelineLanesAdded$ = new Subject<void>();
     let telemetryLanesLoaded$ = new Subject<void>();
+
+    if (this.timelineReloaded$) {
+      completeSub(this.timelineReloaded$);
+      this.timelineReloaded$ = new Subject<void>();
+    }
 
     this._manifestLoadBreaker$.pipe(take(1)).subscribe(() => {
       // remove listeners set for error handling
@@ -580,7 +662,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     //   }
     // })
 
-    videoLoaded$.pipe(takeUntil(this._manifestLoadBreaker$), take(1)).subscribe({
+    this.videoLoaded$.pipe(takeUntil(this._manifestLoadBreaker$), take(1)).subscribe({
       next: () => {
         combineLatest([timelineLanesAdded$, appAudioLoaded$])
           .pipe(takeUntil(this._manifestLoadBreaker$), take(1))
@@ -710,7 +792,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
         telemetryLanesLoaded$.pipe(takeUntil(this._manifestLoadBreaker$), take(1)).subscribe({
           complete: () => {
+            this.layoutService.disableSwitchModeButton$.next(false);
             this._disableSessionButtons$.next(false);
+            completeSub(this.timelineReloaded$);
           },
         });
 
@@ -767,6 +851,31 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           });
       },
     });
+  }
+
+  private loadManifest(manifestId: string | undefined = void 0) {
+    completeSub(this._manifestLoadBreaker$);
+    this._manifestLoadBreaker$ = new Subject<void>();
+
+    if (!this.ompApiService.onCreate$.value) {
+      throw new Error('Omakase Player API not ready, cannot load manifest');
+    }
+
+    if (manifestId) {
+      console.debug(`Selecting manifest with id: ${manifestId}`);
+    }
+
+    this._currentMasterManifest = manifestId ? this._masterManifests!.find((p) => p.id === manifestId) : this._masterManifests![0];
+
+    console.debug('Manifest selected: ', this._currentMasterManifest);
+
+    if (!this._currentMasterManifest) {
+      throw new Error(`Could not select master manifest with id: ${manifestId}`);
+    }
+
+    this.videoLoaded$ = new Subject<void>();
+
+    this.populateTimeline();
 
     this.loadVideo()
       .pipe(takeUntil(this._manifestLoadBreaker$), take(1))
@@ -789,14 +898,14 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                     .api!.video.play()
                     .subscribe()
                     .add(() => {
-                      completeSub(videoLoaded$);
+                      completeSub(this.videoLoaded$);
                     });
                 } else {
-                  completeSub(videoLoaded$);
+                  completeSub(this.videoLoaded$);
                 }
               });
           } else {
-            completeSub(videoLoaded$);
+            completeSub(this.videoLoaded$);
           }
         },
       });
@@ -927,6 +1036,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     let scrubberLane = this.ompApiService.api!.timeline!.getScrubberLane();
     scrubberLane.style = {
       ...Constants.SCRUBBER_LANE_STYLE,
+      ...LayoutService.themeStyleConstants.SCRUBBER_LANE_STYLE_COLORS,
     };
 
     let buttonConfig: Partial<ImageButtonConfig> = {
@@ -936,12 +1046,12 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     let zoomInButton = new ImageButton({
-      ...Constants.IMAGE_BUTTONS.circlePlus,
+      ...LayoutService.themeStyleConstants.IMAGE_BUTTONS.circlePlus,
       ...buttonConfig,
     });
 
     let zoomOutButton = new ImageButton({
-      ...Constants.IMAGE_BUTTONS.circleMinus,
+      ...LayoutService.themeStyleConstants.IMAGE_BUTTONS.circleMinus,
       ...buttonConfig,
     });
 
@@ -999,9 +1109,11 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       videoMediaTrack: videoMediaTrack,
       style: {
         ...Constants.LABEL_LANE_STYLE,
+        ...LayoutService.themeStyleConstants.LABEL_LANE_STYLE_COLORS,
         // DP-CORE-TIME-4
         // TODO Since player is currently limited to a single video track, if a video track is presented it will be active. Logic will need to change in the future when support for multiple video tracks is added
         ...Constants.LABEL_LANE_STYLE_ACTIVE,
+        ...LayoutService.themeStyleConstants.LABEL_LANE_STYLE_ACTIVE_COLORS,
       },
     });
 
@@ -1052,6 +1164,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       channelsCount: channelsCount,
       style: {
         ...Constants.CUSTOM_AUDIO_TRACK_LANE_STYLE,
+        ...LayoutService.themeStyleConstants.CUSTOM_AUDIO_TRACK_LANE_STYLE_COLORS,
       },
     });
 
@@ -1063,6 +1176,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       audioMediaTrack: audioMediaTrack,
       style: {
         ...Constants.CUSTOM_AUDIO_TRACK_LANE_STYLE,
+        ...LayoutService.themeStyleConstants.CUSTOM_AUDIO_TRACK_LANE_STYLE_COLORS,
       },
     });
     return lane;
@@ -1076,6 +1190,18 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ompApiService.api!.video.appendHelpMenuGroup(helpMenuGroup);
       });
     }
+  }
+
+  private populateWithIds<T extends {id?: string}>(tracks: T[] | undefined) {
+    if (!tracks) {
+      return;
+    }
+    tracks.forEach((track) => {
+      if (!track.id) {
+        track.id = CryptoUtil.uuid();
+      }
+    });
+    return tracks;
   }
 
   setNgbNav(ngbNav: NgbNav) {
@@ -1113,21 +1239,20 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         .map((lane) => (lane as BaseGroupingLane<any>).description);
     };
 
-    if (this.ompApiService.api!.video.isPlaying()) {
-      this.ompApiService.api!.video.pause().subscribe({
-        next: () => {
-          captureState();
-          this.store.dispatch(new Minimize());
-          this.cleanTimeline();
-          this.loadManifest(masterManifest.id);
-        },
-      });
-    } else {
-      captureState();
-      this.store.dispatch(new Minimize());
-      this.cleanTimeline();
-      this.loadManifest(masterManifest.id);
-    }
+    (this.ompApiService.api!.video.isPlaying() ? this.ompApiService.api!.video.pause().pipe(map((p) => true)) : of(true)).subscribe({
+      next: () => {
+        captureState();
+        this.store.dispatch(new Minimize());
+        this.cleanTimeline();
+        this.loadManifest(masterManifest.id);
+
+        this.timelineReloaded$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
+          next: () => {
+            this.connectAnnotations();
+          },
+        });
+      },
+    });
   }
 
   private extendAnalysisGroups(lanes: TimelineLaneWithOptionalGroup<TimelineLaneApi>[]) {
@@ -1147,24 +1272,71 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   handleAnalysisGroupsVisibleChanged(visibleLanesMap: Map<string, boolean>) {
     let allFalse = ![...visibleLanesMap.values()].reduce((acc, curr) => acc || curr);
 
+    this._analysisGroupsVisibility = visibleLanesMap;
+
     [...visibleLanesMap.keys()].forEach((group) => {
       let ids = this._analysisGroups.get(group);
       if (visibleLanesMap.get(group) || allFalse) {
         if (ids && ids.length > 0) {
-          this.timelineService.maximize(ids.map((id) => this.timelineService.getTimelineLaneById(id)!));
+          let maximizeIds = ids.filter((id) => this._analysisLaneParent.get(id)!.groupVisibility === 'maximized');
+          let minimizeIds = ids.filter((id) => this._analysisLaneParent.get(id)!.groupVisibility === 'minimized');
+
+          ids.forEach((id) => {
+            const lane = this.timelineService.getTimelineLaneById(id)!;
+            this._analysisLaneParent.get(id)!.unfilterLane(id);
+
+            if (this.timelineService.isAnalyticsLane(lane)) {
+              const telemetryLane = lane as TelemetryLane;
+              if (telemetryLane.isHidden) {
+                telemetryLane.toggleHidden();
+              }
+            }
+          });
+          this.timelineService.minimize(minimizeIds.map((id) => this.timelineService.getTimelineLaneById(id)!));
+          this.timelineService.maximize(maximizeIds.map((id) => this.timelineService.getTimelineLaneById(id)!));
         }
       } else {
         if (ids && ids.length > 0) {
           this.timelineService.minimize(ids.map((id) => this.timelineService.getTimelineLaneById(id)!));
+          ids.forEach((id) => {
+            const lane = this.timelineService.getTimelineLaneById(id)!;
+            this._analysisLaneParent.get(id)!.filterLane(id);
+            if (this.timelineService.isAnalyticsLane(lane)) {
+              const telemetryLane = lane as TelemetryLane;
+              if (!telemetryLane.isHidden) {
+                telemetryLane.toggleHidden();
+              }
+            }
+          });
         }
       }
     });
 
     let lanes = this._analysisWithoutGroup.map((id) => this.timelineService.getTimelineLaneById(id)!);
     if (allFalse) {
-      this.timelineService.maximize(lanes);
+      lanes.forEach((lane) => {
+        if (this.timelineService.isAnalyticsLane(lane)) {
+          const telemetryLane = lane as TelemetryLane;
+          if (telemetryLane.isHidden) {
+            telemetryLane.toggleHidden();
+          }
+        }
+        this._analysisLaneParent.get(lane.id)?.unfilterLane(lane.id);
+      });
+
+      this.timelineService.minimize(lanes.filter((lane) => this._analysisLaneParent.get(lane.id)!.groupVisibility === 'minimized'));
+      this.timelineService.maximize(lanes.filter((lane) => this._analysisLaneParent.get(lane.id)!.groupVisibility === 'maximized'));
     } else {
-      this.timelineService.minimize(lanes);
+      lanes.forEach((lane) => {
+        if (this.timelineService.isAnalyticsLane(lane)) {
+          const telemetryLane = lane as TelemetryLane;
+          if (!telemetryLane.isHidden) {
+            telemetryLane.toggleHidden();
+          }
+        }
+        this._analysisLaneParent.get(lane.id)?.filterLane(lane.id);
+      });
+      this.timelineService.minimize(lanes.filter((lane) => this._analysisLaneParent.get(lane.id)!.groupVisibility === 'minimized'));
     }
   }
 
@@ -1184,10 +1356,37 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  private connectAnnotations() {
+    const annotations = this.store.selectSnapshot(AnnotationState.annotations);
+    const selectedAnnotation = this.store.selectSnapshot(AnnotationState.selectedAnnotation);
+    if (annotations) {
+      this.annotationService.connectAnnotationMode(annotations);
+      selectedAnnotation ? this.annotationService.selectAnnotation(selectedAnnotation.id) : void 0;
+    }
+  }
+
+  private cleanAnalysisGroups() {
+    this.analysisGroups.clear();
+    this._analysisWithoutGroup = [];
+  }
+
+  private resetMetadataNav() {
+    this.metadataExplorerService.navActiveId = 'sources';
+    this.metadataExplorerService.infoTabHeaderActive = false;
+  }
+
   private performSessionCleanup() {
     this.store.dispatch(new Minimize());
     this.segmentationService.resetSegmentationMode();
+    this.annotationService.resetAnnotationMode();
     this.cleanTimeline();
+    this.cleanAnalysisGroups();
+  }
+
+  private resetPlayer() {
+    this.layoutService.disableSwitchModeButton$.next(true);
+    this._disableSessionButtons$.next(true);
+    this.cleanAnalysisGroups();
   }
 
   private toggleGroupingLanesCollapse(visibility: GroupingLaneVisibility) {
@@ -1367,6 +1566,10 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  onNavChange(activeId: LayoutTab) {
+    this.layoutService.activeTab = activeId;
+  }
+
   get sessionData(): SessionData | undefined {
     return this._sessionData;
   }
@@ -1424,23 +1627,27 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.layoutService.activeTab;
   }
 
-  get navBarAboveVideo(): boolean {
-    if (this._sessionData?.presentation?.layout.qc && (this._sessionData?.data.source_info || (this._sessionData?.presentation.info_tabs && this._sessionData?.presentation.info_tabs.length > 0))) {
-      return true;
-    } else if (
-      this._sessionData?.presentation?.layout.segmentation ||
-      this._sessionData?.presentation?.layout.approval ||
-      this._sessionData?.session?.status ||
-      this._sessionData?.session?.next ||
-      this._sessionData?.session?.previous
-    ) {
-      return true;
-    }
-
-    return false;
-  }
-
   get timelineControlsUp(): boolean {
     return this.windowService.window.outerWidth > 1000;
+  }
+
+  get isInfoModeVisible(): boolean {
+    return !!this.sessionData?.data.source_info?.length || !!this.sessionData?.presentation?.info_tabs?.length;
+  }
+
+  get isAnnotationModeVisible(): boolean {
+    return !!this.sessionData?.presentation?.layout?.annotations;
+  }
+
+  get isSegmentationModeVisible(): boolean {
+    return !!this.sessionData?.presentation?.layout?.segmentation;
+  }
+
+  get showTabs(): boolean {
+    let tabCount = 0;
+    if (this.isInfoModeVisible) tabCount++;
+    if (this.isAnnotationModeVisible) tabCount++;
+    if (this.isSegmentationModeVisible) tabCount++;
+    return tabCount > 1;
   }
 }

@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
+@import "themes";
+
+@include themify($themes);
+
 #timeline-controls {
+  border-top: 1px solid var(--color-48);
   height: 42px;
+  color: var(--color-2);
 
   @media (min-width: 650px) and (max-width: 1000px), (min-width: 1900px) {
     height: 45px;
   }
 
-  .limit-group {
-    margin-left: 10px;
-  }
-
   .btn-group {
     height: 100%;
+    margin-right: 10px;
+
+    .icon {
+      color: var(--color-44);
+    }
 
     .btn {
       border-radius: 0 5px 0 0;
@@ -37,30 +44,23 @@
       justify-content: center;
     }
 
-    .btn-minimize {
+    .btn-minimize-maximize {
+      background-color: var(--color-46);
       width: 40px;
       background-size: 30px 30px;
-      background: $color-7 url("/assets/images/timeline/icon-double-chevron-up.svg") no-repeat center;
-      border-right: 1px solid $body-bg-dark;
-      margin-right: 10px;
-    }
-
-    .btn-maximize {
-      width: 40px;
-      background-size: 30px 30px;
-      background: $color-7 url("/assets/images/timeline/icon-double-chevron-down.svg") no-repeat center;
-      border-right: 1px solid $body-bg-dark;
+      border-right: 1px solid var(--color-48);
       margin-right: 10px;
     }
 
     .btn-dropdown {
-      background: $color-6;
+      background: var(--color-73);
       border-top: 0px;
       border-bottom: 0px;
       border-left: 1px;
-      border-right: 1px;
+      border-right: 0;
       border-style: solid;
-      border-color: $color-12;
+      border-color: var(--color-48);
+      color: var(--color-44);
 
       padding-left: 1.5em;
       padding-right: 1.5em;
@@ -72,6 +72,14 @@
 
       font-size: 12px;
       font-weight: 400;
+
+      &.border-right {
+        border-right: 1px solid var(--color-48);
+      }
+
+      .icon {
+        color: var(--color-44);
+      }
     }
 
     .dropdown-toggle::after {
@@ -79,24 +87,86 @@
     }
 
     .dropdown-menu {
-      background: $color-7;
+      background: var(--color-74);
       border-radius: 0 0 5px 5px;
       margin-top: -2px !important;
+      border-color: var(--color-75);
     }
 
     .dropdown-menu.show {
-      background: $color-7;
+      background: var(--color-74);
       border-radius: 0 0 5px 5px;
       max-width: 400px;
     }
 
     .group-dropdown-active {
-      background: rgba(0, 233, 163, 0.3);
-      color: rgba(0, 233, 163, 1);
+      background: var(--color-76);
+      color: var(--color-77);
+
+      .icon {
+        svg {
+          path {
+            fill: var(--color-77);
+          }
+        }
+      }
     }
 
     .form-check {
       padding-left: 1em;
+      color: var(--color-69);
+    }
+  }
+
+  .segmentation-controls {
+    display: inline-flex;
+    height: 100%;
+    vertical-align: top;
+    padding: 10px 15px;
+    position: relative;
+    border-right: 1px solid var(--color-48);
+    border-left: 1px solid var(--color-48);
+
+    .segmentation-list-item-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+
+    .segmentation-color-dropdown {
+      position: absolute;
+      bottom: 50px;
+      left: 0;
+    }
+  }
+
+  .segmentation-add {
+    display: inline-flex;
+    font-size: 14px;
+    padding: 10px 15px;
+    border-right: 1px solid var(--color-48);
+    height: 100%;
+    line-height: 24px;
+    vertical-align: top;
+    cursor: pointer;
+    color: var(--color-44);
+
+    .icon {
+      font-size: 11px;
+      margin-top: -1px;
+      margin-right: 5px;
+
+      svg {
+        rect {
+          stroke: var(--color-44);
+        }
+        path {
+          fill: var(--color-44);
+          stroke: var(--color-44);
+        }
+      }
     }
   }
 }

@@ -17,6 +17,7 @@
 import {Dimension, TextLabel, TimelineNode} from '@byomakase/omakase-player';
 import {SubtitlesControl, SubtitlesControlState} from './subtitles-control';
 import {Constants} from '../../../../../constants/constants';
+import {LayoutService} from '../../../../../../core/layout/layout.service';
 
 export interface SubtitlesControlTextButtonConfig {
   text: string;
@@ -37,7 +38,15 @@ export class SubtitlesControlTextButton implements SubtitlesControl {
       text: this._config.text,
       listening: !this._config.disabled,
       style: {
-        ...(this._config.disabled ? Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE : Constants.TEXT_LABEL_BUTTON_STYLE),
+        ...(this._config.disabled
+          ? {
+              ...Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE,
+              ...LayoutService.themeStyleConstants.TEXT_LABEL_BUTTON_DISABLED_STYLE_COLORS,
+            }
+          : {
+              ...Constants.TEXT_LABEL_BUTTON_STYLE,
+              ...LayoutService.themeStyleConstants.TEXT_LABEL_BUTTON_STYLE_COLORS,
+            }),
       },
     });
   }
@@ -49,16 +58,19 @@ export class SubtitlesControlTextButton implements SubtitlesControl {
       case 'default':
         this._textLabel.style = {
           ...Constants.TEXT_LABEL_BUTTON_STYLE,
+          ...LayoutService.themeStyleConstants.TEXT_LABEL_BUTTON_STYLE_COLORS,
         };
         break;
       case 'active':
         this._textLabel.style = {
           ...Constants.TEXT_LABEL_BUTTON_ACTIVE_STYLE,
+          ...LayoutService.themeStyleConstants.TEXT_LABEL_BUTTON_ACTIVE_STYLE_COLORS,
         };
         break;
       case 'disabled':
         this._textLabel.style = {
           ...Constants.TEXT_LABEL_BUTTON_DISABLED_STYLE,
+          ...LayoutService.themeStyleConstants.TEXT_LABEL_BUTTON_DISABLED_STYLE_COLORS,
         };
         break;
     }
