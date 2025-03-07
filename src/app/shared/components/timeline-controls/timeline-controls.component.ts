@@ -21,9 +21,8 @@ import {BehaviorSubject, filter, first, Subject, takeUntil} from 'rxjs';
 import {IconModule} from '../icon/icon.module';
 import {completeSub} from '../../../util/rx-util';
 import {OmpApiService} from '../omakase-player/omp-api.service';
-import {Marker, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation, TimeObservation, VideoLoadedEvent, VideoTimeChangeEvent} from '@byomakase/omakase-player';
+import {Marker, MarkerApi, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation, TimeObservation, VideoLoadedEvent, VideoTimeChangeEvent} from '@byomakase/omakase-player';
 import {SegmentationService} from '../../../features/main/segmentation-list/segmentation.service';
-import {MarkerApi} from '@byomakase/omakase-player/dist/api/marker-api';
 import {DropdownOption} from '../dropdown/dropdown.component';
 import {CommonModule} from '@angular/common';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
@@ -52,14 +51,14 @@ const INACTIVE_SEGMENTATION_COLOR = '#cccccc';
         <button type="button" class="btn play-back-forward" (click)="moveCTIToMarker('end')" [disabled]="!segmentationService.selectedMarker">
           <i appIcon="bracket-double-right"></i>
         </button>
-        @if (isSegmentationEnabled) {
+        @if (isSegmentationEnabled || isAnnotationEnabled) {
           <button type="button" class="btn play-back-forward" (click)="setSelectedMarkerStartToCTI()" [disabled]="!isMarkerStartToCTIValid">
             <i appIcon="bracket-left"></i>
           </button>
           <button type="button" class="btn play-back-forward" (click)="setSelectedMarkerEndToCTI()" [disabled]="!isMarkerEndToCTIValid">
             <i appIcon="bracket-right"></i>
           </button>
-          <button type="button" class="btn marker-add" (click)="addMarker()" [disabled]="!isSegmentationActive() && !isAnnotationActive()">
+          <button type="button" class="btn marker-add" (click)="addMarker()" [disabled]="(!isSegmentationActive() && !isAnnotationActive()) || (hasIncompleteMarker() && !canEndMarker)">
             <i [appIcon]="hasIncompleteMarker() ? 'marker-end' : 'marker-start'"></i>
           </button>
           <button type="button" class="btn marker-delete" (click)="deleteMarker()" [disabled]="!segmentationService.selectedMarker">
@@ -107,16 +106,16 @@ const INACTIVE_SEGMENTATION_COLOR = '#cccccc';
           </div>
         }
       }
-      @if (isSegmentationEnabled) {
+      @if (isSegmentationEnabled || isAnnotationEnabled) {
         <div class="segmentation-controls">
           <div
             class="segmentation-list-item-color"
-            [ngStyle]="{'background-color': isAnnotationSelected ? annotationService.annotationColor : getSegmentationColor()}"
+            [ngStyle]="{'background-color': isAnnotationColorPickerActive() ? annotationService.annotationColor : getSegmentationColor()}"
             (click)="!editingSegmentationColor ? openColorPicker() : closeColorPicker()"
           ></div>
           @if (editingSegmentationColor) {
             <div class="segmentation-color-dropdown">
-              @if (isAnnotationSelected) {
+              @if (isAnnotationColorPickerActive()) {
                 <app-color-picker
                   [colors]="segmentationColors"
                   [activeColor]="annotationService.annotationColor"
@@ -134,10 +133,12 @@ const INACTIVE_SEGMENTATION_COLOR = '#cccccc';
             </div>
           }
         </div>
-        <div class="segmentation-add" (click)="addSegmentationTrack()">
-          <i appIcon="add" title="Create segmentation track"></i>
-          NEW SEGMENTATION
-        </div>
+        @if (isSegmentationEnabled) {
+          <div class="segmentation-add" (click)="addSegmentationTrack()">
+            <i appIcon="add" title="Create segmentation track"></i>
+            NEW SEGMENTATION
+          </div>
+        }
       }
     </div>
   `,
@@ -163,6 +164,7 @@ export class TimelineControlsComponent {
   @Input() activeTab!: string;
   @Input() timelineLanesAdded$: BehaviorSubject<boolean> | undefined = undefined;
   @Input() isSegmentationEnabled = false;
+  @Input() isAnnotationEnabled = false;
 
   dropdownGroupOptions: DropdownOption<string>[] | undefined = undefined;
 
@@ -555,7 +557,7 @@ export class TimelineControlsComponent {
   }
 
   openColorPicker() {
-    if (!this.isAnnotationSelected && this.getSegmentationColor() === INACTIVE_SEGMENTATION_COLOR) {
+    if (!this.isAnnotationColorPickerActive() && this.getSegmentationColor() === INACTIVE_SEGMENTATION_COLOR) {
       return;
     }
     // timeout is needed to prevent closing the color picker before it is opened
@@ -581,18 +583,35 @@ export class TimelineControlsComponent {
     return this.activeTab === 'annotation';
   }
 
+  isAnnotationColorPickerActive() {
+    return this.segmentationService.isAnnotationMarkerSelected() || (this.isAnnotationActive() && !this.segmentationService.selectedMarker);
+  }
+
+  get canEndMarker(): boolean {
+    const incompleteMarker = this.segmentationService.incompleteMarker ?? this.annotationService.incompleteMarker;
+    if (!this.ompApiService.api || !incompleteMarker) {
+      return false;
+    }
+    return this.ompApiService.api.video.getCurrentTime() >= incompleteMarker.timeObservation.start!;
+  }
+
   get isMarkerSplitValid(): boolean {
     const selectedMarker = this.segmentationService.selectedMarker;
 
+    if (!this.ompApiService.api?.video.isVideoLoaded()) {
+      return false;
+    }
+
     if (selectedMarker && this.isPeriodMarker(selectedMarker) && selectedMarker.timeObservation.end) {
-      if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'attaching' || this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detaching') {
+      if (this.ompApiService.api.video.getVideoWindowPlaybackState() === 'attaching' || this.ompApiService.api.video.getVideoWindowPlaybackState() === 'detaching') {
         return false;
       }
 
-      const startFrame = this.ompApiService.api!.video.calculateTimeToFrame(selectedMarker.timeObservation.start!);
-      const minimalEndTime = this.ompApiService.api!.video.calculateFrameToTime(startFrame + 2);
+      const startFrame = this.ompApiService.api.video.calculateTimeToFrame(selectedMarker.timeObservation.start!);
+      const minimalEndTime = this.ompApiService.api.video.calculateFrameToTime(startFrame + 2);
+      const CTITime = this.ompApiService.api.video.getCurrentTime();
 
-      if (minimalEndTime < selectedMarker.timeObservation.end) {
+      if (minimalEndTime < selectedMarker.timeObservation.end && CTITime > selectedMarker.timeObservation.start! && CTITime < selectedMarker.timeObservation.end) {
         return true;
       }
     }
@@ -732,7 +751,9 @@ export class TimelineControlsComponent {
     const targetElement = event.target as HTMLElement;
     const formInputs = ['INPUT', 'TEXTAREA', 'OMAKASE-MARKER-LIST'];
     if (formInputs.includes(targetElement.tagName.toUpperCase())) {
-      return;
+      if (!targetElement.classList.contains('omakase-timecode-edit-input') || event.key !== "'") {
+        return;
+      }
     }
 
     if (this.activeTab === 'segmentation' || this.activeTab === 'annotation') {
@@ -742,7 +763,9 @@ export class TimelineControlsComponent {
           return;
         }
 
-        this.addMarker();
+        if (!this.hasIncompleteMarker() || this.canEndMarker) {
+          this.addMarker();
+        }
       }
 
       // Add Point - ,
@@ -871,6 +894,15 @@ export class TimelineControlsComponent {
           this.playLastNSeconds(3);
         }
       }
+    }
+
+    // Toggle interactive CTI
+    if (event.key === "'") {
+      if (!this.ompApiService.api || !this.ompApiService.api.timeline) {
+        return;
+      }
+
+      this.ompApiService.api.timeline.toggleTimecodeEdit();
     }
   }
 }

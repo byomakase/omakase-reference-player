@@ -1,37 +1,45 @@
-import {Component, ElementRef, HostBinding, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, HostBinding, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
-import {Select, Store} from '@ngxs/store';
+import {Store} from '@ngxs/store';
 import {Annotation, AnnotationState} from '../annotation/annotation.state';
 import {filter, interval, map, Observable, Subject, takeUntil} from 'rxjs';
 import {AnnotationService} from '../annotation/annotation.service';
 import {InlineEditComponent} from '../../../shared/components/inline-edit/inline-edit.component';
 import {AnnotationActions} from '../annotation/annotation.actions';
 import UpdateAnnotation = AnnotationActions.UpdateAnnotation;
+import {AnnotationSortingStrategy, timecodeSortingStrategy} from './annotation-list.sorting';
+import {AnnotationListFilterPipe} from './annotation-list-filter.pipe';
+import {AnnotationListSortPipe} from './annotation-list-sort.pipe';
 
-type ExtendedAnnotation = Annotation & {
+export type ExtendedAnnotation = Annotation & {
   timeDisplay: string;
   isSelected: boolean;
   edit$: Observable<void>;
   removing: boolean;
+  collapsed: boolean;
   children: Array<Annotation & {timeDisplay: string; edit$: Observable<void>}>;
 };
 
 @Component({
   selector: 'div[appAnnotationList]',
   standalone: true,
-  imports: [CoreModule, SharedModule, InlineEditComponent],
-  template: `@for (annotation of annotationList; track annotation.id) {
+  imports: [CoreModule, SharedModule, InlineEditComponent, AnnotationListFilterPipe, AnnotationListSortPipe],
+  template: `@for (annotation of annotationList | annotationListFilter: filterToken : filterTokenSetDate : selectedId | annotationListSort: sortingStrategy; track annotation.id) {
     <div
       class="annotation-item d-flex flex-column"
       id="annotation-{{ annotation.id }}"
       [class.active]="annotation.isSelected"
       [class.fade-out]="annotation.removing"
+      [class.collapsed]="annotation.collapsed"
       (click)="selectAnnotation(annotation)"
     >
       @if (annotation.start) {
         <div class="annotation-item-start">{{ annotation.start }}</div>
       }
+      <div class="annotation-item-collapse-toggle">
+        <i [appIcon]="annotation.collapsed ? 'chevron-down' : 'chevron-up'" (click)="toggleAnnotationCollapse($event, annotation)"></i>
+      </div>
       <div class="d-flex">
         <div class="annotation-item-user-icon">
           <i appIcon="user" [style.color]="'#62C0A4'"></i>
@@ -44,13 +52,15 @@ type ExtendedAnnotation = Annotation & {
             <span class="annotation-item-user">{{ annotation.user }}</span>
             <span class="annotation-item-created">{{ annotation.timeDisplay }}</span>
           </div>
-          <app-inline-edit [displayText]="annotation.body" [edit$]="annotation.edit$" (edited)="saveAnnotationBody(annotation, $event)"></app-inline-edit>
-          <div class="annotation-item-actions">
-            <i appIcon="edit" (click)="editAnnotation($event, annotation)"></i>
-            <i appIcon="delete" (click)="deleteAnnotation($event, annotation)"></i>
-            @if (isThreadingSupported && !annotation.children.length) {
-              <span (click)="replyToAnnotation($event, annotation)">Reply</span>
-            }
+          <div class="annotation-item-details">
+            <app-inline-edit [displayText]="annotation.body" [edit$]="annotation.edit$" (edited)="saveAnnotationBody(annotation, $event)"></app-inline-edit>
+            <div class="annotation-item-actions">
+              <i appIcon="edit" (click)="editAnnotation($event, annotation)"></i>
+              <i appIcon="delete" (click)="deleteAnnotation($event, annotation)"></i>
+              @if (isThreadingSupported && !annotation.children.length && filterToken === '') {
+                <span (click)="replyToAnnotation($event, annotation)">Reply</span>
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -67,13 +77,15 @@ type ExtendedAnnotation = Annotation & {
               <span class="annotation-item-user">{{ child.user }}</span>
               <span class="annotation-item-created">{{ child.timeDisplay }}</span>
             </div>
-            <app-inline-edit [displayText]="child.body" [edit$]="child.edit$" (edited)="saveAnnotationBody(child, $event)"></app-inline-edit>
-            <div class="annotation-item-actions">
-              <i appIcon="edit" (click)="editAnnotation($event, child)"></i>
-              <i appIcon="delete" (click)="deleteAnnotation($event, child, true)"></i>
-              @if (isThreadingSupported && $index === annotation.children.length - 1) {
-                <span (click)="replyToAnnotation($event, annotation)">Reply</span>
-              }
+            <div class="annotation-item-details">
+              <app-inline-edit [displayText]="child.body" [edit$]="child.edit$" (edited)="saveAnnotationBody(child, $event)"></app-inline-edit>
+              <div class="annotation-item-actions">
+                <i appIcon="edit" (click)="editAnnotation($event, child)"></i>
+                <i appIcon="delete" (click)="deleteAnnotation($event, child, true)"></i>
+                @if (isThreadingSupported && $index === annotation.children.length - 1 && filterToken === '') {
+                  <span (click)="replyToAnnotation($event, annotation)">Reply</span>
+                }
+              </div>
             </div>
           </div>
         </div>
@@ -94,14 +106,20 @@ export class AnnotationListComponent implements OnInit, OnDestroy {
 
   public edit$ = new Subject<Annotation>();
   public reply$ = new Subject<Annotation | null>();
+  public selectedId?: string;
 
   private _destroyed$ = new Subject<void>();
   private _annotationList: ExtendedAnnotation[] = [];
   private _timeDisplayRefreshInterval = 300000;
+  private _sortingStrategy?: AnnotationSortingStrategy;
+  private _selectedAfterFiltering?: string;
+  private _filterToken: string = '';
+  private _filterTokenUpdatedAt?: Date;
 
   constructor(
     private store: Store,
-    private annotationService: AnnotationService
+    private annotationService: AnnotationService,
+    private changeDetectorRef: ChangeDetectorRef
   ) {}
 
   @HostBinding('id')
@@ -113,23 +131,78 @@ export class AnnotationListComponent implements OnInit, OnDestroy {
     return this._annotationList;
   }
 
+  set sortingStrategy(sortingStrategy: AnnotationSortingStrategy | undefined) {
+    this._sortingStrategy = sortingStrategy;
+    this.changeDetectorRef.detectChanges();
+  }
+
+  get sortingStrategy() {
+    return this._sortingStrategy;
+  }
+
+  set filterToken(filterToken: string) {
+    if (filterToken == '' && this._selectedAfterFiltering) {
+      this.annotationService.selectAnnotation(this._selectedAfterFiltering);
+      this._selectedAfterFiltering = undefined;
+      this._filterTokenUpdatedAt = undefined;
+    } else {
+      this._filterTokenUpdatedAt = new Date();
+    }
+    this._filterToken = filterToken;
+  }
+
+  get filterToken() {
+    return this._filterToken;
+  }
+
+  get filterTokenSetDate() {
+    return this._filterTokenUpdatedAt;
+  }
+
+  public sort() {
+    this._annotationList.sort(this._sortingStrategy);
+    this.changeDetectorRef.detectChanges();
+  }
+
+  public changeCollapsedState(collapsed: boolean) {
+    if (collapsed) {
+      this.annotationList.forEach((annotation) => (annotation.collapsed = true));
+      this._annotationList = [...this.annotationList];
+    } else {
+      this.annotationList.forEach((annotation) => (annotation.collapsed = false));
+      this._annotationList = [...this.annotationList];
+    }
+  }
+
   ngOnInit(): void {
     this.store
       .select(AnnotationState.annotations)
       .pipe(takeUntil(this._destroyed$))
       .subscribe((annotations) => {
-        this._annotationList = annotations.map((annotation) => ({
-          ...annotation,
-          timeDisplay: this.formatCreatedAt(annotation.createdAt),
-          isSelected: annotation.id === this.store.selectSnapshot(AnnotationState.selectedAnnotation)?.id,
-          edit$: this.getAnnotationEditObservable(annotation),
-          removing: false,
-          children: annotation.children.map((child) => ({
-            ...child,
-            timeDisplay: this.formatCreatedAt(child.createdAt),
-            edit$: this.getAnnotationEditObservable(child),
-          })),
-        }));
+        const selectedId = this.store.selectSnapshot(AnnotationState.selectedAnnotation)?.id;
+
+        this._annotationList = annotations.map((annotation) => {
+          const isSelected = selectedId === annotation.id;
+          if (this.filterToken != '' && selectedId && annotation.children) {
+            const selectedChild = annotation.children.find((child) => child.id === selectedId);
+            if (selectedChild) {
+              this._selectedAfterFiltering = annotation.id;
+            }
+          }
+          return {
+            ...annotation,
+            timeDisplay: this.formatCreatedAt(annotation.createdAt),
+            isSelected: isSelected,
+            edit$: this.getAnnotationEditObservable(annotation),
+            removing: false,
+            collapsed: this.annotationList.find((a) => a.id === annotation.id)?.collapsed ?? false,
+            children: annotation.children.map((child) => ({
+              ...child,
+              timeDisplay: this.formatCreatedAt(child.createdAt),
+              edit$: this.getAnnotationEditObservable(child),
+            })),
+          };
+        });
       });
     this.store
       .select(AnnotationState.selectedAnnotation)
@@ -158,6 +231,10 @@ export class AnnotationListComponent implements OnInit, OnDestroy {
       if (annotation) {
         annotation.removing = true;
       }
+    });
+
+    this.store.select(AnnotationState.selectedAnnotation).subscribe({
+      next: (annotation) => (this.selectedId = annotation?.id),
     });
   }
 
@@ -209,6 +286,11 @@ export class AnnotationListComponent implements OnInit, OnDestroy {
 
   saveAnnotationBody(annotation: Annotation, body: string) {
     this.store.dispatch(new UpdateAnnotation(annotation.id, {body}));
+  }
+
+  toggleAnnotationCollapse(event: MouseEvent, annotation: ExtendedAnnotation) {
+    event.stopPropagation();
+    annotation.collapsed = !annotation.collapsed;
   }
 
   private getAnnotationEditObservable(annotation: Annotation): Observable<void> {

@@ -68,10 +68,10 @@ header {
 
       #settings {
         margin-left: auto;
+        border-left: 1px solid transparent;
 
-        .show {
-          border: 1px solid var(--color-16) !important;
-          border-bottom: 0;
+        &.show {
+          border-color: var(--color-16);
           background-color: var(--color-15);
           color: var(--color-38);
         }
@@ -104,9 +104,22 @@ header {
           padding: 0;
           border-radius: 5px 0px 5px 5px;
           transform: translate(-140px, 0px) !important;
-          border: 1px solid;
-          border-top: 0;
-          border-color: var(--color-16);
+
+          &.show {
+            border: 1px solid var(--color-16);
+            background-color: var(--color-15);
+            color: var(--color-38);
+
+            &:after {
+              content: "";
+              display: block;
+              position: absolute;
+              width: 60px;
+              top: -1px;
+              right: 0px;
+              border: 1px solid var(--color-15);
+            }
+          }
 
           &.dark {
             box-shadow: 0 4px 4px #000;

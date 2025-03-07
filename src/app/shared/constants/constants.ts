@@ -20,6 +20,7 @@ import {
   ConfigWithOptionalStyle,
   LabelLaneStyle,
   LineChartLaneStyle,
+  MomentMarkerStyle,
   OgChartLaneStyle,
   OmakasePlayerConfig,
   PeriodMarkerStyle,
@@ -29,9 +30,9 @@ import {
   ThumbnailLaneStyle,
   TimelineConfig,
   TimelineLaneStyle,
+  Video,
+  VideoLoadOptions,
 } from '@byomakase/omakase-player';
-import {MomentMarkerStyle} from '@byomakase/omakase-player/dist/timeline/marker/moment-marker';
-import {Video, VideoLoadOptions} from '@byomakase/omakase-player/dist/video';
 
 export class Constants {
   static VARIABLES = {

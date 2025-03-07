@@ -1,17 +1,28 @@
-import {AnnotationActions} from '../annotation/annotation.actions';
+import {AnnotationActions} from './annotation.actions';
 import {Injectable} from '@angular/core';
 import {OmpApiService} from '../../../shared/components/omakase-player/omp-api.service';
 import {TimelineService} from '../../timeline/timeline.service';
 import {Subject, Subscription, take} from 'rxjs';
-import {ConfigWithOptionalStyle, Marker, MarkerApi, MarkerLane, MarkerLaneConfig, MarkerLaneStyle, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation} from '@byomakase/omakase-player';
+import {
+  ConfigWithOptionalStyle,
+  Marker,
+  MarkerApi,
+  MarkerLane,
+  MarkerLaneConfig,
+  MarkerLaneStyle,
+  MomentMarker,
+  MomentMarkerConfig,
+  MomentObservation,
+  PeriodMarker,
+  PeriodMarkerConfig,
+  PeriodObservation,
+} from '@byomakase/omakase-player';
 import {Constants} from '../../../shared/constants/constants';
 import {Store} from '@ngxs/store';
 import {LayoutService} from '../../../core/layout/layout.service';
-import {Annotation} from './annotation.state';
+import {Annotation, AnnotationState} from './annotation.state';
 import {isNullOrUndefined} from '../../../util/object-util';
 import {CryptoUtil} from '../../../util/crypto-util';
-import {MomentMarkerConfig} from '@byomakase/omakase-player/dist/timeline/marker/moment-marker';
-import {PeriodMarkerConfig} from '@byomakase/omakase-player/dist/timeline/marker/period-marker';
 import AddAnnotation = AnnotationActions.AddAnnotation;
 import UpdateAnnotation = AnnotationActions.UpdateAnnotation;
 import DeleteAnnotation = AnnotationActions.DeleteAnnotation;
@@ -31,6 +42,7 @@ export class AnnotationService {
   onMarkerUpdate$ = new Subject<MarkerApi>();
   onMarkerRemove$ = new Subject<string>();
   onMarkerSelected$ = new Subject<Marker>();
+  onAnnotationSelected$ = new Subject<void>();
 
   constructor(
     protected ompApiService: OmpApiService,
@@ -61,6 +73,14 @@ export class AnnotationService {
 
   get incompleteMarker(): PeriodMarker | undefined {
     return this._incompleteMarker;
+  }
+
+  set incompleteMarker(marker: PeriodMarker | undefined) {
+    this._incompleteMarker = marker;
+  }
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
   }
 
   initAnnotationMode() {
@@ -248,6 +268,7 @@ export class AnnotationService {
     };
     this.store.dispatch(new AddAnnotation(annotation));
     if (!annotationData.thread) {
+      this.onAnnotationSelected$.next();
       this.store.dispatch(new SelectAnnotation(annotation.id));
       this.scrollAnnotationIntoView(annotation.id);
     }
@@ -273,7 +294,12 @@ export class AnnotationService {
     if (marker) {
       this.onMarkerSelected$.next(marker);
     } else {
-      this.store.dispatch(new SelectAnnotation(annotationId));
+      this.onAnnotationSelected$.next();
+      if (this.store.selectSnapshot(AnnotationState.selectedAnnotation)?.id === annotationId) {
+        this.store.dispatch(new SelectAnnotation(undefined));
+      } else {
+        this.store.dispatch(new SelectAnnotation(annotationId));
+      }
     }
   }
 

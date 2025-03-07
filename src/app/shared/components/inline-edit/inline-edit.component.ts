@@ -72,6 +72,9 @@ export class InlineEditComponent implements OnInit, OnDestroy {
     requestAnimationFrame(() => {
       this.editing = true;
       requestAnimationFrame(() => {
+        console.log('open edit input el', this.inputEl);
+        console.log('open edit editing', this.editing);
+
         this.inputEl.nativeElement.focus();
       });
     });

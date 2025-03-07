@@ -22,6 +22,7 @@ import AddAnnotation = AnnotationActions.AddAnnotation;
 import DeleteAnnotation = AnnotationActions.DeleteAnnotation;
 import UpdateAnnotation = AnnotationActions.UpdateAnnotation;
 import ResetAnnotations = AnnotationActions.ResetAnnotations;
+import {timecodeSortingStrategy} from '../annotation-list/annotation-list.sorting';
 
 export type MarkerType = 'period' | 'moment';
 
@@ -57,17 +58,7 @@ export class AnnotationState {
   static annotations(state: AnnotationStateModel) {
     return state.annotations
       .filter((a) => !a.thread)
-      .sort((a, b) => {
-        if (a.start !== undefined && b.start !== undefined) {
-          return a.start > b.start ? 1 : b.start > a.start ? -1 : 0;
-        } else if (a.start === undefined && b.start === undefined) {
-          return a.createdAt.getTime() - b.createdAt.getTime();
-        } else if (a.start === undefined) {
-          return -1;
-        } else {
-          return 1;
-        }
-      })
+      .sort(timecodeSortingStrategy)
       .map((annotation) => ({
         ...annotation,
         children: state.annotations.filter((a) => a.thread === annotation.id),

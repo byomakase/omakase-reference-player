@@ -35,12 +35,14 @@
 @import "player-controls";
 @import "timeline-controls";
 @import "vu-meter";
+@import "audio-router";
 @import "telemetry";
 @import "chart-legend";
 @import "timeline-config";
 @import "segmentation-list";
 @import "segmentation";
 @import "metadata-nav";
+@import "metadata-content";
 @import "session-navigation";
 @import "status";
 @import "annotations";
@@ -51,6 +53,8 @@
 @import "layout";
 
 @import "themes";
+
+@import "annotation-offcanvas";
 
 @include themify($themes);
 
@@ -89,56 +93,6 @@ main {
         display: none !important;
       }
 
-      .has-header {
-        flex-direction: column;
-      }
-
-      .no-header {
-        overflow-y: auto;
-      }
-
-      #metadata-explorer {
-        display: flex;
-        flex-grow: 1;
-        height: 100%;
-        padding: 20px 30px;
-        border-right: 1px solid var(--color-48);
-        background-color: var(--color-64);
-
-        #metadata-explorer-container {
-          overflow-y: auto;
-
-          .name-header {
-            width: 200px;
-            flex-grow: 1;
-            font-size: 14px;
-            font-weight: 800;
-            line-height: 20px;
-            color: var(--color-43);
-          }
-
-          .description-header {
-            width: 300px;
-            flex-grow: 1;
-            font-size: 14px;
-            font-weight: 700;
-            line-height: 20px;
-            color: var(--color-43);
-
-            @media (max-width: 1600px) {
-              display: none;
-            }
-          }
-
-          #metadata-content {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            overflow-x: auto;
-          }
-        }
-      }
-
       #segmentation {
         display: flex;
         flex-grow: 1;
@@ -172,6 +126,7 @@ main {
   #vu-meter-wrapper,
   #telemetry-wrapper {
     border-bottom: 1px solid var(--color-48);
+    z-index: 1;
 
     @media (max-width: 1300px) {
       // down
@@ -183,6 +138,7 @@ main {
     min-height: 0;
     min-width: 600px;
     height: fit-content;
+    z-index: 1;
 
     @media (min-width: 2300px) {
       // up

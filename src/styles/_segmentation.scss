@@ -23,6 +23,10 @@
     background-position-y: center;
     background-repeat: no-repeat;
 
+    &.disabled {
+      opacity: 0.5;
+    }
+
     .icon {
       svg {
         width: 18px;

@@ -1,6 +1,6 @@
 {
   "name": "omakase-reference-player",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -19,7 +19,8 @@
     "@angular/platform-browser": "^17.2.0",
     "@angular/platform-browser-dynamic": "^17.2.0",
     "@angular/router": "^17.2.0",
-    "@byomakase/omakase-player": "0.14.0",
+    "@byomakase/omakase-player": "0.15.0",
+    "@byomakase/vu-meter": "^1.0.0",
     "@ng-bootstrap/ng-bootstrap": "^16.0.0",
     "@ngxs/store": "^3.8.2",
     "@popperjs/core": "^2.11.8",
@@ -30,7 +31,6 @@
     "serialize-error": "^11.0.3",
     "stats.js": "^0.17.0",
     "tslib": "^2.3.0",
-    "web-audio-peak-meter": "^3.1.0",
     "zod": "^3.23.0-canary.20240315T001949",
     "zone.js": "~0.14.3"
   },

@@ -186,7 +186,7 @@ export interface MediaTracks {
 
 export type InfoTabType = 'json' | 'file_list';
 
-export type InfoTabVisualization = 'json_tree' | 'list';
+export type InfoTabVisualization = 'json_tree' | 'list' | 'formatted_json';
 
 export interface InfoTab {
   name: string;

@@ -443,7 +443,16 @@ export class TimelineService {
         });
         if (lane instanceof TelemetryLineChartLane) {
           lane.telemetryButton!.onMouseEnter$.subscribe({
-            next: () => {
+            next: (event) => {
+              const handleScroll = () => {
+                if (lane.telemetryButton!.konvaNode.getRelativePointerPosition().y < 0 || lane.telemetryButton!.konvaNode.getRelativePointerPosition().y > 19) {
+                  this.store.dispatch(new HideLegend());
+                  document.body.style.cursor = 'default';
+                  window.removeEventListener('scroll', handleScroll);
+                }
+              };
+              window.addEventListener('scroll', handleScroll);
+
               const firstCue = lane.vttFile?.cues[0];
               const rows = firstCue?.extension?.rows;
               if (!rows) {

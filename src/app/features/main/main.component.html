@@ -78,6 +78,7 @@
               [disabled]="!groupingLanes"
               [analysisGroups]="analysisGroups"
               [isSegmentationEnabled]="isSegmentationModeVisible"
+              [isAnnotationEnabled]="isAnnotationModeVisible"
               (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
               (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
               [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
@@ -92,7 +93,7 @@
       }
       @if (isVuMeterSupported) {
         <div id="vu-meter-wrapper" #vuMeterWrapper>
-          <div appVuMeter class="h-100"></div>
+          <div appVuMeter [audioMediaTracks]="audioMediaTracks" class="h-100"></div>
         </div>
       }
       <div id="player-wrapper" class="d-flex" #playerWrapper>

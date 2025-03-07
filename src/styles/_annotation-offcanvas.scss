@@ -19,24 +19,109 @@
   }
 }
 
-#annotation-content {
-  width: 100%;
+.annotation-offcanvas-panel {
+  width: 600px !important;
+}
+
+.annotation-offcanvas {
+  width: 600px;
+  height: 100vh;
+  max-height: 100vh;
   font-size: 13px;
   font-weight: 700;
-  background-color: var(--color-64);
-  border-right: 1px solid var(--color-48);
-  .annotation-wrapper {
-    .annotation-header {
-      padding: 20px;
-      text-align: right;
-      color: var(--color-94);
+  background-color: var(--color-114);
 
-      .fly-out {
+  .annotation-wrapper {
+    .annotation-flyout-header {
+      display: flex;
+      align-items: center;
+      background-color: var(--color-113);
+      height: 50px;
+      min-height: 50px;
+      padding: 15px 20px 15px 30px;
+      justify-content: space-between;
+
+      span {
+        line-height: 18px;
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--color-69);
+      }
+
+      .close-icon {
+        color: var(--color-43);
         cursor: pointer;
       }
     }
+    .annotation-header {
+      padding: 10px 5px 20px 30px;
+
+      color: var(--color-94);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .search-bar {
+        width: 300px;
+        display: flex;
+        align-items: center;
+
+        border-bottom: 1px solid var(--color-94);
+
+        input {
+          flex-grow: 1;
+          padding: 0 1em;
+          line-height: 38px;
+          outline: none;
+          border: none;
+          background: transparent;
+          color: var(--color-43);
+
+          &::placeholder {
+            color: var(--color-43);
+          }
+        }
+
+        input:focus::placeholder {
+          color: transparent;
+        }
+      }
+
+      .icon-container {
+        i {
+          margin-right: 20px;
+          cursor: pointer;
+        }
+        .dropdown-toggle::after {
+          display: none;
+        }
+
+        .dropdown-item {
+          cursor: pointer;
+          color: var(--color-2);
+        }
+
+        .selected {
+          font-weight: bold;
+        }
+
+        .dropdown-menu.show {
+          margin-top: 0.5em !important;
+          background-color: var(--color-62);
+
+          border-style: solid;
+          border-color: var(--color-63);
+          border-radius: 3px;
+          border-width: 1px;
+
+          font-size: 13px;
+          line-height: 29px;
+        }
+      }
+    }
     .annotation-list-wrapper {
-      padding: 0 25px;
+      padding: 0 25px 0 30px;
+      margin-bottom: 1em;
       overflow-y: auto;
 
       .annotation-item {
@@ -203,7 +288,9 @@
     }
 
     .annotation-create-wrapper {
-      padding: 10px 25px 20px 25px;
+      padding: 45px 30px 45px 30px;
+      background-color: var(--color-115);
+      box-sizing: border-box;
 
       .annotation-create-input-wrapper {
         position: relative;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ClickEvent, ConfigWithOptionalStyle, OmakaseAudioTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
+import {ClickEvent, ConfigWithOptionalStyle, OmpAudioTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
 import {AudioMediaTrack} from '../../../../../model/domain.model';
 import {merge, switchMap, takeUntil} from 'rxjs';
 import {BaseGroupingLane, BaseGroupingLaneConfig} from './base-grouping-lane';
@@ -28,7 +28,7 @@ export interface AudioGroupingLaneConfig extends BaseGroupingLaneConfig {
 }
 
 export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig> {
-  private _audioTrack?: OmakaseAudioTrack;
+  private _audioTrack?: OmpAudioTrack;
   private _audioMediaTrack: AudioMediaTrack;
   private _soundControlButton?: SoundControlImageButton;
   private _soundLabelButton?: TextLabel | undefined;
@@ -220,7 +220,7 @@ export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig>
     return this.isActiveByAudioMediaTrack || this.isActiveByChannel;
   }
 
-  get audioTrack(): OmakaseAudioTrack | undefined {
+  get audioTrack(): OmpAudioTrack | undefined {
     return this._audioTrack;
   }
 
@@ -228,7 +228,7 @@ export class AudioGroupingLane extends BaseGroupingLane<AudioGroupingLaneConfig>
     return this._audioMediaTrack;
   }
 
-  set audioTrack(value: OmakaseAudioTrack | undefined) {
+  set audioTrack(value: OmpAudioTrack | undefined) {
     this._audioTrack = value;
     this.updateStyles();
   }

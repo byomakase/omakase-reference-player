@@ -4,6 +4,7 @@ import {
   ConfigWithOptionalStyle,
   LabelLaneStyle,
   LineChartLaneStyle,
+  MomentMarkerStyle,
   OgChartLaneStyle,
   PeriodMarkerStyle,
   ScrubberLaneStyle,
@@ -13,7 +14,6 @@ import {
   TimelineConfig,
   TimelineLaneStyle,
 } from '@byomakase/omakase-player';
-import {MomentMarkerStyle} from '@byomakase/omakase-player/dist/timeline/marker/moment-marker';
 
 export class ThemeStyleConstants {
   static IMAGES_ROOT = '/assets/images/timeline';

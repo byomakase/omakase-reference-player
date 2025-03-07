@@ -15,13 +15,12 @@
  */
 
 import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, OnDestroy, Output} from '@angular/core';
-import {ConfigWithOptionalStyle, MarkerLane, TimelineApi, TimelineConfig} from '@byomakase/omakase-player';
+import {ConfigWithOptionalStyle, TimelineApi, TimelineConfig} from '@byomakase/omakase-player';
 import {Subject, take, takeUntil} from 'rxjs';
 import {CryptoUtil} from '../../../../util/crypto-util';
 import {OmpApiService} from '../omp-api.service';
 import {LayoutService} from '../../../../core/layout/layout.service';
 import {Store} from '@ngxs/store';
-import {SegmentationState} from '../../../../features/main/segmentation/segmentation.state';
 import {SegmentationService} from '../../../../features/main/segmentation-list/segmentation.service';
 import {Constants} from '../../../constants/constants';
 import {TimelineConfiguratorState} from '../../../../features/main/timeline-configurator/timeline-configurator.state';
@@ -83,19 +82,8 @@ export class OmakasePlayerTimelineComponent implements OnDestroy {
     this.layoutService.presentationMode$.pipe(takeUntil(this._onDestroy$)).subscribe({
       next: (presentationMode) => {
         if (this.ompApiService.api?.timeline) {
-          const tracks = this.store.selectSnapshot(SegmentationState.tracks);
-          const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
+          this.segmentationService.saveSegmentationMode();
           const marker = this.segmentationService.selectedMarker;
-          tracks.forEach((track) => {
-            const lane = this.ompApiService.api!.timeline!.getTimelineLane(track.markerLaneId) as MarkerLane;
-            const markers = [...lane.getMarkers()];
-
-            if (activeTrack?.id === track.id && this.layoutService.activeTab === 'segmentation') {
-              this.segmentationService.markerList?.destroy();
-            }
-
-            this.segmentationService.trackMarkersStorage.set(track, markers);
-          });
 
           this._config = {
             ...this.config,

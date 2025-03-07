@@ -63,20 +63,42 @@ import {DownloadService} from '../../../shared/services/download.service';
                     @for (info_tab_file of info_tab.files; track info_tab_file; let file_index = $index) {
                       @if (info_tab_file.filename) {
                         <div class="w-100 h-100 file-list">
-                          <div ngbAccordion>
-                            <div ngbAccordionItem #accordionItem="ngbAccordionItem" class="custom-accordion-item">
-                              <div ngbAccordionHeader class="accordion-button custom-header file-accordion">
-                                <div style="min-width: 70px"><i [appIcon]="getFilenameIcon(info_tab_file.filename)"></i></div>
-                                <div class="name">{{ info_tab_file.filename }}</div>
-                                <div class="description">{{ info_tab_file.description }}</div>
-                                <button type="button" class="btn download-btn" [disabled]="!info_tab_file.url" (click)="downloadService.downloadFile(info_tab_file.url, info_tab_file.filename)">
-                                  <i appIcon="download"></i>
-                                </button>
-                              </div>
-                              <div ngbAccordionCollapse>
-                                <div ngbAccordionBody></div>
-                              </div>
-                            </div>
+                          <div class="file-item">
+                            <div style="min-width: 70px"><i [appIcon]="getFilenameIcon(info_tab_file.filename)"></i></div>
+                            <div class="name">{{ info_tab_file.filename }}</div>
+                            <div class="description">{{ info_tab_file.description }}</div>
+                            <button type="button" class="btn download-btn" [disabled]="!info_tab_file.url" (click)="downloadService.downloadFile(info_tab_file.url, info_tab_file.filename)">
+                              <i appIcon="download"></i>
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    }
+                  } @else if (info_tab.type === 'json' && info_tab.visualization === 'formatted_json') {
+                    @for (info_tab_key of objectKeys(info_tab.data); track info_tab_key; let index = $index) {
+                      @if (isValidFormattedJsonType(info_tab.data[info_tab_key])) {
+                        <div
+                          class="formatted-json"
+                          [class.map]="isObject(info_tab.data[info_tab_key])"
+                          [class.d-none]="!isObject(info_tab.data[info_tab_key]) && filterData(info_tab.data[info_tab_key]) === ''"
+                          [class.first]="index === 0"
+                        >
+                          @if (isObject(info_tab.data[info_tab_key])) {
+                            <div class="header" [innerHTML]="toAllCase(StringUtil.toMixedCase(info_tab_key))"></div>
+                          }
+                          <div class="json-item">
+                            @if (isObject(info_tab.data[info_tab_key])) {
+                              @for (key of objectKeys(info_tab.data[info_tab_key]); track key) {
+                                @if (!isObject(info_tab.data[info_tab_key][key])) {
+                                  <div class="d-flex" [class.d-none]="filterData(info_tab.data[info_tab_key][key]) === ''">
+                                    <div class="key">{{ StringUtil.toMixedCase(key) }}:</div>
+                                    <div class="value indented" [innerHTML]="filterData(info_tab.data[info_tab_key][key])"></div>
+                                  </div>
+                                }
+                              }
+                            } @else {
+                              <div class="value" [innerHTML]="filterData(info_tab.data[info_tab_key])"></div>
+                            }
                           </div>
                         </div>
                       }
@@ -104,6 +126,8 @@ export class MetadataExplorerNavComponent {
   sessionDataFiltered?: Partial<SessionData>;
 
   private _sessionData?: SessionData;
+
+  StringUtil = StringUtil;
 
   constructor(
     private metadataOffcanvasService: MetadataOffcanvasService,
@@ -170,6 +194,55 @@ export class MetadataExplorerNavComponent {
 
   changeTab(infoTab: InfoTab | undefined = undefined) {
     this.metadataExplorerService.infoTabHeaderActive = infoTab?.type === 'file_list' && infoTab?.visualization === 'list';
+  }
+
+  objectKeys(object: Object): string[] {
+    return Object.keys(object);
+  }
+
+  isObject(value: any): boolean {
+    return typeof value === 'object';
+  }
+
+  isValidFormattedJsonType(value: any): boolean {
+    return (
+      value != null &&
+      (typeof value === 'number' || typeof value === 'boolean' || (typeof value === 'string' && value !== '') || (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0))
+    );
+  }
+
+  filterData(value: any): string | boolean | number {
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return value;
+    } else {
+      let spans = Array.from(value.matchAll(/(<span\b[^>]*>[^<]+)(<\/span>)|<span\b[^>]*>[^<]+$/g), (v: string) => v);
+      if (!spans.length) {
+        let invalidFormatingMarkup = Array.from(value.matchAll(/(<[^>]*>)([^<]+)(<\/[^>]*>)|(<[^>]*>)([^<]+)$/g), (v: string) => v);
+        if (invalidFormatingMarkup.length) {
+          let html = '';
+          invalidFormatingMarkup.forEach((match) => {
+            html += match[2] ?? match[5];
+          });
+
+          return html;
+        }
+
+        let text = value.match(/^[^<>]+$/g);
+
+        return text ? text : '';
+      }
+
+      let html = '';
+      spans.forEach((span) => {
+        html += (span[1] ?? span[0]) + '</span>';
+      });
+
+      return html;
+    }
+  }
+
+  toAllCase(value: string): string {
+    return value.toUpperCase();
   }
 
   get sessionData(): SessionData | undefined {

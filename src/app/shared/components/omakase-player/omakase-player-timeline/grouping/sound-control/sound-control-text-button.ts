@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {Dimension, TextLabel, TimelineNode} from '@byomakase/omakase-player';
+import {Dimension, TextLabel, TextLabelStyle, TimelineNode} from '@byomakase/omakase-player';
 import {SoundControl, SoundControlState} from './sound-control';
 import {CanvasUtil} from '../../../../../../util/canvas-util';
-import {TextLabelStyle} from '@byomakase/omakase-player/dist/timeline/timeline-component';
 import {Constants} from '../../../../../constants/constants';
 import {LayoutService} from '../../../../../../core/layout/layout.service';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AudioTrackLane, AudioTrackLaneConfig, ClickEvent, ConfigWithOptionalStyle, OmakaseAudioTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
+import {AudioTrackLane, AudioTrackLaneConfig, ClickEvent, ConfigWithOptionalStyle, OmpAudioTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
 import {AudioMediaTrack, Channel, VisualReference} from '../../../../../model/domain.model';
 import {StringUtil} from '../../../../../util/string-util';
 import {merge, switchMap, takeUntil} from 'rxjs';
@@ -30,8 +30,8 @@ export interface AudioChannelLaneConfig extends AudioTrackLaneConfig {
 }
 
 export class AudioChannelLane extends AudioTrackLane {
-  private _audioTrack?: OmakaseAudioTrack;
-  private _channelAudioTrack?: OmakaseAudioTrack;
+  private _audioTrack?: OmpAudioTrack;
+  private _channelAudioTrack?: OmpAudioTrack;
 
   private _audioMediaTrack: AudioMediaTrack;
   private _channel: Channel;
@@ -144,7 +144,7 @@ export class AudioChannelLane extends AudioTrackLane {
     return !!currentAudioTrack && !!this._channelAudioTrack && this._channelAudioTrack.id === currentAudioTrack.id;
   }
 
-  get channelAudioTrack(): OmakaseAudioTrack | undefined {
+  get channelAudioTrack(): OmpAudioTrack | undefined {
     return this._channelAudioTrack;
   }
 
@@ -156,7 +156,7 @@ export class AudioChannelLane extends AudioTrackLane {
     return this._channel;
   }
 
-  get audioTrack(): OmakaseAudioTrack | undefined {
+  get audioTrack(): OmpAudioTrack | undefined {
     return this._audioTrack;
   }
 
@@ -164,12 +164,12 @@ export class AudioChannelLane extends AudioTrackLane {
     return this._channel.program_name;
   }
 
-  set audioTrack(value: OmakaseAudioTrack | undefined) {
+  set audioTrack(value: OmpAudioTrack | undefined) {
     this._audioTrack = value;
     this.updateStyles();
   }
 
-  set channelAudioTrack(value: OmakaseAudioTrack | undefined) {
+  set channelAudioTrack(value: OmpAudioTrack | undefined) {
     this._channelAudioTrack = value;
     this.updateStyles();
   }

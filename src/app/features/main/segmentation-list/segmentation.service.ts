@@ -17,22 +17,23 @@
 import {Injectable} from '@angular/core';
 import {Subject, Subscription, take, takeUntil} from 'rxjs';
 import {TimelineService} from '../../timeline/timeline.service';
-import {Marker, MarkerLane, MarkerLaneConfig, MarkerLaneStyle, MarkerListApi, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation} from '@byomakase/omakase-player';
+import {Marker, MarkerApi, MarkerLane, MarkerLaneConfig, MarkerLaneStyle, MarkerListApi, MomentMarker, MomentObservation, PeriodMarker, PeriodObservation} from '@byomakase/omakase-player';
 import {Store} from '@ngxs/store';
 import {SegmentationState, SegmentationTrack} from '../segmentation/segmentation.state';
 import {SegmentationActions} from '../segmentation/segmentation.actions';
 import {CryptoUtil} from '../../../util/crypto-util';
-import {MarkerApi} from '@byomakase/omakase-player/dist/api/marker-api';
 import {OmpApiService} from '../../../shared/components/omakase-player/omp-api.service';
+import {LayoutService} from '../../../core/layout/layout.service';
+import {Constants} from '../../../shared/constants/constants';
+import {AnnotationService} from '../annotation/annotation.service';
+import {AnnotationState} from '../annotation/annotation.state';
+import {AnnotationActions} from '../annotation/annotation.actions';
 import AddTrack = SegmentationActions.AddTrack;
 import DeleteTrack = SegmentationActions.DeleteTrack;
 import SetActiveTrack = SegmentationActions.SetActiveTrack;
 import UpdateTrack = SegmentationActions.UpdateTrack;
 import SetTracks = SegmentationActions.SetTracks;
-import {LayoutService} from '../../../core/layout/layout.service';
-import {Constants} from '../../../shared/constants/constants';
-import {AnnotationService} from '../annotation/annotation.service';
-import {AnnotationState} from '../annotation/annotation.state';
+import SelectAnnotation = AnnotationActions.SelectAnnotation;
 
 interface MarkerRecolorData {
   marker: MarkerApi;
@@ -82,11 +83,20 @@ export class SegmentationService {
         this.onAnnotationSelected$.next(true);
         this.selectedMarker = marker;
         this.layoutService.activeTab = 'annotation';
+        this.annotationService.annotationLane!.toggleMarker(marker.id);
       }
-      this.annotationService.annotationLane!.toggleMarker(marker.id);
     });
     this.annotationService.onMarkerRemove$.subscribe((markerId) => {
       if (this.selectedMarker?.id === markerId) {
+        this.selectedMarker = undefined;
+      }
+    });
+    this.annotationService.onAnnotationSelected$.subscribe(() => {
+      if (this.annotationService.annotationLane?.getSelectedMarker()) {
+        this.annotationService.annotationLane!.toggleMarker(this.annotationService.annotationLane!.getSelectedMarker()!.id);
+        this.selectedMarker = undefined;
+      } else if (this.selectedMarker) {
+        this.markerLane!.toggleMarker(this.selectedMarker.id);
         this.selectedMarker = undefined;
       }
     });
@@ -119,7 +129,22 @@ export class SegmentationService {
     delete this._incompleteMarker;
   }
 
-  connectSegmentationMode(activeTrack: SegmentationTrack, destroyed$: Subject<void>) {
+  saveSegmentationMode() {
+    const tracks = this.store.selectSnapshot(SegmentationState.tracks);
+    const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
+    tracks.forEach((track) => {
+      const lane = this.ompApiService.api!.timeline!.getTimelineLane(track.markerLaneId) as MarkerLane;
+      const markers = [...lane.getMarkers()];
+
+      if (activeTrack?.id === track.id && this.layoutService.activeTab === 'segmentation') {
+        this.markerList?.destroy();
+      }
+
+      this.trackMarkersStorage.set(track, markers);
+    });
+  }
+
+  connectSegmentationMode(activeTrack: SegmentationTrack | undefined, destroyed$: Subject<void>) {
     let index = this.annotationService.annotationLane ? 2 : 1;
     this.trackMarkersStorage.forEach((markers, track) => {
       let style: Partial<MarkerLaneStyle> = {
@@ -170,10 +195,12 @@ export class SegmentationService {
       index++;
     });
 
-    this.markerLane = this.timelineService.getTimelineLaneById(activeTrack.markerLaneId) as MarkerLane;
+    if (activeTrack) {
+      this.markerLane = this.timelineService.getTimelineLaneById(activeTrack.markerLaneId) as MarkerLane;
 
-    if (this.layoutService.activeTab === 'segmentation') {
-      this.createMarkerList(activeTrack, destroyed$);
+      if (this.layoutService.activeTab === 'segmentation') {
+        this.createMarkerList(activeTrack, destroyed$);
+      }
     }
 
     this.trackMarkersStorage.clear();
@@ -206,9 +233,6 @@ export class SegmentationService {
   }
 
   createSegmentationTrack(name?: string) {
-    if (this._incompleteMarker) {
-      return;
-    }
     if (!this._isInitialized) {
       this._isInitialized = true;
     }
@@ -265,9 +289,6 @@ export class SegmentationService {
   }
 
   setActiveTrack(track: SegmentationTrack | undefined) {
-    if (this._incompleteMarker) {
-      return;
-    }
     this.store.dispatch(new SetActiveTrack(track));
   }
 
@@ -394,21 +415,20 @@ export class SegmentationService {
 
   splitMarker(selectedMarker: PeriodMarker) {
     const selectedMarkerTimeObservation = selectedMarker.timeObservation;
-    const selectedMarkerDuration = selectedMarkerTimeObservation.end! - selectedMarkerTimeObservation.start!;
-    const selectedMarkerNewEnd = selectedMarker.timeObservation.start! + selectedMarkerDuration / 2;
+    const CTITime = this.ompApiService.api!.video.getCurrentTime();
+
+    const selectedMarkerNewEnd = CTITime - 1 / this.ompApiService.api!.video.getFrameRate();
 
     const selectedMarkerNewTimeObservation = {
       ...selectedMarker.timeObservation,
       end: selectedMarkerNewEnd,
     };
 
-    const newMarkerStart = selectedMarkerNewEnd + 1 / this.ompApiService.api!.video.getFrameRate();
-
     this.updatePeriodMarker(selectedMarker.id, selectedMarkerNewTimeObservation, true);
 
     let newPeriodMarker = this.addPeriodMarker(
       {
-        start: newMarkerStart,
+        start: CTITime,
         end: selectedMarkerTimeObservation.end,
       },
       true
@@ -432,9 +452,14 @@ export class SegmentationService {
     const activeMarker = this.markerList?.getSelectedMarker();
     if (activeMarker) {
       this.markerList!.toggleMarker(activeMarker.id);
-
       if (this.layoutService.activeTab !== 'segmentation') {
-        this.markerLane!.toggleMarker(activeMarker.id);
+        if (this._incompleteMarker?.id === activeMarker.id) {
+          this._incompleteMarker.destroy();
+          this.markerLane!.removeMarker(this._incompleteMarker.id);
+          delete this._incompleteMarker;
+        } else {
+          this.markerLane!.toggleMarker(activeMarker.id);
+        }
       }
     }
   }
@@ -464,6 +489,9 @@ export class SegmentationService {
         if (marker) {
           this.selectedMarker = marker;
           this.markerLane = markerLane;
+          if (this.store.selectSnapshot(AnnotationState.selectedAnnotation)) {
+            this.store.dispatch(new SelectAnnotation(undefined));
+          }
         } else {
           this.selectedMarker = undefined;
         }
@@ -548,10 +576,9 @@ export class SegmentationService {
   private addMarkerClickHandler(marker: Marker, segmentationTrack: SegmentationTrack) {
     marker.onClick$.subscribe(() => {
       const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
-      if (this.layoutService.activeTab !== 'segmentation' && activeTrack && this.selectedMarker && this.selectedMarker.id !== marker.id && this.markerLane !== this.annotationService.annotationLane) {
-        this.markerLane!.toggleMarker(this.selectedMarker.id);
+      if (this.layoutService.activeTab !== 'segmentation' && this.selectedMarker?.id !== marker.id) {
+        this.layoutService.activeTab = 'segmentation';
       }
-      this.unselectAnnotationMarker();
       if (this.markerLane && this.markerLane === this.annotationService.annotationLane) {
         this.markerLane = this.timelineService.getTimelineLaneById(segmentationTrack.markerLaneId) as MarkerLane;
       }
@@ -559,17 +586,30 @@ export class SegmentationService {
         this.markerLane = this.timelineService.getTimelineLaneById(segmentationTrack.markerLaneId) as MarkerLane;
         const tracks = this.store.selectSnapshot(SegmentationState.tracks);
         this.store.dispatch(new SetActiveTrack(tracks.find((t) => t.id === segmentationTrack.id)));
-        // timeout is needed to propagate the SetActiveTrack event
-        setTimeout(() => {
-          this.selectMarker(marker);
-        });
-      } else {
-        this.selectMarker(marker);
       }
+      requestAnimationFrame(() => {
+        this.selectMarker(marker);
+      });
     });
   }
 
   set markerLane(value: MarkerLane | undefined) {
+    if (this.isAnnotationMarkerSelected()) {
+      this.annotationService.annotationLane!.toggleMarker(this.selectedMarker!.id);
+      delete this._selectedMarker;
+    } else if (this.selectedMarker && !(this.selectedMarker.id === this.markerLane?.getSelectedMarker()?.id)) {
+      this._markerLane?.toggleMarker(this.selectedMarker.id);
+      delete this._selectedMarker;
+    }
+    if (this._incompleteMarker) {
+      this._incompleteMarker.destroy();
+      this._markerLane?.removeMarker(this._incompleteMarker.id);
+      delete this._incompleteMarker;
+    } else if (this.annotationService.incompleteMarker) {
+      this.annotationService.incompleteMarker.destroy();
+      this.annotationService.deleteMarker(this.annotationService.incompleteMarker.id);
+      this.annotationService.incompleteMarker = undefined;
+    }
     this._markerLane = value;
   }
 

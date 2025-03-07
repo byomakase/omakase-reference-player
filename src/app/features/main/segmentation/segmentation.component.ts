@@ -21,14 +21,13 @@ import {Store} from '@ngxs/store';
 import {SegmentationState, SegmentationTrack} from './segmentation.state';
 import {Observable, Subject, takeUntil} from 'rxjs';
 import {OmpApiService} from '../../../shared/components/omakase-player/omp-api.service';
-import {Marker, MarkerLane} from '@byomakase/omakase-player';
 import {SegmentationService} from '../segmentation-list/segmentation.service';
 import {TimelineService} from '../../timeline/timeline.service';
 import {ModalService} from '../../../shared/components/modal/modal.service';
 import {ConfirmationModalComponent} from '../../../shared/components/modal/confirmation-modal.component';
 import {SegmentationAction} from '../../../model/domain.model';
 import {DownloadService} from '../../../shared/services/download.service';
-import {MarkerListItem} from '@byomakase/omakase-player/dist/marker-list/marker-list-item';
+import {MarkerListItem} from '@byomakase/omakase-player';
 import {ToastService} from '../../../shared/components/toast/toast.service';
 import {IconModule} from '../../../shared/components/icon/icon.module';
 
@@ -42,12 +41,12 @@ interface MarkerExportItem {
   selector: 'div[appSegmentation]',
   standalone: true,
   imports: [CoreModule, SharedModule, IconModule],
-  template: `<div class="segmentation-wrapper">
+  template: ` <div class="segmentation-wrapper">
     @if (!(activeTrack$ | async)) {
       <div>No segmentation tracks defined</div>
     }
     <div id="segmentation-marker-list" class="h-100"></div>
-    <div #segmentationToggle class="segmentation-menu-trigger" (click)="toggleSegmentationMenu()">
+    <div #segmentationToggle class="segmentation-menu-trigger" [class.disabled]="!(activeTrack$ | async)" (click)="toggleSegmentationMenu()">
       <i appIcon="menu"></i>
     </div>
     <div #segmentationMenu class="segmentation-menu" [ngClass]="{'d-none': !openSegmentationMenu}">
@@ -229,6 +228,9 @@ export class SegmentationComponent implements OnInit, OnDestroy {
   }
 
   toggleSegmentationMenu() {
+    if (!this.store.selectSnapshot(SegmentationState.activeTrack)) {
+      return;
+    }
     this.openSegmentationMenu = !this.openSegmentationMenu;
   }
 

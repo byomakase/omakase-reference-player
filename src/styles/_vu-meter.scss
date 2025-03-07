@@ -67,12 +67,12 @@
       }
 
       .channel-labels {
+        margin-right: 5px;
         > div {
           font-family: $font-family-nunito;
           text-align: center;
           width: 24px;
           //background-color: darkorange;
-          margin-right: 7px;
           font-size: 12px;
           color: #70849a;
         }

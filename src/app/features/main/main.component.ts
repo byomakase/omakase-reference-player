@@ -16,7 +16,7 @@
 
 import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 import {OmakasePlayerVideoComponent} from '../../shared/components/omakase-player/omakase-player-video/omakase-player-video.component';
-import {ImageButton, ImageButtonConfig, OmakaseAudioTrack, SubtitlesVttTrack, ThumbnailLane, TimelineApi, TimelineLaneApi, Video} from '@byomakase/omakase-player';
+import {ImageButton, ImageButtonConfig, OmpAudioTrack, SubtitlesVttTrack, ThumbnailLane, TimelineApi, TimelineLaneApi, Video} from '@byomakase/omakase-player';
 import {BehaviorSubject, combineLatest, filter, forkJoin, fromEvent, map, Observable, of, Subject, take, takeUntil} from 'rxjs';
 import {CoreModule} from '../../core/core.module';
 import {SharedModule} from '../../shared/shared.module';
@@ -65,11 +65,6 @@ import {LayoutService, LayoutTab} from '../../core/layout/layout.service';
 import {SegmentationListComponent} from './segmentation-list/segmentation-list.component';
 import {SegmentationComponent} from './segmentation/segmentation.component';
 import {SegmentationService} from './segmentation-list/segmentation.service';
-import ShowExceptionModal = AppActions.ShowExceptionModal;
-import SelectConfigLane = TimelineConfiguratorActions.SelectLane;
-import SetLaneOptions = TimelineConfiguratorActions.SetLaneOptions;
-import Minimize = TimelineConfiguratorActions.Minimize;
-import SelectLane = TimelineConfiguratorActions.SelectLane;
 import {SessionNavigationComponent} from './session-navigation/session-navigation.component';
 import {StatusComponent} from './status/status.component';
 import {TelemetryLineChartLane} from '../../shared/components/omakase-player/omakase-player-timeline/grouping/telemetry-line-chart-lane';
@@ -85,6 +80,11 @@ import {Constants} from '../../shared/constants/constants';
 import {AnnotationService} from './annotation/annotation.service';
 import {AnnotationComponent} from './annotation/annotation.component';
 import {AnnotationState} from './annotation/annotation.state';
+import ShowExceptionModal = AppActions.ShowExceptionModal;
+import SelectConfigLane = TimelineConfiguratorActions.SelectLane;
+import SetLaneOptions = TimelineConfiguratorActions.SetLaneOptions;
+import Minimize = TimelineConfiguratorActions.Minimize;
+import SelectLane = TimelineConfiguratorActions.SelectLane;
 
 type GroupingLane = VideoGroupingLane | AudioGroupingLane | TextTrackGroupingLane;
 
@@ -136,8 +136,10 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   private _sessionData?: SessionData;
   private _masterManifests?: MasterManifest[]; // only supported manifests
   private _currentMasterManifest?: MasterManifest;
-  private _currentAudioTrack?: OmakaseAudioTrack;
+  private _currentAudioTrack?: OmpAudioTrack;
   private _currentAudioLane?: AudioGroupingLane | AudioChannelLane;
+  private _currentSubtitleTrackLabel?: string;
+
   private _collapsedGroups: string[] = [];
 
   private _disableSessionButtons$ = new BehaviorSubject<boolean>(true);
@@ -153,8 +155,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   private _audioMediaTracks?: AudioMediaTrack[];
   private _textMediaTracks?: TextMediaTrack[];
 
-  private _audioTracks?: OmakaseAudioTrack[];
-  private _audioTracksByName?: Map<string, OmakaseAudioTrack>;
+  private _audioTracks?: OmpAudioTrack[];
+  private _audioTracksByName?: Map<string, OmpAudioTrack>;
 
   private _subtitlesVttTracks?: SubtitlesVttTrack[];
   private _subtitlesVttTracksByName?: Map<string, SubtitlesVttTrack>;
@@ -334,10 +336,11 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
       this.timelineReloaded$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
         next: () => {
-          this.connectAnnotations();
-
-          const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
-          if (activeTrack) {
+          if (this.isAnnotationModeVisible) {
+            this.connectAnnotations();
+          }
+          if (this.isSegmentationModeVisible) {
+            const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
             this.segmentationService.connectSegmentationMode(activeTrack, this._destroyed$);
           }
 
@@ -354,7 +357,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                 if (this.timelineService.isAnalyticsLane(childLane)) {
                   const analyticsLane = lane.childLanes.find((lane) => (lane as TelemetryLane).description === (childLane as TelemetryLane).description) as TelemetryLane;
 
-                  analyticsLane?.isHidden !== (childLane as TelemetryLane).isHidden ? analyticsLane.toggleHidden() : void 0;
+                  if (analyticsLane && analyticsLane.isHidden !== (childLane as TelemetryLane).isHidden) {
+                    analyticsLane.toggleHidden();
+                  }
                 }
               });
             }
@@ -703,6 +708,11 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                 .pipe(takeUntil(this._manifestLoadBreaker$))
                 .subscribe({
                   next: () => {
+                    const subtitleTrack = this.ompApiService.api!.subtitles.getTracks().find((track) => track.label === this._currentSubtitleTrackLabel);
+
+                    if (subtitleTrack) {
+                      this.ompApiService.api!.subtitles.showTrack(subtitleTrack.id);
+                    }
                     const textTrackGroupingLanes = this.timelineService.getTextGroupingLanes();
                     if (!textTrackGroupingLanes) {
                       return;
@@ -746,6 +756,13 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                 timelineLanes = this.orderMediaTracks(timelineLanes, this._sessionData!.presentation.timeline_configuration.track_ordering);
               }
               this.ompApiService.api!.timeline!.addTimelineLanes(timelineLanes);
+
+              this._groupingLanes?.forEach((lane) => {
+                if (lane.groupVisibility === 'minimized') {
+                  lane.groupMinimize();
+                }
+              });
+
               if (this._sessionData!.presentation?.timeline_configuration?.visible_tracks?.length) {
                 this.hideMediaTracks(timelineLanes, this._sessionData!.presentation.timeline_configuration.visible_tracks);
               } else if (this._sessionData!.presentation?.timeline_configuration?.track_ordering?.length) {
@@ -808,9 +825,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             next: (event) => {
               // populate audio tracks from hls stream
               this._audioTracks = this.ompApiService.api!.video.getAudioTracks();
-              this._audioTracksByName = new Map<string, OmakaseAudioTrack>();
+              this._audioTracksByName = new Map<string, OmpAudioTrack>();
               this._audioTracks.forEach((audioTrack) => {
-                this._audioTracksByName!.set(audioTrack.label, audioTrack);
+                this._audioTracksByName!.set(audioTrack.label!, audioTrack);
               });
               completeSub(appAudioLoaded$);
             },
@@ -883,6 +900,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         next: () => {
           if (this._currentAudioLane) {
             this._currentAudioLane.setAsActiveAudioTrack(false);
+          }
+          if (this._currentAudioTrack) {
+            this.ompApiService.api!.audio.setActiveAudioTrack(this._currentAudioTrack.id);
           }
           if (this._videoPreviousTime !== void 0) {
             this.ompApiService
@@ -1233,11 +1253,14 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       this._videoPreviousTime = this.ompApiService.api!.video.getCurrentTime();
       this._videoPreviousIsPlaying = videoPreviousIsPlaying;
       this._currentAudioTrack = this.ompApiService.api!.audio.getActiveAudioTrack();
+      this._currentSubtitleTrackLabel = this.ompApiService.api!.subtitles.getActiveTrack()?.label;
       this._collapsedGroups = this.ompApiService
         .api!.timeline!.getTimelineLanes()
         .filter((lane) => (lane as BaseGroupingLane<any>).groupVisibility === 'minimized')
         .map((lane) => (lane as BaseGroupingLane<any>).description);
     };
+
+    this.segmentationService.saveSegmentationMode();
 
     (this.ompApiService.api!.video.isPlaying() ? this.ompApiService.api!.video.pause().pipe(map((p) => true)) : of(true)).subscribe({
       next: () => {
@@ -1248,7 +1271,13 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.timelineReloaded$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
           next: () => {
-            this.connectAnnotations();
+            if (this.isAnnotationModeVisible) {
+              this.connectAnnotations();
+            }
+            if (this.isSegmentationModeVisible) {
+              const activeTrack = this.store.selectSnapshot(SegmentationState.activeTrack);
+              this.segmentationService.connectSegmentationMode(activeTrack, this._destroyed$);
+            }
           },
         });
       },
@@ -1379,6 +1408,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     this.store.dispatch(new Minimize());
     this.segmentationService.resetSegmentationMode();
     this.annotationService.resetAnnotationMode();
+    delete this._videoPreviousTime;
     this.cleanTimeline();
     this.cleanAnalysisGroups();
   }
@@ -1649,5 +1679,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.isAnnotationModeVisible) tabCount++;
     if (this.isSegmentationModeVisible) tabCount++;
     return tabCount > 1;
+  }
+
+  get audioMediaTracks(): AudioMediaTrack[] | undefined {
+    return this._audioMediaTracks;
   }
 }

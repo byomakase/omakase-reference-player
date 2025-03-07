@@ -132,7 +132,26 @@
 .omakase-timeline-overlay {
   .omakase-timeline-timecode {
     font-size: 20px;
-    pointer-events: none;
+    max-width: 150px;
+
+    .omakase-timecode-edit {
+      input {
+        font-size: 20px;
+        padding: 0 5px;
+        width: 125px;
+        border-radius: 5px;
+        border: 1px solid #00a3e9;
+        background-color: rgba(#00a3e9, 0.3);
+        &:disabled {
+          background-color: rgba(#00a3e9, 0.15);
+        }
+
+        &.omakase-timecode-edit-input-invalid {
+          border: 1px solid #ff0000;
+          background-color: rgba(#ff0000, 0.3);
+        }
+      }
+    }
   }
 }
 

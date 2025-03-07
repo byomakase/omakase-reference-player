@@ -86,11 +86,17 @@ import {IconUser} from './svg/icon-user';
 import {IconEdit} from './svg/icon-edit';
 import {IconDelete} from './svg/icon-delete';
 import {IconSend} from './svg/icon-send';
+import {IconChevronUp} from './svg/icon-chevron-up';
+import {IconSort} from './svg/icon-sort';
+import {IconCircleChevronUp} from './svg/icon-circle-chevron-up';
+import {IconCircleChevronDown} from './svg/icon-circle-chevron-down';
+import {IconSearch} from './svg/icon-search';
 
 export type IconName =
   | 'arrow-down'
   | 'arrow-up'
   | 'chevron-down'
+  | 'chevron-up'
   | 'double-chevron-down'
   | 'double-chevron-up'
   | 'double-chevron-left'
@@ -158,7 +164,11 @@ export type IconName =
   | 'mode-audio'
   | 'mode-annotation'
   | 'mode-segmentation'
-  | 'menu';
+  | 'menu'
+  | 'sort'
+  | 'circle-chevron-up'
+  | 'circle-chevron-down'
+  | 'search';
 
 @Injectable({
   providedIn: 'root',
@@ -168,6 +178,7 @@ export class IconService {
     'arrow-down': IconArrowDown,
     'arrow-up': IconArrowUp,
     'chevron-down': IconChevronDown,
+    'chevron-up': IconChevronUp,
     'double-chevron-down': IconDoubleChevronDown,
     'double-chevron-up': IconDoubleChevronUp,
     'double-chevron-left': IconDoubleChevronLeft,
@@ -244,6 +255,10 @@ export class IconService {
     'mode-segmentation': IconModeSegmentation,
 
     'menu': IconMenu,
+    'sort': IconSort,
+    'circle-chevron-up': IconCircleChevronUp,
+    'circle-chevron-down': IconCircleChevronDown,
+    'search': IconSearch,
   };
 
   constructor() {}

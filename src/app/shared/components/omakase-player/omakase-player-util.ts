@@ -109,6 +109,11 @@ export class OmakasePlayerUtil {
         description: 'Set playhead to End of Media and Stop',
         name: keyCombination(ctrlKey, '1') + ' / End',
       },
+
+      {
+        description: 'Toggle CTI into/out-of Interactive Mode',
+        name: keyCombination("'"),
+      },
     ];
 
     let timelineHelpMenuItems: HelpMenuItem[] = [
@@ -361,7 +366,7 @@ export class OmakasePlayerUtil {
           if (omakasePlayer.video.isPlaying()) {
             omakasePlayer.video.pause().subscribe(() => omakasePlayer.video.seekToEnd());
           } else {
-            omakasePlayer.video.seekToEnd()
+            omakasePlayer.video.seekToEnd();
           }
           return true;
         }

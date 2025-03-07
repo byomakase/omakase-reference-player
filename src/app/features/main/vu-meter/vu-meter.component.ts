@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, ElementRef, HostBinding, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostBinding, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
 import {animate, AnimationEvent, state, style, transition, trigger} from '@angular/animations';
@@ -22,28 +22,27 @@ import {Select, Store} from '@ngxs/store';
 import {filter, map, Observable, Subject, take, takeUntil} from 'rxjs';
 import {VuMeterState, VuMeterStateModel} from './vu-meter.state';
 import {VuMeterActions} from './vu-meter.actions';
-import {WebAudioPeakMeter} from 'web-audio-peak-meter';
 import {OmpApiService} from '../../../shared/components/omakase-player/omp-api.service';
-import {AudioMeterStandard} from '@byomakase/omakase-player/dist/video/model';
-import Minimize = VuMeterActions.Minimize;
-import Maximize = VuMeterActions.Maximize;
 import {LayoutService} from '../../../core/layout/layout.service';
-import {PeakMeterConfig} from 'web-audio-peak-meter/lib/config';
 import {completeSub} from '../../../util/rx-util';
 import {IconModule} from '../../../shared/components/icon/icon.module';
+import {RouterVisualizationApi} from '@byomakase/omakase-player/dist/api/router-visualization-api';
+import {AudioMediaTrack} from '../../../model/domain.model';
+import {PeakMeterConfig, VuMeter, VuMeterApi} from '@byomakase/vu-meter';
+import Minimize = VuMeterActions.Minimize;
+import Maximize = VuMeterActions.Maximize;
 
 const animateDurationMs = 300;
 const animateTimings = `${animateDurationMs}ms ease-in-out`;
 
 const vuMeterSingleBarWidth = 25;
 const viMeterScaleWidth = 30;
+let audioRouterWidth = 400;
 
-const peakMeterConfigDark: PeakMeterConfig = {
-  maskTransition: '0.1s',
-  audioMeterStandard: 'peak-sample' as AudioMeterStandard,
-  peakHoldDuration: 0,
-
+const peakMeterConfigDark: Partial<PeakMeterConfig> = {
   vertical: true,
+  maskTransition: '0.1s',
+  peakHoldDuration: 0,
   dbTickSize: 10,
   borderSize: 7,
   fontSize: 12,
@@ -56,7 +55,7 @@ const peakMeterConfigDark: PeakMeterConfig = {
   gradient: ['#F3C6B3 0%', '#E2BDB2 33%', '#D5B5B2 50%', '#C2AAB1 59%', '#A499B1 78%', '#8D8BB0 93%', '#747DAF 100%'],
 };
 
-const peakMeterConfigLight: PeakMeterConfig = {
+const peakMeterConfigLight: Partial<PeakMeterConfig> = {
   ...peakMeterConfigDark,
   backgroundColor: '#F4F5F5',
   tickColor: '#5D6B7E',
@@ -91,11 +90,19 @@ const peakMeterConfigLight: PeakMeterConfig = {
       </div>
 
       <div class="vu-meter-eq flex-grow-1">
-        <div class="d-flex flex-column justify-content-end h-100">
-          <div class="web-audio-peak-meter flex-grow-1" #webAudioPeakMeter></div>
-          <div class="channel-labels d-flex justify-content-end">
-            <div>L</div>
-            <div>R</div>
+        <div class="d-flex flex-row h-100">
+          <div #audioRouter id="omakase-audio-router" [hidden]="(animationState | async) === 'minimized'"></div>
+          <div class="d-flex flex-column flex-grow-1 justify-content-end h-100">
+            <div class="web-audio-peak-meter flex-grow-1" #vuMeter></div>
+            <div class="channel-labels d-flex justify-content-between">
+              <div></div>
+              <div>L</div>
+              <div>R</div>
+              <div>C</div>
+              <div>LFE</div>
+              <div>Ls</div>
+              <div>Rs</div>
+            </div>
           </div>
         </div>
       </div>
@@ -121,15 +128,20 @@ const peakMeterConfigLight: PeakMeterConfig = {
     ]),
   ],
 })
-export class VuMeterComponent implements OnInit, AfterViewInit {
-  @ViewChild('webAudioPeakMeter') webAudioPeakMeterElementRef!: ElementRef;
+export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('vuMeter') vuMeterElementRef!: ElementRef;
+  @ViewChild('audioRouter') audioRouterElementRef!: ElementRef;
 
   @Select(VuMeterState) state$!: Observable<VuMeterStateModel>;
 
-  private _webAudioPeakMeter?: WebAudioPeakMeter;
-  private _audioSourceNode?: MediaElementAudioSourceNode;
+  @Input() audioMediaTracks?: AudioMediaTrack[];
 
-  private _minimizedWidth: number = vuMeterSingleBarWidth * 2;
+  private _audioRouter?: RouterVisualizationApi;
+  private _vuMeter?: VuMeterApi;
+
+  private _activeTrack?: AudioMediaTrack;
+
+  private _minimizedWidth: number = vuMeterSingleBarWidth * 6;
   private _maximizedWidth: number = this._minimizedWidth;
 
   private _destroyed$ = new Subject<void>();
@@ -154,7 +166,18 @@ export class VuMeterComponent implements OnInit, AfterViewInit {
             this.layoutService.presentationMode$.pipe(takeUntil(this._destroyed$)).subscribe({
               next: (presentationMode) => {
                 let peakMeterConfig = presentationMode === 'dark' ? peakMeterConfigDark : peakMeterConfigLight;
-                this.tryCreateWebAudioPeakMeter(peakMeterConfig);
+                this.initializeAudioRouter();
+                this.tryCreateVuMeter(peakMeterConfig);
+                this.ompApiService.api!.audio.onAudioSwitched$.pipe(takeUntil(this._destroyed$)).subscribe((event) => {
+                  const audioMediaTrack = this.audioMediaTracks?.find((track) => event.activeAudioTrack.label?.startsWith(track.program_name));
+                  if (audioMediaTrack && audioMediaTrack.channels && this._activeTrack !== audioMediaTrack) {
+                    this._activeTrack = audioMediaTrack;
+                    this._audioRouter!.updateMainTrack({
+                      inputNumber: audioMediaTrack.channels.length,
+                      inputLabels: audioMediaTrack.channels.map((channel) => channel.channel_order ?? ''),
+                    });
+                  }
+                });
               },
             });
           });
@@ -171,62 +194,32 @@ export class VuMeterComponent implements OnInit, AfterViewInit {
     return 'vu-meter';
   }
 
-  private tryCreateWebAudioPeakMeter(peakMeterConfig: PeakMeterConfig) {
-    let channelCount = 2;
+  private tryCreateVuMeter(peakMeterConfig: Partial<PeakMeterConfig>) {
+    let channelCount = 6;
 
     this.minimizedWidth = channelCount * vuMeterSingleBarWidth;
-    this.maximizedWidth = this.minimizedWidth + viMeterScaleWidth + 14;
+    this.maximizedWidth = this.minimizedWidth + viMeterScaleWidth + 14 + audioRouterWidth;
 
-    let attachEvents = !this._webAudioPeakMeter; // we need to attach events only once
-
-    if (this._webAudioPeakMeter) {
-      this._webAudioPeakMeter.node!.port.onmessage = (event) => {};
-      this._webAudioPeakMeter.cleanup();
-      this._webAudioPeakMeter = void 0;
+    if (this._vuMeter) {
+      this._vuMeter.destroy();
+      this._vuMeter = void 0;
     }
 
-    this.ompApiService.api!.audio.createAudioRouter(channelCount).subscribe({
-      next: () => {
-        if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'attached') {
-          this._audioSourceNode = this.ompApiService.api!.audio.getMediaElementAudioSourceNode();
-        }
-
-        this._webAudioPeakMeter = new WebAudioPeakMeter(this._audioSourceNode!, this.webAudioPeakMeterElementRef.nativeElement, peakMeterConfig);
-
-        if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached') {
-          this._webAudioPeakMeter.node!.port.onmessage = (event) => {};
-        }
-
-        if (attachEvents) {
-          this.attachEvents(peakMeterConfig);
-        }
-      },
-    });
+    this._vuMeter = new VuMeter(channelCount, this.vuMeterElementRef.nativeElement, peakMeterConfig).attachSource(this.ompApiService.api!.audio.createMainAudioPeakProcessor());
   }
 
-  private attachEvents(peakMeterConfig: PeakMeterConfig) {
-    this.ompApiService.api!.video.onVideoWindowPlaybackStateChange$.pipe(takeUntil(this._destroyed$)).subscribe({
-      next: (event) => {
-        if (event.videoWindowPlaybackState !== 'attached') {
-          this._webAudioPeakMeter!.node!.port.onmessage = (event) => {}; // stop processing metrics received from VU meter's AudioWorkletNode
-        } else {
-          this._webAudioPeakMeter!.node!.port.onmessage = (event) => {
-            this._webAudioPeakMeter!.handleNodePortMessage(event);
-          }; // resume processing metrics received from VU meter's AudioWorkletNode
-        }
-      },
-    });
-
-    this.ompApiService.api!.audio.createAudioPeakProcessorWorkletNode(peakMeterConfig.audioMeterStandard as AudioMeterStandard).subscribe({
-      next: (event) => {
-        this.ompApiService.api!.audio.onAudioPeakProcessorWorkletNodeMessage$.pipe(takeUntil(this._destroyed$)).subscribe({
-          next: (event) => {
-            if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached' && this._webAudioPeakMeter) {
-              // @ts-ignore
-              this._webAudioPeakMeter.handleNodePortMessage(event);
-            }
-          },
-        });
+  private initializeAudioRouter() {
+    const outputNumber = this.ompApiService.api!.audio.getAudioContext().destination.maxChannelCount >= 6 ? 6 : 2;
+    audioRouterWidth = outputNumber === 6 ? 400 : 250;
+    this.audioRouterElementRef.nativeElement.style.width = `${audioRouterWidth}px`;
+    this._audioRouter = this.ompApiService.api!.initializeRouterVisualization({
+      size: 'large',
+      outputNumber,
+      routerVisualizationHTMLElementId: 'omakase-audio-router',
+      mainTrack: {
+        inputNumber: 2,
+        maxInputNumber: 6,
+        inputLabels: ['L', 'R', 'C', 'LFE', 'Ls', 'Rs'],
       },
     });
   }
