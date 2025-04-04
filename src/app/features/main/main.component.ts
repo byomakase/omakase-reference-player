@@ -25,7 +25,7 @@ import {ActivatedRoute, Event, Router} from '@angular/router';
 import {StringUtil} from '../../util/string-util';
 import {UrlUtil} from '../../util/url-util';
 import {MainService} from './main.service';
-import {z} from 'zod';
+import {boolean, z} from 'zod';
 import {
   AudioMediaTrack,
   BasicAuthenticationData,
@@ -497,7 +497,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         if (isAudioChannelLane()) {
           let audioChannelLanes: AudioChannelLane[] = [];
           viusalReferencesInOrder!.forEach((visualReference, index) => {
-            let audioChannelLane = this.createAudioChannelLane(audioMediaTrack, visualReference, audioGroupingLane, index, viusalReferencesInOrder!.length, true);
+            let audioChannelLane = this.createAudioChannelLane(audioMediaTrack, visualReference, audioGroupingLane, index, viusalReferencesInOrder!.length, false);
             lanes.push(audioChannelLane);
             audioGroupingLane.addChildLane(audioChannelLane);
             audioChannelLanes.push(audioChannelLane);
@@ -1668,7 +1668,13 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get groupingLanesVisible(): boolean {
-    return !!this._groupingLanes?.find((p) => !p.isMinimized());
+    let out = true;
+    try {
+      out = !!this._groupingLanes?.find((p) => !p.isMinimized());
+    } catch (e) {
+
+    }
+    return out;
   }
 
   get isVuMeterSupported(): boolean {

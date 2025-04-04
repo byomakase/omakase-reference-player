@@ -192,7 +192,7 @@ export class TimelineService {
           };
         }
       },
-      loadingAnimationEnabled: true,
+      loadingAnimationEnabled: false,
     });
 
     return lane;
@@ -215,7 +215,7 @@ export class TimelineService {
           ...Constants.SUBTITLES_LANE_STYLE,
           ...LayoutService.themeStyleConstants.SUBTITLES_LANE_STYLE_COLORS,
         },
-        loadingAnimationEnabled: true,
+        loadingAnimationEnabled: false,
       },
       this.ompApiService.api!.subtitles
     );
@@ -294,7 +294,7 @@ export class TimelineService {
         ...Constants.THUMBNAIL_LANE_STYLE,
         ...LayoutService.themeStyleConstants.THUMBNAIL_LANE_STYLE_COLORS,
       },
-      loadingAnimationEnabled: true,
+      loadingAnimationEnabled: false,
       vttUrl: visualReference.url,
     });
 
@@ -421,7 +421,7 @@ export class TimelineService {
       style: {
         ...style,
       },
-      loadingAnimationEnabled: true,
+      loadingAnimationEnabled: false,
     };
 
     let lane = type === 'bar' ? new TelemetryBarChartLane(config) : new TelemetryOgChartLane(config);
