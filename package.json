@@ -1,6 +1,6 @@
 {
   "name": "omakase-reference-player",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -19,8 +19,8 @@
     "@angular/platform-browser": "^17.2.0",
     "@angular/platform-browser-dynamic": "^17.2.0",
     "@angular/router": "^17.2.0",
-    "@byomakase/omakase-player": "0.15.0",
-    "@byomakase/vu-meter": "^1.0.0",
+    "@byomakase/omakase-player": "0.16.0",
+    "@byomakase/vu-meter": "1.0.1-SNAPSHOT.1740512209",
     "@ng-bootstrap/ng-bootstrap": "^16.0.0",
     "@ngxs/store": "^3.8.2",
     "@popperjs/core": "^2.11.8",

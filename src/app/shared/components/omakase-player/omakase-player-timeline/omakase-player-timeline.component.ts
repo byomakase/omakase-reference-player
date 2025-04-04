@@ -19,12 +19,13 @@ import {ConfigWithOptionalStyle, TimelineApi, TimelineConfig} from '@byomakase/o
 import {Subject, take, takeUntil} from 'rxjs';
 import {CryptoUtil} from '../../../../util/crypto-util';
 import {OmpApiService} from '../omp-api.service';
-import {LayoutService} from '../../../../core/layout/layout.service';
+import {LayoutService, PresentationMode} from '../../../../core/layout/layout.service';
 import {Store} from '@ngxs/store';
 import {SegmentationService} from '../../../../features/main/segmentation-list/segmentation.service';
 import {Constants} from '../../../constants/constants';
 import {TimelineConfiguratorState} from '../../../../features/main/timeline-configurator/timeline-configurator.state';
 import {BaseGroupingLane} from './grouping/base-grouping-lane';
+import {LocalStorageService} from "../../../storage/local-storage.service";
 
 @Component({
   selector: 'div[appOmakasePlayerTimeline]',
@@ -60,11 +61,14 @@ export class OmakasePlayerTimelineComponent implements OnDestroy {
       timelineHTMLElementId: CryptoUtil.uuid(),
     };
 
+    const presentationMode = LocalStorageService.getItem('presentationMode') as PresentationMode | undefined;
+
     this._config = {
       ...this._presetConfig,
       style: {
         ...Constants.TIMELINE_CONFIG.style,
         ...LayoutService.themeStyleConstants.TIMELINE_CONFIG_STYLE_COLORS.style,
+        loadingAnimationTheme: presentationMode ? presentationMode : `dark`
       },
     };
 
@@ -84,12 +88,14 @@ export class OmakasePlayerTimelineComponent implements OnDestroy {
         if (this.ompApiService.api?.timeline) {
           this.segmentationService.saveSegmentationMode();
           const marker = this.segmentationService.selectedMarker;
+          this._baseGroupingLanes = [];
 
           this._config = {
             ...this.config,
             style: {
               ...Constants.TIMELINE_CONFIG.style,
               ...LayoutService.themeStyleConstants.TIMELINE_CONFIG_STYLE_COLORS.style,
+              loadingAnimationTheme: presentationMode,
             },
           };
 

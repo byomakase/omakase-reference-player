@@ -76,11 +76,13 @@
               [visibility]="groupingLanesVisibility"
               [activeTab]="activeTab"
               [disabled]="!groupingLanes"
+              [visible]="groupingLanesVisible"
               [analysisGroups]="analysisGroups"
               [isSegmentationEnabled]="isSegmentationModeVisible"
               [isAnnotationEnabled]="isAnnotationModeVisible"
               (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
               (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
+              (timelineConfiguratorPanelTrigger)="handleTimelineConfiguratorPanelClick()"
               [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
           </div>
         }
@@ -123,10 +125,12 @@
             [visibility]="groupingLanesVisibility"
             [activeTab]="activeTab"
             [disabled]="!groupingLanes"
+            [visible]="groupingLanesVisible"
             [analysisGroups]="analysisGroups"
             [isSegmentationEnabled]="isSegmentationModeVisible"
             (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
             (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
+            (timelineConfiguratorPanelTrigger)="handleTimelineConfiguratorPanelClick()"
             [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
         </div>
       }

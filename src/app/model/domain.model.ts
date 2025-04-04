@@ -114,9 +114,11 @@ export interface MasterManifest {
   ffom?: string;
 }
 
+export type ChannelType = 'L' | 'R' | 'C' | 'LS' | 'RS' | 'LFE';
 export interface VisualReference {
   id: string;
   type: VisualReferenceType;
+  channel?: ChannelType;
   url: string;
 }
 
@@ -157,7 +159,6 @@ export interface AudioMediaTrack extends MediaTrack {
   sound_field: string;
   channel_layout?: string;
   language?: string;
-  channels?: Channel[];
   analysis?: Analysis[];
   visual_reference?: VisualReference[]; // can appear in media files without channels (ie. audio only files)
 }
@@ -171,12 +172,12 @@ export interface TextMediaTrack extends MediaTrack {
   language?: string;
 }
 
-export interface Channel {
-  id: string;
-  channel_order?: string;
-  program_name: string;
-  visual_reference: VisualReference[];
-}
+// export interface Channel {
+//   id: string;
+//   channel_order?: string;
+//   program_name: string;
+//   visual_reference: VisualReference[];
+// }
 
 export interface MediaTracks {
   video?: VideoMediaTrack[];

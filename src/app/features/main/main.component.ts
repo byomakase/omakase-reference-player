@@ -30,12 +30,12 @@ import {
   AudioMediaTrack,
   BasicAuthenticationData,
   BearerAuthenticationData,
-  Channel,
   MasterManifest,
   SessionData,
   TextMediaTrack,
   TimelineLaneWithOptionalGroup,
   VideoMediaTrack,
+  VisualReference,
 } from '../../model/domain.model';
 import {DomainUtil} from '../../util/domain-util';
 import {TelemetryLane, TimelineService} from '../timeline/timeline.service';
@@ -351,7 +351,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             const lane = value.timelineApi.getTimelineLanes().find((lane) => lane instanceof BaseGroupingLane && lane.description === baseGroupingLane.description) as BaseGroupingLane<any>;
 
             if (lane) {
-              lane.groupVisibility !== baseGroupingLane.groupVisibility ? lane.toggleMinimizeMaximize() : void 0;
+              lane.groupVisibility !== baseGroupingLane.groupVisibility ? lane.toggleGroupVisibility().subscribe() : void 0;
 
               baseGroupingLane.childLanes.forEach((childLane) => {
                 if (this.timelineService.isAnalyticsLane(childLane)) {
@@ -362,6 +362,10 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                   }
                 }
               });
+
+              if (baseGroupingLane.style.height === 0) {
+                lane.toggleHidden('minimized');
+              }
             }
 
             if (baseGroupingLane.id === activeTimelineLaneId) {
@@ -481,20 +485,22 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           defaultTrackSet = true;
         }
 
-        let channelsInOrder = DomainUtil.resolveAudioMediaTrackChannelsInOrder(audioMediaTrack);
+        let viusalReferencesInOrder = DomainUtil.resolveAudioMediaTrackVisualReferencesInOrder(audioMediaTrack);
         let isAudioChannelLane = () => {
-          return channelsInOrder && channelsInOrder.length > 0;
+          return viusalReferencesInOrder && viusalReferencesInOrder.length > 1;
         };
 
         let isCustomAudioTrackLane = () => {
-          return (!channelsInOrder || channelsInOrder.length === 0) && audioMediaTrack.visual_reference && audioMediaTrack.visual_reference.find((p) => p.type === 'waveform');
+          return !viusalReferencesInOrder || viusalReferencesInOrder.length <= 1;
         };
 
         if (isAudioChannelLane()) {
-          channelsInOrder!.forEach((channel, index) => {
-            let audioChannelLane = this.createAudioChannelLane(audioMediaTrack, channel, index, channelsInOrder!.length);
+          let audioChannelLanes: AudioChannelLane[] = [];
+          viusalReferencesInOrder!.forEach((visualReference, index) => {
+            let audioChannelLane = this.createAudioChannelLane(audioMediaTrack, visualReference, audioGroupingLane, index, viusalReferencesInOrder!.length, true);
             lanes.push(audioChannelLane);
             audioGroupingLane.addChildLane(audioChannelLane);
+            audioChannelLanes.push(audioChannelLane);
 
             if (audioChannelLane.name === this._currentAudioTrack?.label) {
               this._currentAudioLane = audioChannelLane;
@@ -505,8 +511,10 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
               defaultTrackSet = true;
             }
           });
+
+          audioGroupingLane.audioChannelLanes = audioChannelLanes;
         } else if (isCustomAudioTrackLane()) {
-          let customAudioTrackLane = this.createCustomAudioTrackLane(audioMediaTrack);
+          let customAudioTrackLane = this.createCustomAudioTrackLane(audioMediaTrack, true);
           lanes.push(customAudioTrackLane);
           audioGroupingLane.addChildLane(customAudioTrackLane);
         }
@@ -688,7 +696,6 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
                     this.timelineService.getAudioChannelLanes()?.forEach((lane) => {
                       lane.audioTrack = StringUtil.isNonEmpty(lane.audioMediaTrack.program_name) ? this._audioTracksByName?.get(lane.audioMediaTrack.program_name) : void 0;
-                      lane.channelAudioTrack = StringUtil.isNonEmpty(lane.channel.program_name) ? this._audioTracksByName?.get(lane.channel.program_name) : void 0;
                     });
                   },
                 });
@@ -1143,7 +1150,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private createAudioGroupingLane(audioMediaTrack: AudioMediaTrack, index: number): AudioGroupingLane {
-    let description = `A${index + 1}${audioMediaTrack.channels && audioMediaTrack.channels.length > 0 ? ` (${audioMediaTrack.channels.length} ch)` : ``}`;
+    let description = `A${index + 1}${audioMediaTrack.visual_reference && audioMediaTrack.visual_reference.length > 1 ? ` (${audioMediaTrack.visual_reference.length} ch)` : ``}`;
 
     let lane = new AudioGroupingLane({
       description: description,
@@ -1176,28 +1183,41 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     return lane;
   }
 
-  private createAudioChannelLane(audioMediaTrack: AudioMediaTrack, channel: Channel, channelIndex: number, channelsCount: number): AudioChannelLane {
-    let lane = new AudioChannelLane({
-      audioMediaTrack: audioMediaTrack,
-      channel: channel,
-      channelIndex: channelIndex,
-      channelsCount: channelsCount,
-      style: {
-        ...Constants.CUSTOM_AUDIO_TRACK_LANE_STYLE,
-        ...LayoutService.themeStyleConstants.CUSTOM_AUDIO_TRACK_LANE_STYLE_COLORS,
+  private createAudioChannelLane(
+    audioMediaTrack: AudioMediaTrack,
+    visualReference: VisualReference,
+    audioGroupingLane: AudioGroupingLane,
+    channelIndex: number,
+    channelsCount: number,
+    loadingAnimationEnabled: boolean
+  ): AudioChannelLane {
+    let lane = new AudioChannelLane(
+      {
+        audioMediaTrack: audioMediaTrack,
+        visualReference: visualReference,
+        audioGroupingLane: audioGroupingLane,
+        channelIndex: channelIndex,
+        channelsCount: channelsCount,
+        style: {
+          ...Constants.CUSTOM_AUDIO_TRACK_LANE_STYLE,
+          ...LayoutService.themeStyleConstants.CUSTOM_AUDIO_TRACK_LANE_STYLE_COLORS,
+        },
+        loadingAnimationEnabled,
       },
-    });
+      this.windowService
+    );
 
     return lane;
   }
 
-  private createCustomAudioTrackLane(audioMediaTrack: AudioMediaTrack): CustomAudioTrackLane {
+  private createCustomAudioTrackLane(audioMediaTrack: AudioMediaTrack, loadingAnimationEnabled: boolean): CustomAudioTrackLane {
     let lane = new CustomAudioTrackLane({
       audioMediaTrack: audioMediaTrack,
       style: {
         ...Constants.CUSTOM_AUDIO_TRACK_LANE_STYLE,
         ...LayoutService.themeStyleConstants.CUSTOM_AUDIO_TRACK_LANE_STYLE_COLORS,
       },
+      loadingAnimationEnabled,
     });
     return lane;
   }
@@ -1373,6 +1393,16 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     this.toggleGroupingLanesCollapse(visibility);
   }
 
+  handleTimelineConfiguratorPanelClick() {
+    const mediaTrackId = this._videoMediaTracks?.at(0)?.id;
+    let selectedLaneId = this._groupingLanes?.find((lane) => lane.id === mediaTrackId)?.id;
+    if (!selectedLaneId) {
+      selectedLaneId = this._groupingLanes?.at(0)?.id;
+    }
+
+    this.store.dispatch(new SelectConfigLane(selectedLaneId));
+  }
+
   handleSessionChange(newSessionUrl: string) {
     (this.ompApiService.api!.video.isPlaying() ? this.ompApiService.api!.video.pause().pipe(map((p) => true)) : of(true)).subscribe({
       next: () => {
@@ -1475,7 +1505,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         .filter((p) => !p.isDisabled);
 
       if (audioChannelLanes.length > 0) {
-        let activeIndex = audioChannelLanes.findIndex((p) => p.isActive);
+        let activeIndex = audioChannelLanes.findIndex((p) => p.isSoloed);
         let newActiveIndex;
         if (activeIndex < 0) {
           newActiveIndex = type === 'next' ? 0 : audioChannelLanes.length - 1;
@@ -1483,9 +1513,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           newActiveIndex = type === 'next' ? (activeIndex === audioChannelLanes.length - 1 ? 0 : activeIndex + 1) : activeIndex === 0 ? audioChannelLanes.length - 1 : activeIndex - 1;
         }
 
-        let nextActiveTrack = audioChannelLanes[newActiveIndex].channelAudioTrack;
+        let nextActiveTrack = audioChannelLanes[newActiveIndex];
         if (nextActiveTrack) {
-          this.ompApiService.api!.video.setActiveAudioTrack(nextActiveTrack.id);
+          nextActiveTrack.setAsActiveAudioTrack();
         }
       }
     }
@@ -1635,6 +1665,10 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       return 'maximized';
     }
+  }
+
+  get groupingLanesVisible(): boolean {
+    return !!this._groupingLanes?.find((p) => !p.isMinimized());
   }
 
   get isVuMeterSupported(): boolean {

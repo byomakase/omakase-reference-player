@@ -91,6 +91,7 @@ import {IconSort} from './svg/icon-sort';
 import {IconCircleChevronUp} from './svg/icon-circle-chevron-up';
 import {IconCircleChevronDown} from './svg/icon-circle-chevron-down';
 import {IconSearch} from './svg/icon-search';
+import {IconGear} from './svg/icon-gear';
 
 export type IconName =
   | 'arrow-down'
@@ -168,7 +169,8 @@ export type IconName =
   | 'sort'
   | 'circle-chevron-up'
   | 'circle-chevron-down'
-  | 'search';
+  | 'search'
+  | 'gear';
 
 @Injectable({
   providedIn: 'root',
@@ -244,6 +246,7 @@ export class IconService {
     'edit': IconEdit,
     'delete': IconDelete,
     'send': IconSend,
+    'gear': IconGear,
 
     'toast-error': IconToastError,
     'toast-warning': IconToastWarning,

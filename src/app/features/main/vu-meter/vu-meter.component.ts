@@ -31,6 +31,7 @@ import {AudioMediaTrack} from '../../../model/domain.model';
 import {PeakMeterConfig, VuMeter, VuMeterApi} from '@byomakase/vu-meter';
 import Minimize = VuMeterActions.Minimize;
 import Maximize = VuMeterActions.Maximize;
+import {DomainUtil} from '../../../util/domain-util';
 
 const animateDurationMs = 300;
 const animateTimings = `${animateDurationMs}ms ease-in-out`;
@@ -100,8 +101,8 @@ const peakMeterConfigLight: Partial<PeakMeterConfig> = {
               <div>R</div>
               <div>C</div>
               <div>LFE</div>
-              <div>Ls</div>
-              <div>Rs</div>
+              <div>LS</div>
+              <div>RS</div>
             </div>
           </div>
         </div>
@@ -170,11 +171,12 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.tryCreateVuMeter(peakMeterConfig);
                 this.ompApiService.api!.audio.onAudioSwitched$.pipe(takeUntil(this._destroyed$)).subscribe((event) => {
                   const audioMediaTrack = this.audioMediaTracks?.find((track) => event.activeAudioTrack.label?.startsWith(track.program_name));
-                  if (audioMediaTrack && audioMediaTrack.channels && this._activeTrack !== audioMediaTrack) {
+                  if (audioMediaTrack && audioMediaTrack.visual_reference && this._activeTrack !== audioMediaTrack) {
                     this._activeTrack = audioMediaTrack;
+                    let visualReferencesInOrder = DomainUtil.resolveAudioMediaTrackVisualReferencesInOrder(audioMediaTrack);
                     this._audioRouter!.updateMainTrack({
-                      inputNumber: audioMediaTrack.channels.length,
-                      inputLabels: audioMediaTrack.channels.map((channel) => channel.channel_order ?? ''),
+                      inputNumber: audioMediaTrack.visual_reference.length,
+                      inputLabels: visualReferencesInOrder!.map((visualReference, index) => visualReference.channel ?? `C${index + 1}`),
                     });
                   }
                 });
@@ -210,16 +212,19 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private initializeAudioRouter() {
     const outputNumber = this.ompApiService.api!.audio.getAudioContext().destination.maxChannelCount >= 6 ? 6 : 2;
-    audioRouterWidth = outputNumber === 6 ? 400 : 250;
+    audioRouterWidth = outputNumber === 6 ? 440 : 290;
     this.audioRouterElementRef.nativeElement.style.width = `${audioRouterWidth}px`;
+
+    const audioMediaTrack = this.audioMediaTracks?.find((track) => this.ompApiService.api!.audio.getActiveAudioTrack()?.label?.startsWith(track.program_name));
     this._audioRouter = this.ompApiService.api!.initializeRouterVisualization({
       size: 'large',
       outputNumber,
       routerVisualizationHTMLElementId: 'omakase-audio-router',
+      outputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
       mainTrack: {
-        inputNumber: 2,
+        inputNumber: audioMediaTrack ? DomainUtil.resolveChannelNrFromSoundFieldLabel(audioMediaTrack) : 2,
         maxInputNumber: 6,
-        inputLabels: ['L', 'R', 'C', 'LFE', 'Ls', 'Rs'],
+        inputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
       },
     });
   }

@@ -225,6 +225,12 @@ export class ThemeStyleConstants {
     ...this.TEXT_LABEL_BUTTON_STYLE_COLORS,
   };
 
+  static SOUND_LABEL_BUTTON_DISABLED_STYLE_COLORS: Partial<TextLabelStyle> = {
+    ...this.TEXT_LABEL_BUTTON_STYLE_COLORS,
+    fill: '#CACFEA',
+    backgroundFill: '#6D738F',
+  };
+
   static TEXT_LABEL_BUTTON_ACTIVE_STYLE_COLORS: Partial<TextLabelStyle> = {
     ...this.TEXT_LABEL_BUTTON_STYLE_COLORS,
     fill: this.COLORS.WHITE,

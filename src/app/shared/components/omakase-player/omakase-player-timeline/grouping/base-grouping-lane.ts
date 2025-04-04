@@ -80,7 +80,7 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
     this._childLanes.push(lane);
   }
 
-  protected toggleGroupVisibility(): Observable<void> {
+  toggleGroupVisibility(): Observable<void> {
     let newGroupVisibility: GroupingLaneVisibility = this._groupVisibility === 'minimized' ? 'maximized' : 'minimized';
 
     if (!this._minimizeMaximizeInProgress) {

@@ -140,6 +140,9 @@ const INACTIVE_SEGMENTATION_COLOR = '#cccccc';
           </div>
         }
       }
+      <button type="button" class="btn btn-gear" (click)="timelineConfiguratorPanelClick()" [class.d-none]="isVisible">
+        <i appIcon="gear"></i>
+      </button>
     </div>
   `,
   //changeDetection: ChangeDetectionStrategy.OnPush,
@@ -172,6 +175,7 @@ export class TimelineControlsComponent {
   private _videoTimeChangeEvent: VideoTimeChangeEvent | undefined;
 
   private _visibility: GroupingLaneVisibility = 'maximized';
+  private _visible: boolean = true;
   private _disabled: boolean = false;
 
   private _onTimeChangeBreaker$ = new Subject<void>();
@@ -227,6 +231,11 @@ export class TimelineControlsComponent {
   }
 
   @Input()
+  set visible(value: boolean) {
+    this._visible = value;
+  }
+
+  @Input()
   set disabled(value: boolean) {
     this._disabled = value;
   }
@@ -236,6 +245,9 @@ export class TimelineControlsComponent {
 
   @Output()
   readonly analysisGroupsVisibleChangedTrigger: EventEmitter<Map<string, boolean>> = new EventEmitter<Map<string, boolean>>();
+
+  @Output()
+  readonly timelineConfiguratorPanelTrigger: EventEmitter<void> = new EventEmitter<void>();
 
   @HostBinding('id')
   get hostElementId(): string | undefined {
@@ -286,6 +298,10 @@ export class TimelineControlsComponent {
 
   buttonClickChangeVisibility() {
     this.groupingLanesVisibilityTrigger.next(this.visibilityToToggle);
+  }
+
+  timelineConfiguratorPanelClick() {
+    this.timelineConfiguratorPanelTrigger.emit();
   }
 
   playLastNSeconds(timeInSec: number) {
@@ -695,6 +711,10 @@ export class TimelineControlsComponent {
 
   get visibilityToToggle(): GroupingLaneVisibility {
     return this._visibility;
+  }
+
+  get isVisible(): boolean {
+    return this._visible;
   }
 
   get isDisabled(): boolean {

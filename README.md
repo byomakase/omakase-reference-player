@@ -11,7 +11,7 @@ npm install
 ng serve --port 3000
 ```
 
-2. Navigate to [http://localhost:3000/?session=http://localhost:3000/demo-assets/tears-of-steel/v1_10-SEC/tears-of-steel_24fps_10-SEC.json](http://localhost:3000/?session=http://localhost:3000/demo-assets/tears-of-steel/v1_10-SEC/tears-of-steel_24fps_10-SEC.json)
+2. Navigate to [http://localhost:3000/?session=http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/tears-of-steel_24fps_10-SEC.json](http://localhost:3000/?session=http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/tears-of-steel_24fps_10-SEC.json)
    to open the application in development mode with the default demo session file.
 
 ![Alt text](screenshot.png)

@@ -1,0 +1,322 @@
+{
+    "version": "2.0",
+    "session": {
+        "services": {
+            "media_authentication": {
+                "type": "none"
+            }
+        }
+    },
+    "data": {
+        "source_info": [
+            {
+                "name": "tears-of-steel_4k_10-secs.mov",
+                "id": "V1",
+                "format": "MOV",
+                "bandwidth_kb": 51787,
+                "duration": 10.125,
+                "video_tracks": 1,
+                "audio_tracks": 2
+            },
+            {
+                "name": "TOS-en.srt",
+                "id": "T1",
+                "format": "SRT",
+                "language": "ENG",
+                "usage": "subtitles"
+            }
+        ],
+        "media_info": [
+            {
+                "source_id": "V1",
+                "general_properties": {
+                    "track": [
+                        {
+                            "@type": "General",
+                            "VideoCount": "1",
+                            "AudioCount": "1",
+                            "FileExtension": "mov",
+                            "Format": "MPEG-4",
+                            "Format_Profile": "QuickTime",
+                            "CodecID": "qt  ",
+                            "CodecID_Version": "0000.02",
+                            "CodecID_Compatible": "qt  ",
+                            "FileSize": "8076725",
+                            "Duration": "10.042",
+                            "OverallBitRate": "6434356",
+                            "FrameRate": "24.000",
+                            "FrameCount": "241",
+                            "StreamSize": "10889",
+                            "HeaderSize": "28",
+                            "DataSize": "8067098",
+                            "FooterSize": "9599",
+                            "IsStreamable": "No",
+                            "File_Modified_Date": "2024-08-21 17:10:53 UTC",
+                            "File_Modified_Date_Local": "2024-08-21 13:10:53",
+                            "Encoded_Application": "Lavf60.16.100"
+                        },
+                        {
+                            "@type": "Video",
+                            "StreamOrder": "0",
+                            "ID": "1",
+                            "Format": "AVC",
+                            "Format_Profile": "Main",
+                            "Format_Level": "4",
+                            "Format_Settings_CABAC": "No",
+                            "Format_Settings_RefFrames": "2",
+                            "Format_Settings_GOP": "M=3, N=18",
+                            "CodecID": "avc1",
+                            "Duration": "10.042",
+                            "BitRate": "6234597",
+                            "Width": "1920",
+                            "Height": "800",
+                            "Sampled_Width": "1920",
+                            "Sampled_Height": "800",
+                            "PixelAspectRatio": "1.000",
+                            "DisplayAspectRatio": "2.400",
+                            "Rotation": "0.000",
+                            "FrameRate_Mode": "CFR",
+                            "FrameRate_Mode_Original": "VFR",
+                            "FrameRate": "24.000",
+                            "FrameRate_Num": "24",
+                            "FrameRate_Den": "1",
+                            "FrameCount": "241",
+                            "ColorSpace": "YUV",
+                            "ChromaSubsampling": "4:2:0",
+                            "BitDepth": "8",
+                            "ScanType": "Progressive",
+                            "StreamSize": "7825718",
+                            "Language": "en",
+                            "extra": {
+                                "CodecConfigurationBox": "avcC"
+                            }
+                        },
+                        {
+                            "@type": "Audio",
+                            "StreamOrder": "1",
+                            "ID": "2",
+                            "Format": "MPEG Audio",
+                            "Format_Version": "1",
+                            "Format_Profile": "Layer 3",
+                            "Format_Settings_Mode": "Joint stereo",
+                            "Format_Settings_ModeExtension": "MS Stereo",
+                            "CodecID": ".mp3",
+                            "Duration": "10.005",
+                            "Source_Duration": "10.057",
+                            "BitRate_Mode": "CBR",
+                            "BitRate": "192000",
+                            "Channels": "2",
+                            "ChannelPositions": "Front: L R",
+                            "ChannelLayout": "L R",
+                            "SamplingRate": "44100",
+                            "SamplingCount": "441221",
+                            "FrameCount": "383",
+                            "Source_FrameCount": "385",
+                            "Compression_Mode": "Lossy",
+                            "StreamSize": "240118",
+                            "Source_StreamSize": "241372",
+                            "Language": "en",
+                            "Default": "Yes",
+                            "AlternateGroup": "1"
+                        }
+                    ]
+                }
+            },
+            {
+                "source_id": "T1",
+                "general_properties": {
+                    "track": [
+                        {
+                            "@type": "General",
+                            "TextCount": "1",
+                            "FileExtension": "srt",
+                            "Format": "SubRip",
+                            "FileSize": "289",
+                            "Duration": "9.000",
+                            "OverallBitRate": "257",
+                            "StreamSize": "289",
+                            "File_Modified_Date": "2024-08-22 22:24:14 UTC",
+                            "File_Modified_Date_Local": "2024-08-22 18:24:14"
+                        },
+                        {
+                            "@type": "Text",
+                            "Format": "SubRip",
+                            "Duration": "9.000",
+                            "Duration_Start": "0.000",
+                            "Duration_End": "9.000",
+                            "Compression_Mode": "Lossless",
+                            "Events_Total": "3",
+                            "Events_MinDuration": "1.999",
+                            "Lines_Count": "5",
+                            "Lines_MaxCountPerEvent": "2"
+                        }
+                    ]
+                }
+            }
+        ],
+        "master_manifests": [
+            {
+                "name": "Proxy 360p",
+                "id": "HLS-360",
+                "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/hls/tears-of-steel_sdr_360p24_BITC/tears-of-steel.m3u8",
+                "width": 720,
+                "height": 360,
+                "bitrate_kb": 730,
+                "codec": "h264",
+                "color_range": "sdr",
+                "frame_rate": "24000/1000",
+                "drop_frame": false
+            }
+        ],
+        "media_tracks": {
+            "video": [
+                {
+                    "name": "tearsofsteel_4k_10-secs.mov",
+                    "source_id": "V1",
+                    "manifest_ids": [
+                        "HLS-360"
+                    ],
+                    "visual_reference": [
+                        {
+                            "type": "thumbnails",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/thumbnails/thumbnails.vtt"
+                        }
+                    ],
+                    "analysis": [
+                        {
+                            "name": "Program Scenes",
+                            "type": "events",
+                            "visualization": "marker",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/analysis/program-scenes.vtt"
+                        },
+                        {
+                            "name": "Points of Interest",
+                            "type": "events",
+                            "visualization": "point",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/analysis/program-poi.vtt"
+                        },
+                        {
+                            "name": "Bit Rate",
+                            "type": "chart",
+                            "visualization": "line",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/analysis/tearsofsteel_4k_10-secs_2-SEC.vtt"
+                        }
+                    ]
+                }
+            ],
+            "audio": [
+                {
+                    "name": "tearsofsteel_4k_10-secs.mov (English 2.0)",
+                    "source_id": "V1",
+                    "program_name": "EN_20",
+                    "channel_layout": "L R",
+                    "language": "en",
+                    "visual_reference": [
+                        {
+                            "channel": "L",
+                            "type": "waveform",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/waveforms/tears-of-steel_sdr_BITC_EN_20_L.vtt"
+                        },
+                        {
+                            "channel": "R",
+                            "type": "waveform",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/waveforms/tears-of-steel_sdr_BITC_EN_20_R.vtt"
+                        }
+                    ],
+                    "analysis": [
+                        {
+                            "name": "Dialog",
+                            "type": "events",
+                            "visualization": "marker",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/analysis/dialog.vtt"
+                        },
+                        {
+                            "name": "Audio POI",
+                            "type": "events",
+                            "visualization": "point",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/analysis/audio-poi.vtt"
+                        },
+                        {
+                            "name": "RMS Levels",
+                            "type": "chart",
+                            "visualization": "line",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/analysis/tears-of-steel_sdr_BITC_EN_20_RMS_2-SEC.vtt"
+                        },
+                        {
+                            "name": "EBU R128 M",
+                            "type": "chart",
+                            "visualization": "bar",
+                            "y_min": -100,
+                            "y_max": 0,
+                            "scale": "linear",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/analysis/tears-of-steel_sdr_BITC_EN_20_R128_2-SEC.vtt"
+                        },
+                        {
+                            "name": "Overall RMS Level",
+                            "type": "chart",
+                            "visualization": "led",
+                            "y_min": -100,
+                            "y_max": 0,
+                            "scale": "linear",
+                            "url": "http://localhost:3000/demo-assets/tears-of-steel/v2_10-SEC/analysis/tears-of-steel_sdr_BITC_EN_20_RMS_2-SEC.vtt"
+                        }
+                    ]
+                }
+            ],
+            "text": [
+                {
+                    "name": "TOS-en.srt (English Subtitles)",
+                    "source_id": "T1",
+                    "program_name": "English Subtitles",
+                    "language": "en"
+                }
+            ]
+        },
+        "presentation": {
+            "layout": {},
+            "info_tabs": [
+                {
+                    "name": "OMDb Title Metadata",
+                    "type": "json",
+                    "visualization": "json_tree",
+                    "data": {
+                        "omdb": {
+                            "Title": "Tears of Steel",
+                            "Year": "2012",
+                            "Rated": "N/A",
+                            "Released": "26 Sep 2012",
+                            "Runtime": "12 min",
+                            "Genre": "Short, Sci-Fi",
+                            "Director": "Ian Hubert",
+                            "Writer": "Ian Hubert",
+                            "Actors": "Derek de Lint, Sergio Hasselbaink, Rogier Schippers",
+                            "Plot": "He just wanted to be awesome in space.",
+                            "Language": "English",
+                            "Country": "Netherlands",
+                            "Awards": "N/A",
+                            "Poster": "https://m.media-amazon.com/images/M/MV5BMTczMzQzNDE5NV5BMl5BanBnXkFtZTcwNzYwMzQ1OA@@._V1_SX300.jpg",
+                            "Ratings": [
+                                {
+                                    "Source": "Internet Movie Database",
+                                    "Value": "5.5/10"
+                                }
+                            ],
+                            "Metascore": "N/A",
+                            "imdbRating": "5.5",
+                            "imdbVotes": "1,486",
+                            "imdbID": "tt2285752",
+                            "Type": "movie",
+                            "DVD": "21 Apr 2017",
+                            "BoxOffice": "N/A",
+                            "Production": "N/A",
+                            "Website": "N/A",
+                            "Response": "True"
+                        }
+                    }
+                }
+            ],
+            "player_configuration": {},
+            "timeline_configuration": {}
+        }
+    }
+}

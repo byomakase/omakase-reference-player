@@ -194,6 +194,12 @@ export class LightThemeStyleConstants extends ThemeStyleConstants {
     ...ThemeStyleConstants.SOUND_LABEL_BUTTON_STYLE_COLORS,
   };
 
+  static override SOUND_LABEL_BUTTON_DISABLED_STYLE_COLORS = {
+    ...this.TEXT_LABEL_BUTTON_STYLE_COLORS,
+    fill: '#CACFEA',
+    backgroundFill: '#6D738F',
+  };
+
   static override TEXT_LABEL_BUTTON_ACTIVE_STYLE_COLORS = {
     ...this.TEXT_LABEL_BUTTON_STYLE_COLORS,
     backgroundFill: this.COLORS.GREEN,
@@ -206,6 +212,7 @@ export class LightThemeStyleConstants extends ThemeStyleConstants {
 
   static override TEXT_LABEL_BUTTON_DISABLED_STYLE_COLORS = {
     ...this.TEXT_LABEL_BUTTON_STYLE_COLORS,
-    backgroundFill: '#6d738f',
+    fill: '#CACFEA',
+    backgroundFill: '#6D738F',
   };
 }

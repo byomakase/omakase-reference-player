@@ -14,10 +14,29 @@
  * limitations under the License.
  */
 
-import {Subject, Subscriber} from 'rxjs';
+import {firstValueFrom, Observable, Observer, Subject, Subscriber, TeardownLogic} from 'rxjs';
+import {fromPromise} from 'rxjs/internal/observable/innerFrom';
 
 export function completeSub(subscriber: Subscriber<void> | Subject<void>, name = '') {
   subscriber.next();
   subscriber.complete();
   // console.debug(name + ' completed');
+}
+
+export function passiveObservable<T = void>(subscribe: (this: Observable<T>, subscriber: Subscriber<T>) => TeardownLogic): Observable<T> {
+  return fromPromise<T>(firstValueFrom<T>(new Observable<T>(subscribe))) as Observable<T>;
+}
+
+export function nextCompleteObserver(observer: Observer<any>, value?: any) {
+  if (observer) {
+    observer.next(value);
+    observer.complete();
+  }
+}
+
+export function errorCompleteObserver(observer: Observer<any>, error: any) {
+  if (observer) {
+    observer.error(error);
+    observer.complete();
+  }
 }
