@@ -149,7 +149,9 @@ const INACTIVE_SEGMENTATION_COLOR = '#cccccc';
 })
 export class TimelineControlsComponent {
   groupingDropdownOpened = false;
-  selectedGroupsMap: Map<string, boolean> = new Map();
+
+  @Input()
+  selectedGroupsMap!: Map<string, boolean>;
 
   segmentationColor = INACTIVE_SEGMENTATION_COLOR;
   editingSegmentationColor = false;
@@ -244,7 +246,7 @@ export class TimelineControlsComponent {
   readonly groupingLanesVisibilityTrigger: EventEmitter<GroupingLaneVisibility> = new EventEmitter<GroupingLaneVisibility>();
 
   @Output()
-  readonly analysisGroupsVisibleChangedTrigger: EventEmitter<Map<string, boolean>> = new EventEmitter<Map<string, boolean>>();
+  readonly analysisGroupsVisibleChangedTrigger: EventEmitter<void> = new EventEmitter<void>();
 
   @Output()
   readonly timelineConfiguratorPanelTrigger: EventEmitter<void> = new EventEmitter<void>();
@@ -264,7 +266,7 @@ export class TimelineControlsComponent {
       next: (value: boolean) => {
         if (value) {
           this.dropdownGroupOptions = this.analysisGroupsToDropdownOptions();
-          this.selectedGroupsMap = this.dropdownOptionsToMap(this.dropdownGroupOptions);
+          // this.selectedGroupsMap = this.dropdownOptionsToMap(this.dropdownGroupOptions);
         }
       },
     });
@@ -277,7 +279,7 @@ export class TimelineControlsComponent {
   handleDropdownClick(id: string) {
     if (this.selectedGroupsMap.has(id)) {
       this.selectedGroupsMap.set(id, !this.selectedGroupsMap.get(id));
-      this.analysisGroupsVisibleChangedTrigger.emit(this.selectedGroupsMap);
+      this.analysisGroupsVisibleChangedTrigger.emit();
     }
   }
 

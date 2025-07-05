@@ -1,0 +1,1086 @@
+WEBVTT
+
+NOTE
+Omakase Player Web VTT
+V1.0
+
+00:00:00.000 --> 00:00:01.999
+-56.384:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:02.000 --> 00:00:03.999
+-27.418:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:04.000 --> 00:00:05.999
+-27.836:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:06.000 --> 00:00:07.999
+-26.066:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:08.000 --> 00:00:09.999
+-25.335:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:10.000 --> 00:00:11.999
+-24.743:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:12.000 --> 00:00:13.999
+-28.109:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:14.000 --> 00:00:15.999
+-25.560:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:16.000 --> 00:00:17.999
+-28.960:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:18.000 --> 00:00:19.999
+-31.944:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:20.000 --> 00:00:21.999
+-27.196:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:22.000 --> 00:00:23.999
+-24.936:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:24.000 --> 00:00:25.999
+-26.866:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:26.000 --> 00:00:27.999
+-29.732:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:28.000 --> 00:00:29.999
+-31.654:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:30.000 --> 00:00:31.999
+-34.387:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:32.000 --> 00:00:33.999
+-31.141:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:34.000 --> 00:00:35.999
+-49.398:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:36.000 --> 00:00:37.999
+-49.768:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:38.000 --> 00:00:39.999
+-50.537:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:40.000 --> 00:00:41.999
+-43.828:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:42.000 --> 00:00:43.999
+-42.543:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:44.000 --> 00:00:45.999
+-41.508:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:46.000 --> 00:00:47.999
+-43.579:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:48.000 --> 00:00:49.999
+-33.455:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:50.000 --> 00:00:51.999
+-41.472:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:52.000 --> 00:00:53.999
+-33.657:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:54.000 --> 00:00:55.999
+-50.893:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:56.000 --> 00:00:57.999
+-46.734:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:00:58.000 --> 00:00:59.999
+-42.324:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:00.000 --> 00:01:01.999
+-34.221:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:02.000 --> 00:01:03.999
+-30.450:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:04.000 --> 00:01:05.999
+-34.218:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:06.000 --> 00:01:07.999
+-34.730:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:08.000 --> 00:01:09.999
+-53.354:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:10.000 --> 00:01:11.999
+-43.705:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:12.000 --> 00:01:13.999
+-41.513:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:14.000 --> 00:01:15.999
+-41.815:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:16.000 --> 00:01:17.999
+-44.374:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:18.000 --> 00:01:19.999
+-31.751:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:20.000 --> 00:01:21.999
+-42.495:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:22.000 --> 00:01:23.999
+-42.246:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:24.000 --> 00:01:25.999
+-35.457:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:26.000 --> 00:01:27.999
+-48.414:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:28.000 --> 00:01:29.999
+-43.505:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:30.000 --> 00:01:31.999
+-44.516:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:32.000 --> 00:01:33.999
+-33.965:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:34.000 --> 00:01:35.999
+-48.701:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:36.000 --> 00:01:37.999
+-39.711:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:38.000 --> 00:01:39.999
+-42.468:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:40.000 --> 00:01:41.999
+-48.689:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:42.000 --> 00:01:43.999
+-39.606:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:44.000 --> 00:01:45.999
+-44.387:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:46.000 --> 00:01:47.999
+-39.103:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:48.000 --> 00:01:49.999
+-44.138:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:50.000 --> 00:01:51.999
+-47.946:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:52.000 --> 00:01:53.999
+-35.093:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:54.000 --> 00:01:55.999
+-48.273:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:56.000 --> 00:01:57.999
+-37.754:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:01:58.000 --> 00:01:59.999
+-40.818:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:00.000 --> 00:02:01.999
+-32.362:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:02.000 --> 00:02:03.999
+-32.358:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:04.000 --> 00:02:05.999
+-39.144:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:06.000 --> 00:02:07.999
+-35.861:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:08.000 --> 00:02:09.999
+-35.183:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:10.000 --> 00:02:11.999
+-38.973:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:12.000 --> 00:02:13.999
+-43.322:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:14.000 --> 00:02:15.999
+-36.147:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:16.000 --> 00:02:17.999
+-37.913:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:18.000 --> 00:02:19.999
+-36.346:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:20.000 --> 00:02:21.999
+-45.234:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:22.000 --> 00:02:23.999
+-36.542:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:24.000 --> 00:02:25.999
+-40.812:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:26.000 --> 00:02:27.999
+-31.260:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:28.000 --> 00:02:29.999
+-36.802:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:30.000 --> 00:02:31.999
+-33.710:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:32.000 --> 00:02:33.999
+-44.885:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:34.000 --> 00:02:35.999
+-37.242:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:36.000 --> 00:02:37.999
+-40.301:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:38.000 --> 00:02:39.999
+-33.452:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:40.000 --> 00:02:41.999
+-35.076:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:42.000 --> 00:02:43.999
+-33.263:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:44.000 --> 00:02:45.999
+-36.984:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:46.000 --> 00:02:47.999
+-39.663:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:48.000 --> 00:02:49.999
+-45.270:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:50.000 --> 00:02:51.999
+-39.379:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:52.000 --> 00:02:53.999
+-34.148:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:54.000 --> 00:02:55.999
+-40.151:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:56.000 --> 00:02:57.999
+-32.408:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:02:58.000 --> 00:02:59.999
+-47.934:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:00.000 --> 00:03:01.999
+-37.878:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:02.000 --> 00:03:03.999
+-40.010:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:04.000 --> 00:03:05.999
+-32.296:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:06.000 --> 00:03:07.999
+-36.885:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:08.000 --> 00:03:09.999
+-32.972:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:10.000 --> 00:03:11.999
+-36.428:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:12.000 --> 00:03:13.999
+-40.596:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:14.000 --> 00:03:15.999
+-36.566:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:16.000 --> 00:03:17.999
+-43.256:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:18.000 --> 00:03:19.999
+-37.931:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:20.000 --> 00:03:21.999
+-35.862:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:22.000 --> 00:03:23.999
+-29.235:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:24.000 --> 00:03:25.999
+-35.938:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:26.000 --> 00:03:27.999
+-29.922:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:28.000 --> 00:03:29.999
+-29.011:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:30.000 --> 00:03:31.999
+-26.412:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:32.000 --> 00:03:33.999
+-23.647:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:34.000 --> 00:03:35.999
+-26.917:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:36.000 --> 00:03:37.999
+-27.393:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:38.000 --> 00:03:39.999
+-23.194:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:40.000 --> 00:03:41.999
+-25.762:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:42.000 --> 00:03:43.999
+-26.017:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:44.000 --> 00:03:45.999
+-22.836:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:46.000 --> 00:03:47.999
+-23.684:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:48.000 --> 00:03:49.999
+-21.894:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:50.000 --> 00:03:51.999
+-21.860:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:52.000 --> 00:03:53.999
+-16.435:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:54.000 --> 00:03:55.999
+-20.963:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:56.000 --> 00:03:57.999
+-22.888:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:03:58.000 --> 00:03:59.999
+-22.551:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:00.000 --> 00:04:01.999
+-23.165:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:02.000 --> 00:04:03.999
+-22.844:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:04.000 --> 00:04:05.999
+-27.256:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:06.000 --> 00:04:07.999
+-25.690:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:08.000 --> 00:04:09.999
+-25.410:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:10.000 --> 00:04:11.999
+-28.751:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:12.000 --> 00:04:13.999
+-24.340:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:14.000 --> 00:04:15.999
+-19.459:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:16.000 --> 00:04:17.999
+-29.910:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:18.000 --> 00:04:19.999
+-22.888:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:20.000 --> 00:04:21.999
+-20.909:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:22.000 --> 00:04:23.999
+-18.796:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:24.000 --> 00:04:25.999
+-18.464:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:26.000 --> 00:04:27.999
+-17.073:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:28.000 --> 00:04:29.999
+-13.487:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:30.000 --> 00:04:31.999
+-13.766:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:32.000 --> 00:04:33.999
+-28.317:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:34.000 --> 00:04:35.999
+-39.850:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:36.000 --> 00:04:37.999
+-38.717:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:38.000 --> 00:04:39.999
+-35.836:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:40.000 --> 00:04:41.999
+-35.724:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:42.000 --> 00:04:43.999
+-36.503:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:44.000 --> 00:04:45.999
+-43.471:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:46.000 --> 00:04:47.999
+-36.250:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:48.000 --> 00:04:49.999
+-36.889:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:50.000 --> 00:04:51.999
+-43.974:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:52.000 --> 00:04:53.999
+-46.703:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:54.000 --> 00:04:55.999
+-47.527:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:56.000 --> 00:04:57.999
+-48.540:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:04:58.000 --> 00:04:59.999
+-47.871:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:00.000 --> 00:05:01.999
+-50.056:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:02.000 --> 00:05:03.999
+-49.779:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:04.000 --> 00:05:05.999
+-43.560:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:06.000 --> 00:05:07.999
+-41.517:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:08.000 --> 00:05:09.999
+-39.100:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:10.000 --> 00:05:11.999
+-36.095:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:12.000 --> 00:05:13.999
+-31.417:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:14.000 --> 00:05:15.999
+-27.200:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:16.000 --> 00:05:17.999
+-31.555:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:18.000 --> 00:05:19.999
+-36.679:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:20.000 --> 00:05:21.999
+-35.187:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:22.000 --> 00:05:23.999
+-25.204:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:24.000 --> 00:05:25.999
+-14.389:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:26.000 --> 00:05:27.999
+-17.608:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:28.000 --> 00:05:29.999
+-21.256:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:30.000 --> 00:05:31.999
+-24.197:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:32.000 --> 00:05:33.999
+-23.283:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:34.000 --> 00:05:35.999
+-26.989:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:36.000 --> 00:05:37.999
+-24.294:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:38.000 --> 00:05:39.999
+-26.961:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:40.000 --> 00:05:41.999
+-25.854:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:42.000 --> 00:05:43.999
+-27.034:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:44.000 --> 00:05:45.999
+-22.648:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:46.000 --> 00:05:47.999
+-25.885:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:48.000 --> 00:05:49.999
+-21.413:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:50.000 --> 00:05:51.999
+-15.890:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:52.000 --> 00:05:53.999
+-19.381:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:54.000 --> 00:05:55.999
+-23.697:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:56.000 --> 00:05:57.999
+-23.530:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:05:58.000 --> 00:05:59.999
+-22.308:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:00.000 --> 00:06:01.999
+-20.157:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:02.000 --> 00:06:03.999
+-20.671:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:04.000 --> 00:06:05.999
+-20.165:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:06.000 --> 00:06:07.999
+-22.165:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:08.000 --> 00:06:09.999
+-21.830:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:10.000 --> 00:06:11.999
+-20.521:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:12.000 --> 00:06:13.999
+-21.269:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:14.000 --> 00:06:15.999
+-18.785:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:16.000 --> 00:06:17.999
+-18.627:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:18.000 --> 00:06:19.999
+-28.363:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:20.000 --> 00:06:21.999
+-28.870:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:22.000 --> 00:06:23.999
+-20.498:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:24.000 --> 00:06:25.999
+-23.923:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:26.000 --> 00:06:27.999
+-28.135:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:28.000 --> 00:06:29.999
+-24.925:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:30.000 --> 00:06:31.999
+-21.858:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:32.000 --> 00:06:33.999
+-24.065:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:34.000 --> 00:06:35.999
+-23.973:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:36.000 --> 00:06:37.999
+-10.728:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:38.000 --> 00:06:39.999
+-19.477:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:40.000 --> 00:06:41.999
+-20.129:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:42.000 --> 00:06:43.999
+-15.603:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:44.000 --> 00:06:45.999
+-23.251:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:46.000 --> 00:06:47.999
+-15.892:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:48.000 --> 00:06:49.999
+-14.534:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:50.000 --> 00:06:51.999
+-22.457:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:52.000 --> 00:06:53.999
+-20.509:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:54.000 --> 00:06:55.999
+-22.151:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:56.000 --> 00:06:57.999
+-30.754:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:06:58.000 --> 00:06:59.999
+-12.378:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:00.000 --> 00:07:01.999
+-19.697:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:02.000 --> 00:07:03.999
+-26.514:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:04.000 --> 00:07:05.999
+-23.266:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:06.000 --> 00:07:07.999
+-21.152:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:08.000 --> 00:07:09.999
+-26.116:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:10.000 --> 00:07:11.999
+-18.787:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:12.000 --> 00:07:13.999
+-19.531:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:14.000 --> 00:07:15.999
+-23.100:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:16.000 --> 00:07:17.999
+-23.449:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:18.000 --> 00:07:19.999
+-27.248:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:20.000 --> 00:07:21.999
+-36.085:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:22.000 --> 00:07:23.999
+-38.422:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:24.000 --> 00:07:25.999
+-38.676:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:26.000 --> 00:07:27.999
+-38.631:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:28.000 --> 00:07:29.999
+-36.256:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:30.000 --> 00:07:31.999
+-38.685:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:32.000 --> 00:07:33.999
+-39.242:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:34.000 --> 00:07:35.999
+-41.127:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:36.000 --> 00:07:37.999
+-34.271:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:38.000 --> 00:07:39.999
+-33.609:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:40.000 --> 00:07:41.999
+-26.404:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:42.000 --> 00:07:43.999
+-39.955:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:44.000 --> 00:07:45.999
+-32.167:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:46.000 --> 00:07:47.999
+-33.349:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:48.000 --> 00:07:49.999
+-26.444:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:50.000 --> 00:07:51.999
+-26.585:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:52.000 --> 00:07:53.999
+-28.891:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:54.000 --> 00:07:55.999
+-29.841:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:56.000 --> 00:07:57.999
+-28.759:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:07:58.000 --> 00:07:59.999
+-25.482:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:00.000 --> 00:08:01.999
+-27.895:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:02.000 --> 00:08:03.999
+-27.065:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:04.000 --> 00:08:05.999
+-29.565:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:06.000 --> 00:08:07.999
+-35.609:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:08.000 --> 00:08:09.999
+-39.243:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:10.000 --> 00:08:11.999
+-30.852:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:12.000 --> 00:08:13.999
+-30.601:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:14.000 --> 00:08:15.999
+-36.136:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:16.000 --> 00:08:17.999
+-35.155:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:18.000 --> 00:08:19.999
+-30.980:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:20.000 --> 00:08:21.999
+-33.339:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:22.000 --> 00:08:23.999
+-31.307:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:24.000 --> 00:08:25.999
+-32.316:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:26.000 --> 00:08:27.999
+-30.580:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:28.000 --> 00:08:29.999
+-29.438:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:30.000 --> 00:08:31.999
+-33.436:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:32.000 --> 00:08:33.999
+-28.790:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:34.000 --> 00:08:35.999
+-28.202:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:36.000 --> 00:08:37.999
+-32.909:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:38.000 --> 00:08:39.999
+-30.789:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:40.000 --> 00:08:41.999
+-29.889:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:42.000 --> 00:08:43.999
+-33.364:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:44.000 --> 00:08:45.999
+-32.520:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:46.000 --> 00:08:47.999
+-32.064:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:48.000 --> 00:08:49.999
+-32.980:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:50.000 --> 00:08:51.999
+-31.410:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:52.000 --> 00:08:53.999
+-33.013:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:54.000 --> 00:08:55.999
+-34.675:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:56.000 --> 00:08:57.999
+-34.071:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:08:58.000 --> 00:08:59.999
+-32.532:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:00.000 --> 00:09:01.999
+-28.670:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:02.000 --> 00:09:03.999
+-26.816:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:04.000 --> 00:09:05.999
+-22.476:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:06.000 --> 00:09:07.999
+-22.877:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:08.000 --> 00:09:09.999
+-19.860:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:10.000 --> 00:09:11.999
+-28.256:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:12.000 --> 00:09:13.999
+-32.477:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:14.000 --> 00:09:15.999
+-34.428:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:16.000 --> 00:09:17.999
+-36.181:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:18.000 --> 00:09:19.999
+-35.487:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:20.000 --> 00:09:21.999
+-33.580:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:22.000 --> 00:09:23.999
+-33.688:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:24.000 --> 00:09:25.999
+-23.218:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:26.000 --> 00:09:27.999
+-32.570:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:28.000 --> 00:09:29.999
+-36.267:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:30.000 --> 00:09:31.999
+-27.388:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:32.000 --> 00:09:33.999
+-26.095:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:34.000 --> 00:09:35.999
+-25.371:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:36.000 --> 00:09:37.999
+-20.687:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:38.000 --> 00:09:39.999
+-21.926:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:40.000 --> 00:09:41.999
+-38.992:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:42.000 --> 00:09:43.999
+-49.321:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:44.000 --> 00:09:45.999
+-51.465:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:46.000 --> 00:09:47.999
+-36.644:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:48.000 --> 00:09:49.999
+-33.805:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:50.000 --> 00:09:51.999
+-37.846:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:52.000 --> 00:09:53.999
+-27.869:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:54.000 --> 00:09:55.999
+-24.994:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:56.000 --> 00:09:57.999
+-24.993:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:09:58.000 --> 00:09:59.999
+-29.879:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:00.000 --> 00:10:01.999
+-29.774:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:02.000 --> 00:10:03.999
+-36.270:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:04.000 --> 00:10:05.999
+-23.481:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:06.000 --> 00:10:07.999
+-22.069:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:08.000 --> 00:10:09.999
+-31.570:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:10.000 --> 00:10:11.999
+-36.292:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:12.000 --> 00:10:13.999
+-43.525:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:14.000 --> 00:10:15.999
+-32.739:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:16.000 --> 00:10:17.999
+-26.767:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:18.000 --> 00:10:19.999
+-28.563:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:20.000 --> 00:10:21.999
+-29.387:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:22.000 --> 00:10:23.999
+-33.970:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:24.000 --> 00:10:25.999
+-25.717:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:26.000 --> 00:10:27.999
+-23.744:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:28.000 --> 00:10:29.999
+-23.927:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:30.000 --> 00:10:31.999
+-27.653:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:32.000 --> 00:10:33.999
+-29.929:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:34.000 --> 00:10:35.999
+-28.962:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:36.000 --> 00:10:37.999
+-30.341:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:38.000 --> 00:10:39.999
+-30.747:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:40.000 --> 00:10:41.999
+-28.963:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:42.000 --> 00:10:43.999
+-34.060:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:44.000 --> 00:10:45.999
+-23.711:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:46.000 --> 00:10:47.999
+-20.969:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:48.000 --> 00:10:49.999
+-17.309:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:50.000 --> 00:10:51.999
+-19.529:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:52.000 --> 00:10:53.999
+-24.774:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:54.000 --> 00:10:55.999
+-28.565:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:56.000 --> 00:10:57.999
+-33.150:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:10:58.000 --> 00:10:59.999
+-40.682:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:00.000 --> 00:11:01.999
+-34.841:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:02.000 --> 00:11:03.999
+-35.576:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:04.000 --> 00:11:05.999
+-38.540:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:06.000 --> 00:11:07.999
+-37.482:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:08.000 --> 00:11:09.999
+-30.831:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:10.000 --> 00:11:11.999
+-36.034:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:12.000 --> 00:11:13.999
+-32.577:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:14.000 --> 00:11:15.999
+-32.338:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:16.000 --> 00:11:17.999
+-33.153:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:18.000 --> 00:11:19.999
+-36.013:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:20.000 --> 00:11:21.999
+-19.517:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:22.000 --> 00:11:23.999
+-19.131:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:24.000 --> 00:11:25.999
+-21.820:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:26.000 --> 00:11:27.999
+-23.692:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:28.000 --> 00:11:29.999
+-24.795:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:30.000 --> 00:11:31.999
+-23.470:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:32.000 --> 00:11:33.999
+-22.933:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:34.000 --> 00:11:35.999
+-27.666:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:36.000 --> 00:11:37.999
+-31.351:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:38.000 --> 00:11:39.999
+-31.831:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:40.000 --> 00:11:41.999
+-29.368:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:42.000 --> 00:11:43.999
+-29.260:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:44.000 --> 00:11:45.999
+-29.716:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:46.000 --> 00:11:47.999
+-26.406:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:48.000 --> 00:11:49.999
+-34.493:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:50.000 --> 00:11:51.999
+-51.097:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:52.000 --> 00:11:53.999
+-91.742:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:54.000 --> 00:11:55.999
+-111.968:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:56.000 --> 00:11:57.999
+-112.860:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+
+00:11:58.000 --> 00:11:59.999
+-113.121:MEASUREMENT=lavfi.astats.Overall.RMS_level:COMMENT=2-sec avg
+

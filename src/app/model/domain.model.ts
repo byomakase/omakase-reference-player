@@ -15,8 +15,6 @@
  */
 
 export interface SourceInfo {
-  id: string;
-  name: string;
   modified: string;
   format: string;
   size_kb: number;
@@ -24,6 +22,13 @@ export interface SourceInfo {
   duration_sec: number;
   video_tracks: number;
   audio_tracks: number;
+}
+
+export interface Source {
+  id: string;
+  name: string;
+  info?: SourceInfo;
+  metadata?: MediaInfo;
 }
 
 export interface Container {
@@ -100,18 +105,22 @@ export interface MediaInfo {
   general_properties: GeneralProperties;
 }
 
-export interface MasterManifest {
-  id: string;
+export type MediaType = 'hls' | 'mp4';
+export interface MainMedia {
+  id?: string;
   name: string;
-  width?: number;
-  height?: number;
-  bitrate_kb?: number;
+  type: MediaType;
   codec?: string;
   color_range?: string;
   frame_rate?: string;
   url: string;
   drop_frame?: boolean;
   ffom?: string;
+}
+
+export interface Mp4MainMedia extends MainMedia {
+  id: string;
+  frame_rate: string;
 }
 
 export type ChannelType = 'L' | 'R' | 'C' | 'LS' | 'RS' | 'LFE';
@@ -141,34 +150,36 @@ export interface ChartAnalysis extends Analysis {
 
 export type AnalysisType = 'event' | 'events' | 'chart';
 export type AnalysisVisualization = 'marker' | 'point' | 'bar' | 'led' | 'line';
-
+export type MediaTrackType = 'video' | 'audio' | 'text';
+export interface Style {
+  hidden?: boolean;
+}
 export interface MediaTrack {
   id: string;
   name: string;
   source_id: string;
+  type: MediaTrackType;
+  visual_reference?: VisualReference[];
+  analysis?: Analysis[];
+  style?: Style;
 }
 
 export interface VideoMediaTrack extends MediaTrack {
-  manifest_ids: string[];
-  visual_reference: VisualReference[];
-  analysis: Analysis[];
+  // manifest_ids: string[];
+  // visual_reference: VisualReference[];
+  // analysis: Analysis[];
 }
 
 export interface AudioMediaTrack extends MediaTrack {
-  program_name: string;
-  sound_field: string;
+  media_id: string;
   channel_layout?: string;
   language?: string;
-  analysis?: Analysis[];
-  visual_reference?: VisualReference[]; // can appear in media files without channels (ie. audio only files)
 }
 
-export type TextMediaTrackUsageType = 'subtitles' | 'fn_subtitles' | 'captions';
+// export type TextMediaTrackUsageType = 'subtitles' | 'fn_subtitles' | 'captions';
 
 export interface TextMediaTrack extends MediaTrack {
-  program_name: string;
-  usage_type?: TextMediaTrackUsageType;
-  analysis?: Analysis[];
+  media_id: string;
   language?: string;
 }
 
@@ -218,10 +229,11 @@ export interface SegmentationAction {
 export interface Presentation {
   layout?: Layout;
   info_tabs: InfoTab[];
-  timeline_configuration: {
-    track_ordering?: string[];
-    visible_tracks?: string[];
-    visible_analysis_groups?: string[];
+  timeline: {
+    tracks: MediaTrack[];
+    configuration?: {
+      visible_analysis_groups?: string[];
+    };
   };
   segmentation_actions: SegmentationAction[];
 }
@@ -257,6 +269,13 @@ export interface BearerAuthenticationData {
   token: string;
 }
 
+export type SidecarEntryType = 'audio' | 'text';
+export interface SidecarEntry {
+  id: string;
+  type: SidecarEntryType;
+  url: string;
+}
+
 export interface SessionData {
   version: string;
   session?: {
@@ -268,12 +287,14 @@ export interface SessionData {
       media_authentication?: AuthenticationData;
     };
   };
+  media: {
+    main: MainMedia[];
+    sidecars: SidecarEntry[];
+  };
   data: {
-    source_info?: SourceInfo[];
-    media_info?: MediaInfo[];
-    master_manifests: MasterManifest[];
     media_tracks: MediaTracks;
   };
+  sources?: Source[];
   presentation?: Presentation;
 }
 

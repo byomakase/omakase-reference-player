@@ -1,27 +1,19 @@
 import {CommonModule} from '@angular/common';
 import {Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {SharedModule} from '../../shared.module';
-import {Observable, Subject, takeUntil} from 'rxjs';
+import {Observable, Subject, Subscription, takeUntil} from 'rxjs';
 
 @Component({
   selector: 'app-inline-edit',
   standalone: true,
   imports: [CommonModule, SharedModule],
   template: `
-    @if (editing) {
-      <input #input class="inline-edit-input" [value]="displayText" (click)="$event.stopPropagation()" />
-      <div class="inline-edit-actions">
-        <span (click)="edited.emit(input.value); editing = false"><i appIcon="confirm"></i></span>
-        <span (click)="editing = false"><i appIcon="reject"></i></span>
-      </div>
-    } @else {
-      <div class="inline-edit-text" (click)="handleClick()">{{ displayText }}</div>
-    }
+    <input [ngStyle]="{display: editing ? 'block' : 'none'}" #input class="inline-edit-input" [value]="displayText" (click)="$event.stopPropagation()" />
+    <div [ngStyle]="{display: editing ? 'none' : 'block'}" class="inline-edit-text" (click)="handleClick()">{{ displayText }}</div>
   `,
 })
-export class InlineEditComponent implements OnInit, OnDestroy {
+export class InlineEditComponent implements OnDestroy {
   @Input() displayText!: string;
-  @Input() edit$?: Observable<void>;
 
   @Output() clicked: EventEmitter<void> = new EventEmitter();
   @Output() edited: EventEmitter<string> = new EventEmitter();
@@ -33,23 +25,48 @@ export class InlineEditComponent implements OnInit, OnDestroy {
   private _clicked = false;
   private _doubleClickTime = 200;
   private _destroyed$ = new Subject<void>();
+  private _open$?: Observable<void>;
+  private _close$?: Observable<boolean>;
+  private _openSubscription?: Subscription;
+  private _closeSubscription?: Subscription;
 
-  constructor(private elementRef: ElementRef) {}
-
-  ngOnInit() {
-    if (this.edit$) {
-      this.edit$.pipe(takeUntil(this._destroyed$)).subscribe(() => {
-        this.openEdit();
-      });
+  @Input()
+  set open$(value: Observable<void>) {
+    if (this._openSubscription) {
+      this._openSubscription.unsubscribe();
     }
+    this._open$ = value;
+    this._openSubscription = this._open$.pipe(takeUntil(this._destroyed$)).subscribe(() => {
+      this.openEdit();
+    });
   }
+
+  @Input()
+  set close$(value: Observable<boolean>) {
+    if (this._closeSubscription) {
+      this._closeSubscription.unsubscribe();
+    }
+    this._close$ = value;
+    this._closeSubscription = this._close$.pipe(takeUntil(this._destroyed$)).subscribe((saveValue) => {
+      if (this.editing) {
+        if (saveValue) {
+          this.edited.next(this.inputEl.nativeElement.value);
+        } else {
+          this.inputEl.nativeElement.value = this.displayText;
+        }
+        this.editing = false;
+      }
+    });
+  }
+
+  constructor() {}
 
   ngOnDestroy() {
     this._destroyed$.next();
   }
 
   handleClick() {
-    if (this.edit$) {
+    if (this.open$) {
       return;
     }
     if (this._clicked) {
@@ -69,34 +86,9 @@ export class InlineEditComponent implements OnInit, OnDestroy {
   }
 
   openEdit() {
-    requestAnimationFrame(() => {
-      this.editing = true;
-      requestAnimationFrame(() => {
-        console.log('open edit input el', this.inputEl);
-        console.log('open edit editing', this.editing);
-
-        this.inputEl.nativeElement.focus();
-      });
+    this.editing = true;
+    setTimeout(() => {
+      this.inputEl.nativeElement.focus();
     });
-  }
-
-  @HostListener('document:click', ['$event.target'])
-  public onClick(targetElement: HTMLElement): void {
-    const clickedInside = this.elementRef.nativeElement.contains(targetElement);
-    if (!clickedInside) {
-      this.editing = false;
-    }
-  }
-
-  @HostListener('document:keydown', ['$event'])
-  onDocumentKeypress(event: KeyboardEvent) {
-    if (this.editing && event.target === this.inputEl.nativeElement) {
-      if (event.code === 'Enter') {
-        this.edited.next(this.inputEl.nativeElement.value);
-        this.editing = false;
-      } else if (event.code === 'Escape') {
-        this.editing = false;
-      }
-    }
   }
 }

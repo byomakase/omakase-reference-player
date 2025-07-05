@@ -303,7 +303,7 @@ export class OmakasePlayerUtil {
 
       // Toggle Sound
       if (event.code === 'KeyS' && !event.shiftKey && !event.ctrlKey) {
-        omakasePlayer.video.toggleMuteUnmute();
+        omakasePlayer.audio.toggleAudioOutputMuteUnmute();
         return true;
       }
 

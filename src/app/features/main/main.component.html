@@ -78,10 +78,11 @@
               [disabled]="!groupingLanes"
               [visible]="groupingLanesVisible"
               [analysisGroups]="analysisGroups"
+              [selectedGroupsMap]="analysisGroupsVisibility"
               [isSegmentationEnabled]="isSegmentationModeVisible"
               [isAnnotationEnabled]="isAnnotationModeVisible"
               (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
-              (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
+              (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged()"
               (timelineConfiguratorPanelTrigger)="handleTimelineConfiguratorPanelClick()"
               [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
           </div>
@@ -104,9 +105,10 @@
             <div appOmakasePlayerVideo [config]="OmakasePlayerConstants.OMAKASE_PLAYER_CONFIG"></div>
             <div
               appPlayerControls
+              [areSidecarsLoaded]="sidecarsLoaded$ | async"
               [isVttLoading]="disableSessionButtons | async"
-              [masterManifests]="masterManifests"
-              [currentMasterManifest]="currentMasterManifest"
+              [mainMedias]="mainMedias"
+              [currentMainMedia]="currentMainMedia"
               (onManifestChange)="handleManifestChange($event)"></div>
           } @else {
             <div class="placeholder placeholder-wave placeholder-player w-100"></div>
@@ -129,7 +131,7 @@
             [analysisGroups]="analysisGroups"
             [isSegmentationEnabled]="isSegmentationModeVisible"
             (groupingLanesVisibilityTrigger)="handleGroupingLanesVisibility($event)"
-            (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged($event)"
+            (analysisGroupsVisibleChangedTrigger)="handleAnalysisGroupsVisibleChanged()"
             (timelineConfiguratorPanelTrigger)="handleTimelineConfiguratorPanelClick()"
             [ngClass]="{'has-border': hasTelemetryLane || isVuMeterSupported}"></div>
         </div>

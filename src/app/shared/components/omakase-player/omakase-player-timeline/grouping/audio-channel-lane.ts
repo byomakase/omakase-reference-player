@@ -17,7 +17,7 @@
 import {AudioTrackLane, AudioTrackLaneConfig, ClickEvent, ConfigWithOptionalStyle, OmpAudioTrack, TextLabel, Timeline, VideoControllerApi} from '@byomakase/omakase-player';
 import {AudioMediaTrack, VisualReference} from '../../../../../model/domain.model';
 import {StringUtil} from '../../../../../util/string-util';
-import {merge, Observable, switchMap, take, takeUntil} from 'rxjs';
+import {filter, merge, Observable, switchMap, take, takeUntil} from 'rxjs';
 import {SoundControlTextButton} from './sound-control/sound-control-text-button';
 import {Constants} from '../../../../constants/constants';
 import {LayoutService} from '../../../../../core/layout/layout.service';
@@ -31,6 +31,7 @@ export interface AudioChannelLaneConfig extends AudioTrackLaneConfig {
   audioGroupingLane: AudioGroupingLane;
   channelIndex: number;
   channelsCount: number;
+  isSidecar: boolean;
 }
 
 export class AudioChannelLane extends AudioTrackLane {
@@ -42,6 +43,10 @@ export class AudioChannelLane extends AudioTrackLane {
   private _channelOrderLabel?: TextLabel | undefined;
   private _soundControlSolo?: SoundControlTextButton;
   private _soundControlMute?: SoundControlTextButton;
+
+  private _isSoloed: boolean = false;
+  private _isMuted: boolean = false;
+  private _isSidecar: boolean = false;
 
   constructor(
     config: ConfigWithOptionalStyle<AudioChannelLaneConfig>,
@@ -55,6 +60,10 @@ export class AudioChannelLane extends AudioTrackLane {
 
     if (config.visualReference.type === 'waveform') {
       this.vttUrl = this._visualReference.url;
+    }
+
+    if (config.isSidecar) {
+      this._isSidecar = config.isSidecar;
     }
   }
 
@@ -113,7 +122,13 @@ export class AudioChannelLane extends AudioTrackLane {
       });
     }
 
-    merge(this._videoController!.onAudioLoaded$, this._videoController!.onAudioSwitched$, this._videoController!.onVolumeChange$, this._audioGroupingLane.onSoloMuteChecked$)
+    merge(
+      this._videoController!.onAudioLoaded$,
+      this._videoController!.onAudioSwitched$,
+      this._videoController!.onVolumeChange$,
+      this._videoController!.onAudioOutputVolumeChange$,
+      this._videoController!.onSidecarAudioChange$
+    )
       .pipe(switchMap((value) => [value])) // // each new emission switches to latest, racing observables
       .pipe(takeUntil(this._destroyed$))
       .subscribe({
@@ -122,28 +137,94 @@ export class AudioChannelLane extends AudioTrackLane {
         },
       });
 
-    this._soundControlSolo?.timelineNode.onClick$.pipe(takeUntil(this._destroyed$)).subscribe({
-      next: (event: ClickEvent) => {
-        this.setAsActiveAudioTrack()
-          .pipe(take(1))
-          .subscribe({
-            next: () => {
-              this._audioGroupingLane.toggleSolo(this.visualReference.channel, (this._config as AudioChannelLaneConfig).channelIndex);
-            },
-          });
+    this._videoController!.onSidecarAudioInputSoloMute$.pipe(takeUntil(this._destroyed$)).subscribe({
+      next: (event) => {
+        const audioRouterInputSoloMuteState = event?.sidecarAudioInputSoloMuteStates.find((state) => state.audioTrack.id === this._audioMediaTrack.media_id)?.audioRouterInputSoloMuteState;
+        // debugger;
+        if (audioRouterInputSoloMuteState) {
+          if (audioRouterInputSoloMuteState.inputNumber === this.channelIndex) {
+            this._isSoloed = audioRouterInputSoloMuteState.soloed;
+            this._isMuted = audioRouterInputSoloMuteState.muted;
+          }
+        } else {
+          this._isSoloed = false;
+          this._isMuted = false;
+        }
+
+        this.updateStyles();
       },
     });
 
-    this._soundControlMute?.timelineNode.onClick$.pipe(takeUntil(this._destroyed$)).subscribe({
-      next: (event: ClickEvent) => {
-        this.setAsActiveAudioTrack()
-          .pipe(take(1))
-          .subscribe({
-            next: () => {
-              let index = (this._config as AudioChannelLaneConfig).channelIndex;
-              this._audioGroupingLane.toggleMute(this.visualReference.channel, (this._config as AudioChannelLaneConfig).channelIndex);
-            },
-          });
+    if (!this._isSidecar) {
+      this._videoController!.onMainAudioInputSoloMute$.pipe(takeUntil(this._destroyed$)).subscribe({
+        next: (event) => {
+          const audioRouterInputSoloMuteState = event?.mainAudioInputSoloMuteState.audioRouterInputSoloMuteState;
+          if (audioRouterInputSoloMuteState) {
+            if (audioRouterInputSoloMuteState.inputNumber === this.channelIndex) {
+              this._isSoloed = audioRouterInputSoloMuteState.soloed;
+              this._isMuted = audioRouterInputSoloMuteState.muted;
+            }
+          } else {
+            this._isSoloed = false;
+            this._isMuted = false;
+          }
+
+          this.updateStyles();
+        },
+      });
+    }
+
+    this._soundControlSolo?.timelineNode.onClick$
+      .pipe(
+        filter(() => !this.isDisabled),
+        takeUntil(this._destroyed$)
+      )
+      .subscribe({
+        next: (event: ClickEvent) => {
+          this.setAsActiveAudioTrack()
+            .pipe(take(1))
+            .subscribe({
+              next: () => {
+                if (this.isSidecar) {
+                  this._videoController!.toggleSidecarAudioRouterSolo(this._audioTrack!.id, {input: this.channelIndex});
+                } else {
+                  this._videoController!.toggleMainAudioRouterSolo({input: this.channelIndex});
+                }
+              },
+            });
+        },
+      });
+
+    this._soundControlSolo?.timelineNode.onMouseEnter$.pipe(takeUntil(this._destroyed$)).subscribe({
+      next: () => {
+        document.body.style.cursor = this.isDisabled ? 'default' : 'pointer';
+      },
+    });
+
+    this._soundControlMute?.timelineNode.onClick$
+      .pipe(
+        filter(() => !this.isDisabled),
+        takeUntil(this._destroyed$)
+      )
+      .subscribe({
+        next: (event: ClickEvent) => {
+          this.setAsActiveAudioTrack()
+            .pipe(take(1))
+            .subscribe({
+              next: () => {
+                if (this.isSidecar) {
+                  this._videoController!.toggleSidecarAudioRouterMute(this._audioTrack!.id, {input: this.channelIndex});
+                } else {
+                  this._videoController!.toggleMainAudioRouterMute({input: this.channelIndex});
+                }
+              },
+            });
+        },
+      });
+
+    this._soundControlMute?.timelineNode.onMouseEnter$.pipe(takeUntil(this._destroyed$)).subscribe({
+      next: () => {
+        document.body.style.cursor = this.isDisabled ? 'default' : 'pointer';
       },
     });
   }
@@ -151,11 +232,21 @@ export class AudioChannelLane extends AudioTrackLane {
   setAsActiveAudioTrack(toggleMuteIfActive = true): Observable<void> {
     return passiveObservable((observer) => {
       if (!this.isActive) {
+        let o$: Observable<void>;
+        if (this.isSidecar) {
+          o$ = this._videoController!.updateSidecarAudioRouterConnections(
+            this.audioMediaTrack.media_id,
+            this._videoController!.getSidecarAudioRouterInitialRoutingConnections(this.audioMediaTrack.media_id)!
+          );
+        } else {
+          o$ = this._videoController!.updateMainAudioRouterConnections(this._videoController!.getMainAudioRouterInitialRoutingConnections()!);
+        }
         this._audioGroupingLane
           .setAsActiveAudioTrack(toggleMuteIfActive)
           .pipe(take(1))
           .subscribe({
             next: () => {
+              o$.subscribe(() => nextCompleteObserver(observer));
               nextCompleteObserver(observer);
             },
             error: (error) => {
@@ -173,7 +264,7 @@ export class AudioChannelLane extends AudioTrackLane {
       return;
     }
 
-    let isMuted = this._videoController.isMuted();
+    let isMuted = this._videoController.isAudioOutputMuted();
 
     if (this.isActive) {
       this.style = {
@@ -204,16 +295,33 @@ export class AudioChannelLane extends AudioTrackLane {
   }
 
   get isActive(): boolean {
+    if (this.isSidecar) {
+      return this.isSidecarActive;
+    }
     let currentAudioTrack = this._videoController!.getActiveAudioTrack();
-    return !!currentAudioTrack && !!this._audioTrack && this._audioTrack.id === currentAudioTrack.id;
+    return !!currentAudioTrack && !!this._audioTrack && this._audioTrack.id === currentAudioTrack.id && !this._videoController!.isMuted();
+  }
+
+  get activeTrack() {
+    if (this._videoController!.isMuted()) {
+      return this._videoController!.getActiveSidecarAudioTracks().at(0);
+    } else {
+      return this._videoController!.getActiveAudioTrack();
+    }
+  }
+
+  get isSidecarActive() {
+    return (
+      !!this._audioTrack &&
+      !!this._videoController
+        ?.getActiveSidecarAudioTracks()
+        .map((track) => track.id)
+        .includes(this._audioTrack.id)
+    );
   }
 
   get audioMediaTrack(): AudioMediaTrack {
     return this._audioMediaTrack;
-  }
-
-  get visualReference(): VisualReference {
-    return this._visualReference;
   }
 
   get audioTrack(): OmpAudioTrack | undefined {
@@ -221,7 +329,7 @@ export class AudioChannelLane extends AudioTrackLane {
   }
 
   get name(): string {
-    return this._audioMediaTrack.program_name;
+    return this._audioMediaTrack.media_id;
   }
 
   set audioTrack(value: OmpAudioTrack | undefined) {
@@ -229,11 +337,19 @@ export class AudioChannelLane extends AudioTrackLane {
     this.updateStyles();
   }
 
+  get channelIndex(): number {
+    return (this._config as AudioChannelLaneConfig).channelIndex;
+  }
+
   get isSoloed(): boolean {
-    return this._audioGroupingLane.soloedChannels[(this._config as AudioChannelLaneConfig).channelIndex];
+    return this._isSoloed;
   }
 
   get isMuted(): boolean {
-    return this._audioGroupingLane.mutedChannels[(this._config as AudioChannelLaneConfig).channelIndex];
+    return this._isMuted;
+  }
+
+  get isSidecar(): boolean {
+    return this._isSidecar;
   }
 }

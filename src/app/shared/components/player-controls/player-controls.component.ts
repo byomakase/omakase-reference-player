@@ -21,7 +21,7 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular
 import {filter, Subject, takeUntil} from 'rxjs';
 import {IconName} from '../icon/icon.service';
 import {completeSub} from '../../../util/rx-util';
-import {MasterManifest} from '../../../model/domain.model';
+import {MainMedia} from '../../../model/domain.model';
 import {OmakasePlayerUtil} from '../omakase-player/omakase-player-util';
 import {OmpApiService} from '../omakase-player/omp-api.service';
 
@@ -81,11 +81,11 @@ interface PlayerControlsFormGroup {
     <div class="col-4 d-flex justify-content-end">
       @if (showManifests) {
         <div class="btn-group btn-group-manifest" ngbDropdown role="group" [placement]="'top-start'">
-          <button type="button" class="btn btn-primary btn-manifest" ngbDropdownToggle>{{ currentMasterManifest?.name }} <i appIcon="arrow-down"></i></button>
+          <button type="button" class="btn btn-primary btn-manifest" ngbDropdownToggle>{{ currentMainMedia?.name }} <i appIcon="arrow-down"></i></button>
           <div class="dropdown-menu" ngbDropdownMenu>
-            @for (masterManifest of filteredMasterManifests; track masterManifest) {
-              <button ngbDropdownItem (click)="buttonClickSetManifest(masterManifest)" class="text-center" [class.active]="masterManifest.id === currentMasterManifest?.id" [disabled]="isDisabled">
-                {{ masterManifest.name }}
+            @for (mainMedia of filteredMainMedias; track mainMedia) {
+              <button ngbDropdownItem (click)="buttonClickSetManifest(mainMedia)" class="text-center" [class.active]="mainMedia.id === currentMainMedia?.id" [disabled]="isDisabled">
+                {{ mainMedia.name }}
               </button>
             }
           </div>
@@ -95,7 +95,7 @@ interface PlayerControlsFormGroup {
         <button type="button" class="btn btn-safezone" (click)="buttonClickSafezone()" [disabled]="isDisabled">
           <i [appIcon]="safeZoneIsOn ? 'safezone-on' : 'safezone-off'"></i>
         </button>
-        <button type="button" class="btn btn-detach" (click)="buttonClickToggleAttachDetach()" [disabled]="isDisabled || !isToggleAttachDetachEnabled">
+        <button type="button" class="btn btn-detach" (click)="buttonClickToggleAttachDetach()" [disabled]="!areSidecarsLoaded || isDisabled || !isToggleAttachDetachEnabled">
           <i [appIcon]="iconAttachDetach"></i>
         </button>
         <button type="button" class="btn btn-fullscreen" (click)="buttonClickFullscreen()" [disabled]="isDisabled || isFullscreenDisabled">
@@ -113,7 +113,10 @@ export class PlayerControlsComponent {
   isVttLoading!: boolean | null;
 
   @Output()
-  readonly onManifestChange: EventEmitter<MasterManifest> = new EventEmitter<MasterManifest>();
+  readonly onManifestChange: EventEmitter<MainMedia> = new EventEmitter<MainMedia>();
+
+  @Input()
+  areSidecarsLoaded!: boolean | null;
 
   controlsState: ControlsState = {
     seekingFfPrevious: false,
@@ -130,9 +133,9 @@ export class PlayerControlsComponent {
 
   safeZoneIsOn = false;
 
-  private _masterManifests?: MasterManifest[];
-  private _currentMasterManifest?: MasterManifest;
-  private _filteredMasterManifests?: MasterManifest[];
+  private _mainMedias?: MainMedia[];
+  private _currentMainMedia?: MainMedia;
+  private _filteredMainMedia?: MainMedia[];
 
   private _videoApiBreaker$ = new Subject<void>();
   private _destroyed$ = new Subject<void>();
@@ -157,8 +160,8 @@ export class PlayerControlsComponent {
             )
             .subscribe({
               next: (event) => {
-                this.updateVolumeProgress(this.ompApiService.api!.video.getVolume());
-                if (this.ompApiService.api!.video.isMuted()) {
+                this.updateVolumeProgress(this.ompApiService.api!.audio.getAudioOutputVolume());
+                if (this.ompApiService.api!.audio.isAudioOutputMuted()) {
                   this.playerControlsFormGroup.disable({emitEvent: false});
                 } else {
                   this.playerControlsFormGroup.enable({emitEvent: false});
@@ -166,10 +169,10 @@ export class PlayerControlsComponent {
               },
             });
 
-          this.ompApiService.api!.video.onVolumeChange$.pipe(takeUntil(this._videoApiBreaker$)).subscribe({
+          this.ompApiService.api!.audio.onAudioOutputVolumeChange$.pipe(takeUntil(this._videoApiBreaker$)).subscribe({
             next: (event) => {
               this.updateVolumeProgress(event.volume);
-              if (this.ompApiService.api!.video.isMuted()) {
+              if (this.ompApiService.api!.audio.isAudioOutputMuted()) {
                 this.playerControlsFormGroup.disable({emitEvent: false});
               } else {
                 this.playerControlsFormGroup.enable({emitEvent: false});
@@ -182,10 +185,10 @@ export class PlayerControlsComponent {
     this.playerControlsFormGroup.controls.volume.valueChanges.pipe(takeUntil(this._destroyed$)).subscribe({
       next: (value) => {
         if (this.ompApiService.api) {
-          if (this.ompApiService.api!.video.isMuted()) {
-            this.ompApiService.api!.video.unmute();
+          if (this.ompApiService.api!.audio.isAudioOutputMuted()) {
+            this.ompApiService.api!.audio.unmuteAudioOutput();
           }
-          this.ompApiService.api!.video.setVolume(value / 100);
+          this.ompApiService.api!.audio.setAudioOutputVolume(value / 100);
         }
       },
     });
@@ -202,23 +205,23 @@ export class PlayerControlsComponent {
   }
 
   @Input()
-  set masterManifests(value: MasterManifest[] | undefined) {
-    this._masterManifests = value;
-    this._filteredMasterManifests = this._masterManifests?.filter((p) => p.id !== this._currentMasterManifest?.id);
+  set mainMedias(value: MainMedia[] | undefined) {
+    this._mainMedias = value;
+    this._filteredMainMedia = this._mainMedias?.filter((p) => p.id !== this._currentMainMedia?.id);
   }
 
   @Input()
-  set currentMasterManifest(value: MasterManifest | undefined) {
-    this._currentMasterManifest = value;
-    this._filteredMasterManifests = this._masterManifests?.filter((p) => p.id !== this._currentMasterManifest?.id);
+  set currentMainMedia(value: MainMedia | undefined) {
+    this._currentMainMedia = value;
+    this._filteredMainMedia = this._mainMedias?.filter((p) => p.id !== this._currentMainMedia?.id);
   }
 
-  get currentMasterManifest(): MasterManifest | undefined {
-    return this._currentMasterManifest;
+  get currentMainMedia(): MainMedia | undefined {
+    return this._currentMainMedia;
   }
 
-  get filteredMasterManifests(): MasterManifest[] | undefined {
-    return this._filteredMasterManifests;
+  get filteredMainMedias(): MainMedia[] | undefined {
+    return this._filteredMainMedia;
   }
 
   updateVolumeProgress(volume: number) {
@@ -330,14 +333,14 @@ export class PlayerControlsComponent {
     this.ompApiService.api?.video.setPlaybackRate(value);
   }
 
-  buttonClickSetManifest(masterManifest: MasterManifest) {
-    if (masterManifest.id !== this._currentMasterManifest?.id) {
-      this.onManifestChange.next(masterManifest);
+  buttonClickSetManifest(mainMedia: MainMedia) {
+    if (mainMedia.id !== this._currentMainMedia?.id) {
+      this.onManifestChange.next(mainMedia);
     }
   }
 
   buttonVolumeClick() {
-    this.ompApiService.api?.video.toggleMuteUnmute();
+    this.ompApiService.api?.audio.toggleAudioOutputMuteUnmute();
   }
 
   get iconAttachDetach(): IconName {
@@ -369,20 +372,20 @@ export class PlayerControlsComponent {
   }
 
   get volumeIcon(): IconName {
-    if (this.ompApiService.api) {
-      if (this.ompApiService.api.video.isMuted()) {
+    if (this.isDisabled) {
+      return 'volume-zero';
+    } else {
+      if (this.ompApiService.api!.audio.isAudioOutputMuted()) {
         return 'volume-muted';
       } else {
-        let volume: number = this.ompApiService.api.video.getVolume();
+        let volume: number = this.ompApiService.api!.audio.getAudioOutputVolume();
         return volume === 0 ? 'volume-zero' : volume >= 0.5 ? 'volume' : 'volume-low';
       }
-    } else {
-      return 'volume-zero';
     }
   }
 
   get showManifests(): boolean {
-    return !!this._filteredMasterManifests && this._filteredMasterManifests.length > 0;
+    return !!this._filteredMainMedia && this._filteredMainMedia.length > 0;
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -392,7 +395,7 @@ export class PlayerControlsComponent {
       let step = 10;
       let upOrDown = event.shiftKey ? 1 : -1;
 
-      let newVolume = this.ompApiService.api.video.getVolume() * 100 + step * upOrDown;
+      let newVolume = this.ompApiService.api.audio.getAudioOutputVolume() * 100 + step * upOrDown;
       if (newVolume >= 100) {
         newVolume = 100;
       } else if (newVolume <= 0) {

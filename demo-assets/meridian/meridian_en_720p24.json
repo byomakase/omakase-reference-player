@@ -1,0 +1,1103 @@
+{
+  "version": "3.0",
+  "sources": [
+    {
+      "name": "meridian_en_720p24.mp4",
+      "id": "V1",
+      "info": {
+        "format": "MP4",
+        "bandwidth": "2 633 kb/s",
+        "duration": 718.958,
+        "video_tracks": 1,
+        "audio_tracks": 1,
+        "channel_count": 2
+      },
+      "metadata": {
+        "track": [
+          {
+            "@type": "General",
+            "Count": "349",
+            "StreamCount": "1",
+            "StreamKind": "General",
+            "StreamKind_String": "General",
+            "StreamKindID": "0",
+            "VideoCount": "1",
+            "AudioCount": "1",
+            "Video_Format_List": "AVC",
+            "Video_Format_WithHint_List": "AVC",
+            "Video_Codec_List": "AVC",
+            "Audio_Format_List": "AAC LC",
+            "Audio_Format_WithHint_List": "AAC LC",
+            "Audio_Codec_List": "AAC LC",
+            "Audio_Language_List": "English",
+            "Audio_Channels_Total": "2",
+            "CompleteName": "sources/meridian_en_720p24.mp4",
+            "FolderName": "sources",
+            "FileNameExtension": "meridian_en_720p24.mp4",
+            "FileName": "meridian_en_720p24",
+            "FileExtension": "mp4",
+            "Format": "MPEG-4",
+            "Format_String": "MPEG-4",
+            "Format_Extensions": "braw mov mp4 m4v m4a m4b m4p m4r 3ga 3gpa 3gpp 3gp 3gpp2 3g2 k3g jpm jpx mqv ismv isma ismt f4a f4b f4v",
+            "Format_Commercial": "MPEG-4",
+            "InternetMediaType": "video/mp4",
+            "CodecID": "M4V ",
+            "CodecID_String": "M4V  (isom/avc1/mp42)",
+            "CodecID_Compatible": "isom/avc1/mp42",
+            "FileSize": "236612073",
+            "FileSize_String": "226 MiB",
+            "FileSize_String1": "226 MiB",
+            "FileSize_String2": "226 MiB",
+            "FileSize_String3": "226 MiB",
+            "FileSize_String4": "225.7 MiB",
+            "Duration": "718.958",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 958 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.958",
+            "Duration_String4": "00:11:58:23",
+            "Duration_String5": "00:11:58.958 (00:11:58:23)",
+            "OverallBitRate_Mode": "VBR",
+            "OverallBitRate_Mode_String": "Variable",
+            "OverallBitRate": "2632833",
+            "OverallBitRate_String": "2 633 kb/s",
+            "FrameRate": "24.000",
+            "FrameRate_String": "24.000 FPS",
+            "FrameCount": "17255",
+            "StreamSize": "499575",
+            "StreamSize_String": "488 KiB (0%)",
+            "StreamSize_String1": "488 KiB",
+            "StreamSize_String2": "488 KiB",
+            "StreamSize_String3": "488 KiB",
+            "StreamSize_String4": "487.9 KiB",
+            "StreamSize_String5": "488 KiB (0%)",
+            "StreamSize_Proportion": "0.00211",
+            "HeaderSize": "499567",
+            "DataSize": "236112506",
+            "FooterSize": "0",
+            "IsStreamable": "Yes",
+            "Encoded_Date": "2025-07-01 21:13:00 UTC",
+            "Tagged_Date": "2025-07-01 21:13:00 UTC",
+            "File_Modified_Date": "2025-07-01 21:02:42 UTC",
+            "File_Modified_Date_Local": "2025-07-01 17:02:42"
+          },
+          {
+            "@type": "Video",
+            "Count": "391",
+            "StreamCount": "1",
+            "StreamKind": "Video",
+            "StreamKind_String": "Video",
+            "StreamKindID": "0",
+            "StreamOrder": "0",
+            "ID": "1",
+            "ID_String": "1",
+            "Format": "AVC",
+            "Format_String": "AVC",
+            "Format_Info": "Advanced Video Codec",
+            "Format_Url": "http://developers.videolan.org/x264.html",
+            "Format_Commercial": "AVC",
+            "Format_Profile": "High",
+            "Format_Level": "3.1",
+            "Format_Settings": "CABAC / 4 Ref Frames",
+            "Format_Settings_CABAC": "Yes",
+            "Format_Settings_CABAC_String": "Yes",
+            "Format_Settings_RefFrames": "4",
+            "Format_Settings_RefFrames_String": "4 frames",
+            "InternetMediaType": "video/H264",
+            "CodecID": "avc1",
+            "CodecID_Info": "Advanced Video Coding",
+            "Duration": "718.958",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 958 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.958",
+            "Duration_String4": "00:11:58:23",
+            "Duration_String5": "00:11:58.958 (00:11:58:23)",
+            "BitRate_Mode": "CBR",
+            "BitRate_Mode_String": "Constant",
+            "BitRate": "2499968",
+            "BitRate_String": "2 500 kb/s",
+            "BitRate_Maximum": "5195160",
+            "BitRate_Maximum_String": "5 195 kb/s",
+            "Width": "1280",
+            "Width_String": "1 280 pixels",
+            "Height": "720",
+            "Height_String": "720 pixels",
+            "Sampled_Width": "1280",
+            "Sampled_Height": "720",
+            "PixelAspectRatio": "1.000",
+            "DisplayAspectRatio": "1.778",
+            "DisplayAspectRatio_String": "16:9",
+            "Rotation": "0.000",
+            "FrameRate_Mode": "CFR",
+            "FrameRate_Mode_String": "Constant",
+            "FrameRate": "24.000",
+            "FrameRate_String": "24.000 FPS",
+            "FrameRate_Num": "24",
+            "FrameRate_Den": "1",
+            "FrameCount": "17255",
+            "ColorSpace": "YUV",
+            "ChromaSubsampling": "4:2:0",
+            "ChromaSubsampling_String": "4:2:0",
+            "BitDepth": "8",
+            "BitDepth_String": "8 bits",
+            "ScanType": "Progressive",
+            "ScanType_String": "Progressive",
+            "BitsPixel_Frame": "0.113",
+            "StreamSize": "224609053",
+            "StreamSize_String": "214 MiB (95%)",
+            "StreamSize_String1": "214 MiB",
+            "StreamSize_String2": "214 MiB",
+            "StreamSize_String3": "214 MiB",
+            "StreamSize_String4": "214.2 MiB",
+            "StreamSize_String5": "214 MiB (95%)",
+            "StreamSize_Proportion": "0.94927",
+            "Encoded_Date": "2025-07-01 21:13:00 UTC",
+            "Tagged_Date": "2025-07-01 21:13:00 UTC",
+            "BufferSize": "5000000",
+            "colour_description_present": "Yes",
+            "colour_description_present_Source": "Stream",
+            "colour_range": "Limited",
+            "colour_range_Source": "Stream",
+            "colour_primaries": "BT.709",
+            "colour_primaries_Source": "Stream",
+            "transfer_characteristics": "BT.709",
+            "transfer_characteristics_Source": "Stream",
+            "matrix_coefficients": "BT.709",
+            "matrix_coefficients_Source": "Stream",
+            "extra": {
+              "CodecConfigurationBox": "avcC"
+            }
+          },
+          {
+            "@type": "Audio",
+            "Count": "285",
+            "StreamCount": "1",
+            "StreamKind": "Audio",
+            "StreamKind_String": "Audio",
+            "StreamKindID": "0",
+            "StreamOrder": "1",
+            "ID": "2",
+            "ID_String": "2",
+            "Format": "AAC",
+            "Format_String": "AAC LC",
+            "Format_Info": "Advanced Audio Codec Low Complexity",
+            "Format_Commercial": "AAC",
+            "Format_AdditionalFeatures": "LC",
+            "CodecID": "mp4a-40-2",
+            "Duration": "718.955",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 955 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.955",
+            "Duration_String5": "00:11:58.955",
+            "BitRate_Mode": "VBR",
+            "BitRate_Mode_String": "Variable",
+            "BitRate": "128000",
+            "BitRate_String": "128 kb/s",
+            "BitRate_Maximum": "133992",
+            "BitRate_Maximum_String": "134 kb/s",
+            "Channels": "2",
+            "Channels_String": "2 channels",
+            "ChannelPositions": "Front: L R",
+            "ChannelPositions_String2": "2/0/0",
+            "ChannelLayout": "L R",
+            "SamplesPerFrame": "1024",
+            "SamplingRate": "48000",
+            "SamplingRate_String": "48.0 kHz",
+            "SamplingCount": "34509840",
+            "FrameRate": "46.875",
+            "FrameRate_String": "46.875 FPS (1024 SPF)",
+            "FrameCount": "33701",
+            "Compression_Mode": "Lossy",
+            "Compression_Mode_String": "Lossy",
+            "StreamSize": "11503445",
+            "StreamSize_String": "11.0 MiB (5%)",
+            "StreamSize_String1": "11 MiB",
+            "StreamSize_String2": "11 MiB",
+            "StreamSize_String3": "11.0 MiB",
+            "StreamSize_String4": "10.97 MiB",
+            "StreamSize_String5": "11.0 MiB (5%)",
+            "StreamSize_Proportion": "0.04862",
+            "Language": "en",
+            "Language_String": "English",
+            "Language_String1": "English",
+            "Language_String2": "en",
+            "Language_String3": "eng",
+            "Language_String4": "en",
+            "Encoded_Date": "2025-07-01 21:13:00 UTC",
+            "Tagged_Date": "2025-07-01 21:13:00 UTC"
+          }
+        ]
+      }
+    },
+    {
+      "name": "meridian_en_51.wav",
+      "id": "A1",
+      "info": {
+        "format": "WAV",
+        "sample_rate": "48.0 kHz",
+        "duration": 718.939,
+        "audio_tracks": 1,
+        "channel_count": 6,
+        "language": "ENG"
+      },
+      "metadata": {
+        "track": [
+          {
+            "@type": "General",
+            "Count": "349",
+            "StreamCount": "1",
+            "StreamKind": "General",
+            "StreamKind_String": "General",
+            "StreamKindID": "0",
+            "AudioCount": "1",
+            "Audio_Format_List": "PCM",
+            "Audio_Format_WithHint_List": "PCM",
+            "Audio_Codec_List": "PCM",
+            "Audio_Channels_Total": "6",
+            "CompleteName": "sources/meridian_en_51.wav",
+            "FolderName": "sources",
+            "FileNameExtension": "meridian_en_51.wav",
+            "FileName": "meridian_en_51",
+            "FileExtension": "wav",
+            "Format": "Wave",
+            "Format_String": "Wave",
+            "Format_Extensions": "act at9 wav",
+            "Format_Commercial": "Wave",
+            "Format_Settings": "WaveFormatExtensible",
+            "InternetMediaType": "audio/vnd.wave",
+            "FileSize": "414109058",
+            "FileSize_String": "395 MiB",
+            "FileSize_String1": "395 MiB",
+            "FileSize_String2": "395 MiB",
+            "FileSize_String3": "395 MiB",
+            "FileSize_String4": "394.9 MiB",
+            "Duration": "718.939",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 939 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.939",
+            "Duration_String5": "00:11:58.939",
+            "OverallBitRate_Mode": "CBR",
+            "OverallBitRate_Mode_String": "Constant",
+            "OverallBitRate": "4608002",
+            "OverallBitRate_String": "4 608 kb/s",
+            "StreamSize": "122",
+            "StreamSize_String": "122 Bytes (0%)",
+            "StreamSize_String1": "122 Bytes",
+            "StreamSize_String2": "122 Bytes",
+            "StreamSize_String3": "122 Bytes",
+            "StreamSize_String4": "122.0 Bytes",
+            "StreamSize_String5": "122 Bytes (0%)",
+            "StreamSize_Proportion": "0.00000",
+            "File_Modified_Date": "2025-06-28 01:11:05 UTC",
+            "File_Modified_Date_Local": "2025-06-27 21:11:05",
+            "Encoded_Application": "Lavf60.3.100",
+            "Encoded_Application_String": "Lavf60.3.100"
+          },
+          {
+            "@type": "Audio",
+            "Count": "285",
+            "StreamCount": "1",
+            "StreamKind": "Audio",
+            "StreamKind_String": "Audio",
+            "StreamKindID": "0",
+            "Format": "PCM",
+            "Format_String": "PCM",
+            "Format_Commercial": "PCM",
+            "Format_Settings": "Little / Signed",
+            "Format_Settings_Endianness": "Little",
+            "Format_Settings_Sign": "Signed",
+            "CodecID": "00000001-0000-0010-8000-00AA00389B71",
+            "CodecID_Url": "http://www.microsoft.com/windows/",
+            "Duration": "718.939",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 939 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.939",
+            "Duration_String5": "00:11:58.939",
+            "BitRate_Mode": "CBR",
+            "BitRate_Mode_String": "Constant",
+            "BitRate": "4608000",
+            "BitRate_String": "4 608 kb/s",
+            "Channels": "6",
+            "Channels_String": "6 channels",
+            "ChannelPositions": "Front: L C R, Side: L R, LFE",
+            "ChannelPositions_String2": "3/2/0.1",
+            "ChannelLayout": "L R C LFE Ls Rs",
+            "SamplingRate": "48000",
+            "SamplingRate_String": "48.0 kHz",
+            "SamplingCount": "34509078",
+            "BitDepth": "16",
+            "BitDepth_String": "16 bits",
+            "StreamSize": "414108936",
+            "StreamSize_String": "395 MiB (100%)",
+            "StreamSize_String1": "395 MiB",
+            "StreamSize_String2": "395 MiB",
+            "StreamSize_String3": "395 MiB",
+            "StreamSize_String4": "394.9 MiB",
+            "StreamSize_String5": "395 MiB (100%)",
+            "StreamSize_Proportion": "1.00000"
+          }
+        ]
+      }
+    },
+    {
+      "name": "meridian_es_20.wav",
+      "id": "A2",
+      "info": {
+        "format": "WAV",
+        "sample_rate": "48.0 kHz",
+        "duration": 718.939,
+        "audio_tracks": 1,
+        "channel_count": 2,
+        "language": "ENG"
+      },
+      "metadata": {
+        "track": [
+          {
+            "@type": "General",
+            "Count": "349",
+            "StreamCount": "1",
+            "StreamKind": "General",
+            "StreamKind_String": "General",
+            "StreamKindID": "0",
+            "AudioCount": "1",
+            "Audio_Format_List": "PCM",
+            "Audio_Format_WithHint_List": "PCM",
+            "Audio_Codec_List": "PCM",
+            "Audio_Channels_Total": "2",
+            "CompleteName": "sources/meridian_es_20.wav",
+            "FolderName": "sources",
+            "FileNameExtension": "meridian_es_20.wav",
+            "FileName": "meridian_es_20",
+            "FileExtension": "wav",
+            "Format": "Wave",
+            "Format_String": "Wave",
+            "Format_Extensions": "act at9 wav",
+            "Format_Commercial": "Wave",
+            "Format_Settings": "PcmWaveformat",
+            "InternetMediaType": "audio/vnd.wave",
+            "FileSize": "207054512",
+            "FileSize_String": "197 MiB",
+            "FileSize_String1": "197 MiB",
+            "FileSize_String2": "197 MiB",
+            "FileSize_String3": "197 MiB",
+            "FileSize_String4": "197.5 MiB",
+            "Duration": "718.939",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 939 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.939",
+            "Duration_String5": "00:11:58.939",
+            "OverallBitRate_Mode": "CBR",
+            "OverallBitRate_Mode_String": "Constant",
+            "OverallBitRate": "2304001",
+            "OverallBitRate_String": "2 304 kb/s",
+            "StreamSize": "44",
+            "StreamSize_String": "44.0 Bytes (0%)",
+            "StreamSize_String1": "44 Bytes",
+            "StreamSize_String2": "44 Bytes",
+            "StreamSize_String3": "44.0 Bytes",
+            "StreamSize_String4": "44.00 Bytes",
+            "StreamSize_String5": "44.0 Bytes (0%)",
+            "StreamSize_Proportion": "0.00000",
+            "File_Modified_Date": "2025-06-28 01:13:15 UTC",
+            "File_Modified_Date_Local": "2025-06-27 21:13:15"
+          },
+          {
+            "@type": "Audio",
+            "Count": "285",
+            "StreamCount": "1",
+            "StreamKind": "Audio",
+            "StreamKind_String": "Audio",
+            "StreamKindID": "0",
+            "Format": "PCM",
+            "Format_String": "PCM",
+            "Format_Commercial": "PCM",
+            "Format_Settings": "Little / Signed",
+            "Format_Settings_Endianness": "Little",
+            "Format_Settings_Sign": "Signed",
+            "CodecID": "1",
+            "CodecID_Url": "http://www.microsoft.com/windows/",
+            "Duration": "718.939",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 939 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.939",
+            "Duration_String5": "00:11:58.939",
+            "BitRate_Mode": "CBR",
+            "BitRate_Mode_String": "Constant",
+            "BitRate": "2304000",
+            "BitRate_String": "2 304 kb/s",
+            "Channels": "2",
+            "Channels_String": "2 channels",
+            "SamplingRate": "48000",
+            "SamplingRate_String": "48.0 kHz",
+            "SamplingCount": "34509078",
+            "BitDepth": "24",
+            "BitDepth_String": "24 bits",
+            "StreamSize": "207054468",
+            "StreamSize_String": "197 MiB (100%)",
+            "StreamSize_String1": "197 MiB",
+            "StreamSize_String2": "197 MiB",
+            "StreamSize_String3": "197 MiB",
+            "StreamSize_String4": "197.5 MiB",
+            "StreamSize_String5": "197 MiB (100%)",
+            "StreamSize_Proportion": "1.00000"
+          }
+        ]
+      }
+    },
+    {
+      "name": "meridian_fr_20.wav",
+      "id": "A3",
+      "info": {
+        "format": "WAV",
+        "sample_rate": "48.0 kHz",
+        "duration": 718.939,
+        "audio_tracks": 1,
+        "channel_count": 2,
+        "language": "ENG"
+      },
+      "metadata": {
+        "track": [
+          {
+            "@type": "General",
+            "Count": "349",
+            "StreamCount": "1",
+            "StreamKind": "General",
+            "StreamKind_String": "General",
+            "StreamKindID": "0",
+            "AudioCount": "1",
+            "Audio_Format_List": "PCM",
+            "Audio_Format_WithHint_List": "PCM",
+            "Audio_Codec_List": "PCM",
+            "Audio_Channels_Total": "2",
+            "CompleteName": "sources/meridian_fr_20.wav",
+            "FolderName": "sources",
+            "FileNameExtension": "meridian_fr_20.wav",
+            "FileName": "meridian_fr_20",
+            "FileExtension": "wav",
+            "Format": "Wave",
+            "Format_String": "Wave",
+            "Format_Extensions": "act at9 wav",
+            "Format_Commercial": "Wave",
+            "Format_Settings": "PcmWaveformat",
+            "InternetMediaType": "audio/vnd.wave",
+            "FileSize": "207054512",
+            "FileSize_String": "197 MiB",
+            "FileSize_String1": "197 MiB",
+            "FileSize_String2": "197 MiB",
+            "FileSize_String3": "197 MiB",
+            "FileSize_String4": "197.5 MiB",
+            "Duration": "718.939",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 939 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.939",
+            "Duration_String5": "00:11:58.939",
+            "OverallBitRate_Mode": "CBR",
+            "OverallBitRate_Mode_String": "Constant",
+            "OverallBitRate": "2304001",
+            "OverallBitRate_String": "2 304 kb/s",
+            "StreamSize": "44",
+            "StreamSize_String": "44.0 Bytes (0%)",
+            "StreamSize_String1": "44 Bytes",
+            "StreamSize_String2": "44 Bytes",
+            "StreamSize_String3": "44.0 Bytes",
+            "StreamSize_String4": "44.00 Bytes",
+            "StreamSize_String5": "44.0 Bytes (0%)",
+            "StreamSize_Proportion": "0.00000",
+            "File_Modified_Date": "2025-06-28 01:12:06 UTC",
+            "File_Modified_Date_Local": "2025-06-27 21:12:06"
+          },
+          {
+            "@type": "Audio",
+            "Count": "285",
+            "StreamCount": "1",
+            "StreamKind": "Audio",
+            "StreamKind_String": "Audio",
+            "StreamKindID": "0",
+            "Format": "PCM",
+            "Format_String": "PCM",
+            "Format_Commercial": "PCM",
+            "Format_Settings": "Little / Signed",
+            "Format_Settings_Endianness": "Little",
+            "Format_Settings_Sign": "Signed",
+            "CodecID": "1",
+            "CodecID_Url": "http://www.microsoft.com/windows/",
+            "Duration": "718.939",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 939 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.939",
+            "Duration_String5": "00:11:58.939",
+            "BitRate_Mode": "CBR",
+            "BitRate_Mode_String": "Constant",
+            "BitRate": "2304000",
+            "BitRate_String": "2 304 kb/s",
+            "Channels": "2",
+            "Channels_String": "2 channels",
+            "SamplingRate": "48000",
+            "SamplingRate_String": "48.0 kHz",
+            "SamplingCount": "34509078",
+            "BitDepth": "24",
+            "BitDepth_String": "24 bits",
+            "StreamSize": "207054468",
+            "StreamSize_String": "197 MiB (100%)",
+            "StreamSize_String1": "197 MiB",
+            "StreamSize_String2": "197 MiB",
+            "StreamSize_String3": "197 MiB",
+            "StreamSize_String4": "197.5 MiB",
+            "StreamSize_String5": "197 MiB (100%)",
+            "StreamSize_Proportion": "1.00000"
+          }
+        ]
+      }
+    },
+    {
+      "name": "meridian_pt_20.wav",
+      "id": "A4",
+      "info": {
+        "format": "WAV",
+        "sample_rate": "48.0 kHz",
+        "duration": 718.939,
+        "audio_tracks": 1,
+        "channel_count": 2,
+        "language": "ENG"
+      },
+      "metadata": {
+        "track": [
+          {
+            "@type": "General",
+            "Count": "349",
+            "StreamCount": "1",
+            "StreamKind": "General",
+            "StreamKind_String": "General",
+            "StreamKindID": "0",
+            "AudioCount": "1",
+            "Audio_Format_List": "PCM",
+            "Audio_Format_WithHint_List": "PCM",
+            "Audio_Codec_List": "PCM",
+            "Audio_Channels_Total": "2",
+            "CompleteName": "sources/meridian_pt_20.wav",
+            "FolderName": "sources",
+            "FileNameExtension": "meridian_pt_20.wav",
+            "FileName": "meridian_pt_20",
+            "FileExtension": "wav",
+            "Format": "Wave",
+            "Format_String": "Wave",
+            "Format_Extensions": "act at9 wav",
+            "Format_Commercial": "Wave",
+            "Format_Settings": "PcmWaveformat",
+            "InternetMediaType": "audio/vnd.wave",
+            "FileSize": "207054512",
+            "FileSize_String": "197 MiB",
+            "FileSize_String1": "197 MiB",
+            "FileSize_String2": "197 MiB",
+            "FileSize_String3": "197 MiB",
+            "FileSize_String4": "197.5 MiB",
+            "Duration": "718.939",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 939 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.939",
+            "Duration_String5": "00:11:58.939",
+            "OverallBitRate_Mode": "CBR",
+            "OverallBitRate_Mode_String": "Constant",
+            "OverallBitRate": "2304001",
+            "OverallBitRate_String": "2 304 kb/s",
+            "StreamSize": "44",
+            "StreamSize_String": "44.0 Bytes (0%)",
+            "StreamSize_String1": "44 Bytes",
+            "StreamSize_String2": "44 Bytes",
+            "StreamSize_String3": "44.0 Bytes",
+            "StreamSize_String4": "44.00 Bytes",
+            "StreamSize_String5": "44.0 Bytes (0%)",
+            "StreamSize_Proportion": "0.00000",
+            "File_Modified_Date": "2025-06-28 01:12:52 UTC",
+            "File_Modified_Date_Local": "2025-06-27 21:12:52"
+          },
+          {
+            "@type": "Audio",
+            "Count": "285",
+            "StreamCount": "1",
+            "StreamKind": "Audio",
+            "StreamKind_String": "Audio",
+            "StreamKindID": "0",
+            "Format": "PCM",
+            "Format_String": "PCM",
+            "Format_Commercial": "PCM",
+            "Format_Settings": "Little / Signed",
+            "Format_Settings_Endianness": "Little",
+            "Format_Settings_Sign": "Signed",
+            "CodecID": "1",
+            "CodecID_Url": "http://www.microsoft.com/windows/",
+            "Duration": "718.939",
+            "Duration_String": "11 min 58 s",
+            "Duration_String1": "11 min 58 s 939 ms",
+            "Duration_String2": "11 min 58 s",
+            "Duration_String3": "00:11:58.939",
+            "Duration_String5": "00:11:58.939",
+            "BitRate_Mode": "CBR",
+            "BitRate_Mode_String": "Constant",
+            "BitRate": "2304000",
+            "BitRate_String": "2 304 kb/s",
+            "Channels": "2",
+            "Channels_String": "2 channels",
+            "SamplingRate": "48000",
+            "SamplingRate_String": "48.0 kHz",
+            "SamplingCount": "34509078",
+            "BitDepth": "24",
+            "BitDepth_String": "24 bits",
+            "StreamSize": "207054468",
+            "StreamSize_String": "197 MiB (100%)",
+            "StreamSize_String1": "197 MiB",
+            "StreamSize_String2": "197 MiB",
+            "StreamSize_String3": "197 MiB",
+            "StreamSize_String4": "197.5 MiB",
+            "StreamSize_String5": "197 MiB (100%)",
+            "StreamSize_Proportion": "1.00000"
+          }
+        ]
+      }
+    },
+    {
+      "name": "meridian_en_cc.srt",
+      "id": "T1",
+      "info": {
+        "format": "SRT"
+      }
+    },
+    {
+      "name": "meridian_es.srt",
+      "id": "T2",
+      "info": {
+        "format": "SRT"
+      }
+    },
+    {
+      "name": "meridian_fr.srt",
+      "id": "T3",
+      "info": {
+        "format": "SRT"
+      }
+    },
+    {
+      "name": "meridian_pt.srt",
+      "id": "T4",
+      "info": {
+        "format": "SRT"
+      }
+    }
+  ],
+  "media": {
+    "main": [
+      {
+        "name": "HLS 720p",
+        "type": "hls",
+        "id": "HLS-720",
+        "url": "https://github-media.assets.byomakase.org/meridian_en_720p24/hls/meridian_en_720p24/meridian.m3u8",
+        "color_range": "sdr",
+        "frame_rate": "24000/1000",
+        "drop_frame": false
+      }
+    ]
+  },
+  "presentation": {
+    "timeline": {
+      "tracks": [
+        {
+          "id": "VT1",
+          "type": "video",
+          "name": "meridian_en_720p24.mp4",
+          "source_id": "V1",
+          "visual_reference": [
+            {
+              "type": "thumbnails",
+              "url": "https://github-media.assets.byomakase.org/meridian_en_720p24/thumbnails/thumbnails.vtt"
+            }
+          ],
+          "analysis": [
+            {
+              "name": "Program Scenes",
+              "type": "events",
+              "visualization": "marker",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian-scenes.vtt"
+            },
+            {
+              "name": "Points of Interest",
+              "type": "events",
+              "visualization": "marker",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian-poi.vtt"
+            },
+            {
+              "name": "Bit Rate",
+              "type": "chart",
+              "visualization": "line",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_en_720p24_2-SEC.vtt"
+            }
+          ]
+        },
+        {
+          "id": "AT1",
+          "type": "audio",
+          "name": "meridian_en_720p24.mp4 (English 2.0)",
+          "source_id": "V1",
+          "media_id": "EN_20",
+          "channel_layout": "L R",
+          "language": "en",
+          "visual_reference": [
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_EN_20_L.vtt",
+              "channel": "L"
+            },
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_EN_20_R.vtt",
+              "channel": "R"
+            }
+          ],
+          "analysis": [
+            {
+              "name": "EBU R128 M",
+              "type": "chart",
+              "visualization": "bar",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_EN_20_R128_2-SEC.vtt"
+            },
+            {
+              "name": "RMS Levels",
+              "type": "chart",
+              "visualization": "line",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_EN_20_RMS_2-SEC.vtt"
+            },
+            {
+              "name": "Overall RMS Levels",
+              "type": "chart",
+              "visualization": "led",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_EN_20_RMS_2-SEC.vtt"
+            }
+          ]
+        },
+        {
+          "id": "AT2",
+          "type": "audio",
+          "name": "meridian_en_51.wav (English 5.1)",
+          "source_id": "A1",
+          "media_id": "EN_51",
+          "channel_layout": "L R C LFE LS RS",
+          "language": "en",
+          "visual_reference": [
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_EN_51_L.vtt",
+              "channel": "L"
+            },
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_EN_51_R.vtt",
+              "channel": "R"
+            },
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_EN_51_C.vtt",
+              "channel": "C"
+            },
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_EN_51_LFE.vtt",
+              "channel": "LFE"
+            },
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_EN_51_Ls.vtt",
+              "channel": "LS"
+            },
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_EN_51_Rs.vtt",
+              "channel": "RS"
+            }
+          ],
+          "analysis": [
+            {
+              "name": "RMS Levels",
+              "type": "chart",
+              "visualization": "line",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_EN_51_RMS_2-SEC.vtt"
+            },
+            {
+              "name": "Overall RMS Levels",
+              "type": "chart",
+              "visualization": "led",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_EN_51_RMS_2-SEC.vtt"
+            },
+            {
+              "name": "EBU R128 M",
+              "type": "chart",
+              "visualization": "bar",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_EN_51_R128_2-SEC.vtt"
+            }
+          ]
+        },
+        {
+          "id": "AT3",
+          "type": "audio",
+          "name": "meridian_es_20.wav (Spanish 2.0)",
+          "source_id": "A2",
+          "media_id": "ES_20",
+          "channel_layout": "L R",
+          "language": "es",
+          "visual_reference": [
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_ES_20_L.vtt",
+              "channel": "L"
+            },
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_ES_20_R.vtt",
+              "channel": "R"
+            }
+          ],
+          "analysis": [
+            {
+              "name": "EBU R128 M",
+              "type": "chart",
+              "visualization": "bar",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_ES_20_R128_2-SEC.vtt"
+            },
+            {
+              "name": "RMS Levels",
+              "type": "chart",
+              "visualization": "line",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_ES_20_RMS_2-SEC.vtt"
+            },
+            {
+              "name": "Overall RMS Levels",
+              "type": "chart",
+              "visualization": "led",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_ES_20_RMS_2-SEC.vtt"
+            }
+          ]
+        },
+        {
+          "id": "AT4",
+          "type": "audio",
+          "name": "meridian_fr_20.wav (French 2.0)",
+          "source_id": "A3",
+          "media_id": "FR_20",
+          "channel_layout": "L R",
+          "language": "fr",
+          "visual_reference": [
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_FR_20_L.vtt",
+              "channel": "L"
+            },
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_FR_20_R.vtt",
+              "channel": "R"
+            }
+          ],
+          "analysis": [
+            {
+              "name": "RMS Levels",
+              "type": "chart",
+              "visualization": "line",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_FR_20_RMS_2-SEC.vtt"
+            },
+            {
+              "name": "Overall RMS Levels",
+              "type": "chart",
+              "visualization": "led",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_FR_20_RMS_2-SEC.vtt"
+            },
+            {
+              "name": "EBU R128 M",
+              "type": "chart",
+              "visualization": "bar",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_FR_20_R128_2-SEC.vtt"
+            }
+          ]
+        },
+        {
+          "id": "AT5",
+          "type": "audio",
+          "name": "meridian_pt_20.wav (Portuguese 2.0)",
+          "source_id": "A4",
+          "media_id": "PT_20",
+          "channel_layout": "L R",
+          "language": "pt",
+          "visual_reference": [
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_PT_20_L.vtt",
+              "channel": "L"
+            },
+            {
+              "type": "waveform",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/waveforms/meridian_PT_20_R.vtt",
+              "channel": "R"
+            }
+          ],
+          "analysis": [
+            {
+              "name": "RMS Levels",
+              "type": "chart",
+              "visualization": "line",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_PT_20_RMS_2-SEC.vtt"
+            },
+            {
+              "name": "Overall RMS Levels",
+              "type": "chart",
+              "visualization": "led",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_PT_20_RMS_2-SEC.vtt"
+            },
+            {
+              "name": "EBU R128 M",
+              "type": "chart",
+              "visualization": "bar",
+              "y_min": -100,
+              "y_max": 0,
+              "scale": "linear",
+              "url": "http://localhost:3000/demo-assets/meridian/meridian_en_720p24/analysis/meridian_PT_20_R128_2-SEC.vtt"
+            }
+          ]
+        },
+        {
+          "id": "TT1",
+          "type": "text",
+          "name": "meridian_en_cc.srt (English Captions)",
+          "source_id": "T1",
+          "media_id": "English CC",
+          "language": "en"
+        },
+        {
+          "id": "TT2",
+          "type": "text",
+          "name": "meridian_es.srt (Spanish Subtitles)",
+          "source_id": "T2",
+          "media_id": "Spanish Subs",
+          "language": "es"
+        },
+        {
+          "id": "TT3",
+          "type": "text",
+          "name": "meridian_fr.srt (French Subtitles)",
+          "source_id": "T3",
+          "media_id": "French Subs",
+          "language": "fr"
+        },
+        {
+          "id": "TT4",
+          "type": "text",
+          "name": "meridian_pt.srt (Portuguese Subtitles)",
+          "source_id": "T4",
+          "media_id": "Portuguese Subs",
+          "language": "pt"
+        }
+      ]
+    },
+    "info_tabs": [
+      {
+        "name": "IMDB Title Metadata",
+        "type": "json",
+        "visualization": "json_tree",
+        "data": {
+          "imdb": {
+            "imdb": {
+              "title": "Meridian",
+              "year": 2016,
+              "type": "Short Film",
+              "director": "Curtis Clark",
+              "writers": [
+                "Curtis Clark",
+                "James Harmon Brown"
+              ],
+              "cast": [
+                {
+                  "name": "Kevin Kilner",
+                  "role": "Captain Mac Foster"
+                },
+                {
+                  "name": "Reid Scott",
+                  "role": "Detective Jake Sullivan"
+                },
+                {
+                  "name": "Elyse Levesque",
+                  "role": "The Woman"
+                }
+              ],
+              "genre": [
+                "Film Noir",
+                "Thriller"
+              ],
+              "plot": "In 1947 Los Angeles, veteran detective Mac Foster and his partner Jake Sullivan investigate the disappearances of three men, leading them to a mysterious cavern where an eerie discovery awaits.",
+              "production_companies": [
+                "Virgin Soil Pictures",
+                "Netflix"
+              ],
+              "release_date": "September 2016",
+              "runtime": "12 minutes",
+              "language": "English",
+              "technical_details": {
+                "hdr_format": "Dolby Vision",
+                "color_space": "P3-D65",
+                "transfer_function": "PQ",
+                "audio_format": "Dolby Atmos",
+                "available_formats": [
+                  "UHD IMF",
+                  "UHD 4k 5994 HDR P3/PQ (mp4)",
+                  "UHD VDM Image Sequence",
+                  "Dolby Atmos Metadata File",
+                  "Atmos BWAV ADM",
+                  "TIFF Sequence"
+                ],
+                "frame_rate": "60 fps",
+                "resolution": "4K",
+                "peak_brightness": "4000 nits"
+              },
+              "distribution": [
+                "Netflix",
+                "Xiph.org"
+              ],
+              "license": "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

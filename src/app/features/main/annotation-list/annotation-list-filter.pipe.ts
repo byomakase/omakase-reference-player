@@ -12,8 +12,6 @@ export class AnnotationListFilterPipe implements PipeTransform {
       return annotationList;
     }
 
-    console.log(annotationList);
-
     const annotationListNoThreads = annotationList.flatMap((extendedAnnotation) => {
       const parent = {
         ...extendedAnnotation,

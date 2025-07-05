@@ -4,7 +4,7 @@ import {CoreModule} from '../../../core/core.module';
 import {IconModule} from '../../../shared/components/icon/icon.module';
 import {SharedModule} from '../../../shared/shared.module';
 import {BehaviorSubject} from 'rxjs';
-import {InfoTab, SessionData, SourceInfo} from '../../../model/domain.model';
+import {InfoTab, SessionData, Source, SourceInfo} from '../../../model/domain.model';
 import {StringUtil} from '../../../util/string-util';
 import {MetadataOffcanvasService} from '../metadata-offcanvas/metadata-offcanvas.service';
 import {MetadataExplorerService} from './metadata-explorer.service';
@@ -23,25 +23,26 @@ import {DownloadService} from '../../../shared/services/download.service';
             <li [ngbNavItem]="'sources'">
               <button ngbNavLink (click)="changeTab()">Sources</button>
               <ng-template ngbNavContent>
-                @for (source_info of sessionDataFiltered!.data?.source_info; track source_info; let index = $index) {
+                @for (source of sessionData!.sources; track source) {
                   <div ngbAccordion class="mb-2">
                     <div ngbAccordionItem #accordionItem="ngbAccordionItem">
-                      @if (hasSourceInfo()) {
-                        <div ngbAccordionHeader class="accordion-button custom-header justify-content-between">
-                          <button type="button" class="btn btn-link btn-source-info-name container-fluid text-start text-truncate" ngbAccordionToggle>
-                            <i [appIcon]="accordionItem.collapsed ? 'chevron-right' : 'chevron-down'"></i>
-                            {{ (sessionData?.data)!.source_info![index].name }}
-                          </button>
-                          @if (hasMediaInfo((sessionData?.data)!.source_info![index])) {
-                            <button type="button" class="btn btn-link btn-metadata d-none d-lg-block text-nowrap" (click)="openMetadata((sessionData?.data)!.source_info![index])">
-                              Metadata <i class="ms-1" appIcon="code"></i>
-                            </button>
-                          }
-                        </div>
-                      }
+                      <div ngbAccordionHeader class="accordion-button custom-header justify-content-between">
+                        <button type="button" class="btn btn-link btn-source-info-name container-fluid text-start text-truncate" ngbAccordionToggle>
+                          <i [appIcon]="accordionItem.collapsed ? 'chevron-right' : 'chevron-down'"></i>
+                          {{ source.name }}
+                        </button>
+                        @if (source.metadata) {
+                          <button type="button" class="btn btn-link btn-metadata d-none d-lg-block text-nowrap" (click)="openMetadata(source)">Metadata <i class="ms-1" appIcon="code"></i></button>
+                        }
+                      </div>
+
                       <div ngbAccordionCollapse>
                         <div ngbAccordionBody>
-                          <ngx-json-viewer [json]="source_info"></ngx-json-viewer>
+                          <ng-template>
+                            @if (source.info !== undefined) {
+                              <ngx-json-viewer test [json]="source.info"></ngx-json-viewer>
+                            }
+                          </ng-template>
                         </div>
                       </div>
                     </div>
@@ -51,7 +52,7 @@ import {DownloadService} from '../../../shared/services/download.service';
             </li>
           }
           @if (showInfo$ | async) {
-            @for (info_tab of sessionDataFiltered!.presentation!.info_tabs; track info_tab; let index = $index) {
+            @for (info_tab of sessionData!.presentation!.info_tabs; track info_tab; let index = $index) {
               <li [ngbNavItem]="'info-tab-' + index">
                 <button ngbNavLink (click)="changeTab(info_tab)">{{ resolveInfoTabName(info_tab, index) }}</button>
                 <ng-template ngbNavContent>
@@ -123,8 +124,6 @@ export class MetadataExplorerNavComponent {
   showSources$ = new BehaviorSubject<boolean>(false);
   showInfo$ = new BehaviorSubject<boolean>(false);
 
-  sessionDataFiltered?: Partial<SessionData>;
-
   private _sessionData?: SessionData;
 
   StringUtil = StringUtil;
@@ -144,18 +143,7 @@ export class MetadataExplorerNavComponent {
   set sessionData(value: SessionData | undefined) {
     this._sessionData = value;
 
-    this.sessionDataFiltered = structuredClone(this._sessionData) as Partial<SessionData>; // we dont want to alter root objec
-
-    if (this.sessionDataFiltered.data?.source_info) {
-      this.sessionDataFiltered.data?.source_info.forEach((sourceInfo) => {
-        // @ts-ignore
-        delete sourceInfo['id'];
-        // @ts-ignore
-        delete sourceInfo['name'];
-      });
-    }
-
-    this.showSources$.next(!!this._sessionData?.data.source_info && this._sessionData.data.source_info.length > 0);
+    this.showSources$.next(!!this._sessionData?.sources && this._sessionData.sources.length > 0);
     this.showInfo$.next(!!this._sessionData?.presentation?.info_tabs && this._sessionData?.presentation.info_tabs.length > 0);
   }
 
@@ -172,17 +160,12 @@ export class MetadataExplorerNavComponent {
   }
 
   hasSourceInfo(): boolean {
-    return !!this._sessionData && !!this._sessionData.data.source_info;
+    return !!this._sessionData && !!this._sessionData.sources;
   }
 
-  hasMediaInfo(sourceInfo: SourceInfo): boolean {
-    return !!this._sessionData && !!this._sessionData.data.media_info && !!this._sessionData.data.media_info.find((p) => p.source_id === sourceInfo.id);
-  }
-
-  openMetadata(sourceInfo: SourceInfo) {
-    let mediaInfo = this._sessionData?.data.media_info?.find((p) => p.source_id === sourceInfo.id);
-    if (mediaInfo) {
-      this.metadataOffcanvasService.open(sourceInfo, mediaInfo);
+  openMetadata(source: Source) {
+    if (source.metadata) {
+      this.metadataOffcanvasService.open(source);
     }
   }
 

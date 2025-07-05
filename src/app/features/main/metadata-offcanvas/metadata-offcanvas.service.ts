@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {MetadataOffcanvasComponent} from './metadata-offcanvas.component';
-import {MediaInfo, SourceInfo} from '../../../model/domain.model';
+import {MediaInfo, Source, SourceInfo} from '../../../model/domain.model';
 
 @Injectable({
   providedIn: 'root',
@@ -25,14 +25,13 @@ import {MediaInfo, SourceInfo} from '../../../model/domain.model';
 export class MetadataOffcanvasService {
   constructor(private ngbOffcanvas: NgbOffcanvas) {}
 
-  open(sourceInfo: SourceInfo, mediaInfo: MediaInfo) {
+  open(source: Source) {
     let offcanvasRef = this.ngbOffcanvas.open(MetadataOffcanvasComponent, {
       panelClass: 'offcanvas',
     });
 
     let component = offcanvasRef.componentInstance as MetadataOffcanvasComponent;
 
-    component.sourceInfo = sourceInfo;
-    component.mediaInfo = mediaInfo;
+    component.source = source;
   }
 }

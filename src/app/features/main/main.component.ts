@@ -16,7 +16,7 @@
 
 import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 import {OmakasePlayerVideoComponent} from '../../shared/components/omakase-player/omakase-player-video/omakase-player-video.component';
-import {ImageButton, ImageButtonConfig, OmpAudioTrack, SubtitlesVttTrack, ThumbnailLane, TimelineApi, TimelineLaneApi, Video} from '@byomakase/omakase-player';
+import {ImageButton, ImageButtonConfig, OmpAudioTrack, OmpAudioTrackCreateType, SidecarAudioCreateEvent, SubtitlesVttTrack, ThumbnailLane, TimelineApi, TimelineLaneApi, Video} from '@byomakase/omakase-player';
 import {BehaviorSubject, combineLatest, filter, forkJoin, fromEvent, map, Observable, of, Subject, take, takeUntil} from 'rxjs';
 import {CoreModule} from '../../core/core.module';
 import {SharedModule} from '../../shared/shared.module';
@@ -25,18 +25,8 @@ import {ActivatedRoute, Event, Router} from '@angular/router';
 import {StringUtil} from '../../util/string-util';
 import {UrlUtil} from '../../util/url-util';
 import {MainService} from './main.service';
-import {boolean, z} from 'zod';
-import {
-  AudioMediaTrack,
-  BasicAuthenticationData,
-  BearerAuthenticationData,
-  MasterManifest,
-  SessionData,
-  TextMediaTrack,
-  TimelineLaneWithOptionalGroup,
-  VideoMediaTrack,
-  VisualReference,
-} from '../../model/domain.model';
+import {z} from 'zod';
+import {AudioMediaTrack, BasicAuthenticationData, BearerAuthenticationData, MainMedia, SessionData, SidecarEntry, TextMediaTrack, TimelineLaneWithOptionalGroup, VideoMediaTrack, VisualReference} from '../../model/domain.model';
 import {DomainUtil} from '../../util/domain-util';
 import {TelemetryLane, TimelineService} from '../timeline/timeline.service';
 import {ErrorData} from 'hls.js';
@@ -126,6 +116,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   showMetadata$ = new BehaviorSubject<boolean>(false);
   showPlayer$ = new BehaviorSubject<boolean>(false);
   timelineLanesAdded$ = new BehaviorSubject<boolean>(false);
+  sidecarsLoaded$ = new BehaviorSubject<boolean>(false);
 
   timelineConfigVisibility$ = this.store.select(TimelineConfiguratorState.visibility);
 
@@ -134,8 +125,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   private _destroyed$ = new Subject<void>();
 
   private _sessionData?: SessionData;
-  private _masterManifests?: MasterManifest[]; // only supported manifests
-  private _currentMasterManifest?: MasterManifest;
+  private _mainMedias?: MainMedia[]; // only supported manifests
+  private _currentMainMedia?: MainMedia;
   private _currentAudioTrack?: OmpAudioTrack;
   private _currentAudioLane?: AudioGroupingLane | AudioChannelLane;
   private _currentSubtitleTrackLabel?: string;
@@ -155,11 +146,24 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   private _audioMediaTracks?: AudioMediaTrack[];
   private _textMediaTracks?: TextMediaTrack[];
 
+  private _sidecarAudioMediaTracks?: AudioMediaTrack[];
+  private _sidecarTextMediaTracks?: TextMediaTrack[];
+
+  private _sidecarAudioEntries?: SidecarEntry[];
+  private _sidecarTextEntries?: SidecarEntry[];
+
   private _audioTracks?: OmpAudioTrack[];
   private _audioTracksByName?: Map<string, OmpAudioTrack>;
+  private _muxedAudioTracks?: OmpAudioTrack[];
 
   private _subtitlesVttTracks?: SubtitlesVttTrack[];
   private _subtitlesVttTracksByName?: Map<string, SubtitlesVttTrack>;
+
+  private _sidecarAudioTracks?: OmpAudioTrack[];
+  private _sidecarAudioTracksByName?: Map<string, OmpAudioTrack>;
+
+  private _sidecarSubtitlesVttTracks?: SubtitlesVttTrack[];
+  private _sidecarSubtitlesVttTracksByName?: Map<string, SubtitlesVttTrack>;
 
   private _zoomInProgress = false;
 
@@ -167,12 +171,14 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private _analysisGroups: Map<string, string[]> = new Map<string, string[]>();
   private _analysisWithoutGroup: string[] = [];
-  private _analysisGroupsVisibility?: Map<string, boolean>;
+  public analysisGroupsVisibility: Map<string, boolean> = new Map<string, boolean>();
   private _analysisLaneParent: Map<string, GroupingLane> = new Map<string, GroupingLane>();
 
   private _manifestLoadBreaker$ = new Subject<void>();
 
   private videoLoaded$ = new Subject<void>();
+  private sidecarAudiosLoaded$ = new BehaviorSubject<boolean>(false);
+  private sidecarTextsLoaded$ = new BehaviorSubject<boolean>(false);
   private timelineReloaded$ = new Subject<void>();
 
   private _video?: Video;
@@ -256,7 +262,33 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             }
 
             this._sessionData = sessionData;
-            this._masterManifests = this._sessionData.data.master_manifests.filter((p) => this.isManifestSupported(p));
+            this._mainMedias = this._sessionData.media.main.filter((p) => this.isMainMediaSupported(p));
+
+            const sessionVideoTracks = this.sessionData!.presentation?.timeline.tracks.filter((track) => track.type === 'video') as VideoMediaTrack[];
+            const sessionAudioTracks = this.sessionData!.presentation?.timeline.tracks.filter((track) => track.type === 'audio') as AudioMediaTrack[];
+            const sessionTextTracks = this.sessionData!.presentation?.timeline.tracks.filter((track) => track.type === 'text') as TextMediaTrack[];
+            this._videoMediaTracks = this.populateWithIds(sessionVideoTracks); // no filtering as there is no manifest id to match for
+            this._audioMediaTracks = this.populateWithIds(sessionAudioTracks);
+            this._textMediaTracks = this.populateWithIds(sessionTextTracks);
+
+            if (this._sessionData.media.sidecars) {
+              const audioSidecars = this._sessionData.media.sidecars.filter((sidecar) => sidecar.type === 'audio');
+              const textSidecars = this._sessionData.media.sidecars.filter((sidecar) => sidecar.type === 'text');
+
+              if (audioSidecars.length > 0) {
+                this._sidecarAudioEntries = audioSidecars;
+                this._sidecarAudioMediaTracks = audioSidecars
+                  .map((sidecar) => this._audioMediaTracks!.find((mediaTrack) => mediaTrack.media_id === sidecar.id))
+                  .filter((track): track is AudioMediaTrack => track !== undefined);
+              }
+
+              if (textSidecars.length > 0) {
+                this._sidecarTextEntries = textSidecars;
+                this._sidecarTextMediaTracks = textSidecars
+                  .map((sidecar) => this._textMediaTracks!.find((mediaTrack) => mediaTrack.media_id === sidecar.id))
+                  .filter((track): track is TextMediaTrack => track !== undefined);
+              }
+            }
 
             if (this.isInfoModeVisible) {
               this.layoutService.activeTab = 'info';
@@ -274,7 +306,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
               this.annotationService.initAnnotationMode();
             }
 
-            if (sessionData.presentation?.info_tabs?.length && !sessionData.data.source_info?.length) {
+            if (sessionData.presentation?.info_tabs?.length && !sessionData.sources?.length) {
               this.metadataExplorerService.navActiveId = 'info-tab-0';
             }
 
@@ -293,7 +325,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.ompApiService.api!.setAuthentication(this._sessionData!.session.services.media_authentication as BasicAuthenticationData | BearerAuthenticationData);
                   }
 
-                  if (this._masterManifests!.length < this._sessionData!.data.master_manifests.length) {
+                  if (this._mainMedias!.length < this._sessionData!.media.main.length) {
                     this.ompApiService.api!.alerts.warn('HDR playback not supported on this platform. Use Safari to view HDR options.', {autodismiss: true});
                   }
 
@@ -305,6 +337,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
               });
           },
           error: (err) => {
+            console.log(err);
             throw new Error(`Error loading bootstrap data from session url: ${sessionUrl}`);
           },
         });
@@ -331,8 +364,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       this.resetPlayer();
 
       this.videoLoaded$ = new Subject<void>();
+      this.timelineReloaded$ = new Subject<void>();
       this.populateTimeline();
-      completeSub(this.videoLoaded$);
 
       this.timelineReloaded$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
         next: () => {
@@ -363,7 +396,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
               });
 
-              if (baseGroupingLane.style.height === 0) {
+              if (!baseGroupingLane.isEnabled) {
                 lane.toggleHidden('minimized');
               }
             }
@@ -378,16 +411,20 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         },
       });
+
+      completeSub(this.videoLoaded$);
     }
   }
 
   private loadVideo(): Observable<void> {
     return new Observable<void>((o$) => {
-      let frameRate = DomainUtil.resolveFrameRate(this._currentMasterManifest!, this._videoMediaTracks);
+      let frameRate = this._currentMainMedia!.type === 'hls' ? undefined : DomainUtil.resolveFrameRate(this._currentMainMedia!, this._videoMediaTracks);
       this.ompApiService
-        .api!.loadVideo(this._currentMasterManifest!.url, frameRate, {
-          dropFrame: isNullOrUndefined(this._currentMasterManifest!.drop_frame) ? false : this._currentMasterManifest!.drop_frame,
-          ffom: isNullOrUndefined(this._currentMasterManifest!.ffom) ? void 0 : this._currentMasterManifest!.ffom,
+        .api!.loadVideo(this._currentMainMedia!.url, {
+          frameRate,
+          dropFrame: isNullOrUndefined(this._currentMainMedia!.drop_frame) ? false : this._currentMainMedia!.drop_frame,
+          ffom: isNullOrUndefined(this._currentMainMedia!.ffom) ? void 0 : this._currentMainMedia!.ffom,
+          protocol: this.currentMainMedia!.type === 'hls' ? 'hls' : 'native',
         })
         .pipe(take(1))
         .subscribe({
@@ -411,6 +448,74 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             completeSub(o$);
           },
         });
+    });
+  }
+
+  private loadSidecarAudios(): Observable<void> {
+    return new Observable<void>((o$) => {
+      if (this._sidecarAudioEntries) {
+        const partialSidecarAudioTracks: OmpAudioTrackCreateType[] = this._sidecarAudioEntries.map((sidecarEntry) => {
+          const sidecarMediaTrack = this._sidecarAudioMediaTracks?.find((mediaTrack) => mediaTrack.media_id === sidecarEntry.id);
+          return {
+            id: sidecarEntry.id,
+            src: sidecarEntry.url,
+            language: sidecarMediaTrack?.language,
+            label: sidecarMediaTrack?.media_id ?? sidecarEntry.id,
+            channelCount: sidecarMediaTrack?.channel_layout ? sidecarMediaTrack.channel_layout.split(' ').length : 2,
+          };
+        });
+        this.ompApiService.api!.audio.createSidecarAudioTracks(partialSidecarAudioTracks).subscribe((sidecarAudioTracks) => {
+          this._sidecarAudioTracks = sidecarAudioTracks;
+          this._sidecarAudioTracksByName = new Map();
+          sidecarAudioTracks.forEach((track) => this._sidecarAudioTracksByName!.set(track.label!, track));
+          const os$ = sidecarAudioTracks.map((track) => this.ompApiService.api!.audio.createSidecarAudioRouter(track.id, track.channelCount));
+
+          forkJoin(os$).subscribe(() => {
+            completeSub(o$);
+            this.sidecarAudiosLoaded$.next(true);
+          });
+        });
+      } else {
+        completeSub(o$);
+        this.sidecarAudiosLoaded$.next(true);
+      }
+    });
+  }
+
+  private loadSidecarTexts(): Observable<void> {
+    return new Observable<void>((o$) => {
+      if (this._sidecarTextEntries) {
+        const partialSidecarTextTracks: Pick<SubtitlesVttTrack, 'id' | 'src' | 'label' | 'language' | 'default'>[] = this._sidecarTextEntries.map((sidecarEntry) => {
+          const sidecarMediaTrack = this._sidecarTextMediaTracks?.find((mediaTrack) => mediaTrack.media_id === sidecarEntry.id);
+          return {
+            id: sidecarEntry.id,
+            src: sidecarEntry.url,
+            language: sidecarMediaTrack?.language ?? '',
+            label: sidecarMediaTrack?.media_id ?? sidecarEntry.id,
+            default: false,
+          };
+        });
+        forkJoin(partialSidecarTextTracks.map((track) => this.ompApiService.api!.subtitles.createVttTrack(track))).subscribe({
+          next: (tracks) => {
+            this._sidecarSubtitlesVttTracksByName = new Map();
+            if (this._subtitlesVttTracksByName === undefined) {
+              this._subtitlesVttTracksByName = new Map();
+            }
+
+            tracks
+              .filter((track) => track)
+              .forEach((track) => {
+                this._sidecarSubtitlesVttTracksByName!.set(track!.label, track!);
+                this._subtitlesVttTracksByName!.set(track!.label, track!);
+              });
+            completeSub(o$);
+            this.sidecarTextsLoaded$.next(true);
+          },
+        });
+      } else {
+        completeSub(o$);
+        this.sidecarTextsLoaded$.next(true);
+      }
     });
   }
 
@@ -445,8 +550,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
           groupingLane.onVisibilityChange$.subscribe({
             next: () => {
-              if (this._analysisGroupsVisibility) {
-                this.handleAnalysisGroupsVisibleChanged(this._analysisGroupsVisibility);
+              if (this.analysisGroups.size > 0 && this.analysisGroupsVisibility) {
+                this.handleAnalysisGroupsVisibleChanged();
               }
             },
           });
@@ -472,11 +577,12 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       let defaultTrackSet = false;
 
       this._audioMediaTracks.forEach((audioMediaTrack, index) => {
-        let audioGroupingLane = this.createAudioGroupingLane(audioMediaTrack, index);
+        const isSidecar = this._sidecarAudioMediaTracks?.includes(audioMediaTrack) ?? false;
+        let audioGroupingLane = this.createAudioGroupingLane(audioMediaTrack, index, isSidecar);
         lanes.push(audioGroupingLane);
         this._groupingLanes!.push(audioGroupingLane);
 
-        if (audioMediaTrack.program_name === this._currentAudioTrack?.label) {
+        if (audioMediaTrack.media_id === this._currentAudioTrack?.label) {
           this._currentAudioLane = audioGroupingLane;
         }
 
@@ -485,22 +591,20 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           defaultTrackSet = true;
         }
 
-        let viusalReferencesInOrder = DomainUtil.resolveAudioMediaTrackVisualReferencesInOrder(audioMediaTrack);
+        let visualReferencesInOrder = DomainUtil.resolveAudioMediaTrackVisualReferencesInOrder(audioMediaTrack);
         let isAudioChannelLane = () => {
-          return viusalReferencesInOrder && viusalReferencesInOrder.length > 1;
+          return visualReferencesInOrder && visualReferencesInOrder.length > 1;
         };
 
         let isCustomAudioTrackLane = () => {
-          return !viusalReferencesInOrder || viusalReferencesInOrder.length <= 1;
+          return !visualReferencesInOrder || visualReferencesInOrder.length <= 1;
         };
 
         if (isAudioChannelLane()) {
-          let audioChannelLanes: AudioChannelLane[] = [];
-          viusalReferencesInOrder!.forEach((visualReference, index) => {
-            let audioChannelLane = this.createAudioChannelLane(audioMediaTrack, visualReference, audioGroupingLane, index, viusalReferencesInOrder!.length, false);
+          visualReferencesInOrder!.forEach((visualReference, index) => {
+            let audioChannelLane = this.createAudioChannelLane(audioMediaTrack, visualReference, audioGroupingLane, index, visualReferencesInOrder!.length, false, isSidecar);
             lanes.push(audioChannelLane);
             audioGroupingLane.addChildLane(audioChannelLane);
-            audioChannelLanes.push(audioChannelLane);
 
             if (audioChannelLane.name === this._currentAudioTrack?.label) {
               this._currentAudioLane = audioChannelLane;
@@ -511,8 +615,6 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
               defaultTrackSet = true;
             }
           });
-
-          audioGroupingLane.audioChannelLanes = audioChannelLanes;
         } else if (isCustomAudioTrackLane()) {
           let customAudioTrackLane = this.createCustomAudioTrackLane(audioMediaTrack, true);
           lanes.push(customAudioTrackLane);
@@ -528,8 +630,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           });
           audioGroupingLane.onVisibilityChange$.subscribe({
             next: () => {
-              if (this._analysisGroupsVisibility) {
-                this.handleAnalysisGroupsVisibleChanged(this._analysisGroupsVisibility);
+              if (this.analysisGroups.size > 0 && this.analysisGroupsVisibility) {
+                this.handleAnalysisGroupsVisibleChanged();
               }
             },
           });
@@ -553,7 +655,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       let defaultTrackSet = false;
 
       this._textMediaTracks.forEach((textMediaTrack, index) => {
-        let subtitlesVttTrack = StringUtil.isNonEmpty(textMediaTrack.program_name) ? this._subtitlesVttTracksByName?.get(textMediaTrack.program_name) : void 0;
+        let subtitlesVttTrack = StringUtil.isNonEmpty(textMediaTrack.media_id) ? this._subtitlesVttTracksByName?.get(textMediaTrack.media_id) : void 0;
 
         let textTrackGroupingLane = this.createTextTrackGroupingLane(textMediaTrack, subtitlesVttTrack, index);
         lanes.push(textTrackGroupingLane);
@@ -580,8 +682,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
           textTrackGroupingLane.onVisibilityChange$.subscribe({
             next: () => {
-              if (this._analysisGroupsVisibility) {
-                this.handleAnalysisGroupsVisibleChanged(this._analysisGroupsVisibility);
+              if (this.analysisGroups.size && this.analysisGroupsVisibility) {
+                this.handleAnalysisGroupsVisibleChanged();
               }
             },
           });
@@ -598,15 +700,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     return lanes;
   }
 
-  private matchesManifest = (obj: {manifest_ids: string[]}): boolean => {
-    return !!obj.manifest_ids.find((p) => p === this._currentMasterManifest!.id);
-  };
-
   private populateTimeline() {
-    this._videoMediaTracks = this.populateWithIds(this._sessionData!.data.media_tracks.video ? this._sessionData!.data.media_tracks.video.filter((p) => this.matchesManifest(p)) : void 0);
-    this._audioMediaTracks = this.populateWithIds(this._sessionData!.data.media_tracks.audio);
-    this._textMediaTracks = this.populateWithIds(this._sessionData!.data.media_tracks.text);
-
     // start video & timeline load
     let subtitlesLoaded$ = new Subject<void>();
     let appAudioLoaded$ = new Subject<void>();
@@ -614,11 +708,6 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     let timelineTextTracksCreated$ = new Subject<TimelineLaneApi[]>();
     let timelineLanesAdded$ = new Subject<void>();
     let telemetryLanesLoaded$ = new Subject<void>();
-
-    if (this.timelineReloaded$) {
-      completeSub(this.timelineReloaded$);
-      this.timelineReloaded$ = new Subject<void>();
-    }
 
     this._manifestLoadBreaker$.pipe(take(1)).subscribe(() => {
       // remove listeners set for error handling
@@ -689,34 +778,122 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                 )
                 .pipe(takeUntil(this._manifestLoadBreaker$))
                 .subscribe({
-                  next: () => {
+                  next: (audioLoadedEvent) => {
+                    this._audioTracks?.forEach((track, index) => {
+                      // refresh references
+                      const newTrack = audioLoadedEvent!.audioTracks.find((loadedTrack) => track.label === loadedTrack.label)!;
+                      this._audioTracksByName?.set(newTrack.label!, newTrack);
+                      this._audioTracks![index] = newTrack;
+                    });
+
+                    this._muxedAudioTracks?.forEach((track, index) => {
+                      const source = this._sessionData!.media.main.find((source) => track.src === source.url)!;
+                      const audioMediaTrack = this._audioMediaTracks?.find((amt) => amt.media_id === source.id);
+                      const newTrack = audioLoadedEvent!.audioTracks.find((loadedTrack) => track.src === loadedTrack.src)!;
+
+                      this._audioTracksByName!.set(audioMediaTrack!.media_id, newTrack!);
+                      this._muxedAudioTracks![index] = newTrack;
+
+                      const audioTrackIndex = this._audioTracks?.findIndex((t) => t.src === newTrack.src);
+
+                      if (audioTrackIndex) {
+                        this._audioTracks![audioTrackIndex] = newTrack;
+                      }
+                    });
+
                     this.timelineService.getAudioGroupingLanes()?.forEach((lane) => {
-                      lane.audioTrack = StringUtil.isNonEmpty(lane.audioMediaTrack.program_name) ? this._audioTracksByName?.get(lane.audioMediaTrack.program_name) : void 0;
+                      lane.audioTrack = StringUtil.isNonEmpty(lane.audioMediaTrack.media_id) ? this._audioTracksByName?.get(lane.audioMediaTrack.media_id) : void 0;
                     });
 
                     this.timelineService.getAudioChannelLanes()?.forEach((lane) => {
-                      lane.audioTrack = StringUtil.isNonEmpty(lane.audioMediaTrack.program_name) ? this._audioTracksByName?.get(lane.audioMediaTrack.program_name) : void 0;
+                      lane.audioTrack = StringUtil.isNonEmpty(lane.audioMediaTrack.media_id) ? this._audioTracksByName?.get(lane.audioMediaTrack.media_id) : void 0;
                     });
                   },
                 });
             },
           });
 
-        combineLatest([timelineLanesAdded$, subtitlesLoaded$])
+        combineLatest([timelineLanesAdded$, this.sidecarAudiosLoaded$])
+          .pipe(filter((p) => !!p.at(1)))
+          .pipe(takeUntil(this._manifestLoadBreaker$), take(1))
+          .subscribe({
+            next: () => {
+              this.timelineService.getAudioGroupingLanes()?.forEach((lane) => {
+                const audioTrack = StringUtil.isNonEmpty(lane.audioMediaTrack.media_id) ? this._sidecarAudioTracksByName?.get(lane.audioMediaTrack.media_id) : void 0;
+                if (audioTrack) {
+                  lane.audioTrack = audioTrack;
+                }
+              });
+
+              this.timelineService.getAudioChannelLanes()?.forEach((lane) => {
+                const audioTrack = StringUtil.isNonEmpty(lane.audioMediaTrack.media_id) ? this._sidecarAudioTracksByName?.get(lane.audioMediaTrack.media_id) : void 0;
+                if (audioTrack) {
+                  lane.audioTrack = audioTrack;
+                }
+              });
+
+              // track audio changes (triggered for example by detached window)
+              this.ompApiService
+                .api!.audio.onSidecarAudioCreate$.pipe(
+                  takeUntil(this._manifestLoadBreaker$),
+                  filter((p) => !!p)
+                )
+                .pipe(takeUntil(this._manifestLoadBreaker$))
+                .subscribe({
+                  next: (sidecarAudioCreateEvent) => {
+                    const newSidecarTrack = sidecarAudioCreateEvent.createdSidecarAudioState.audioTrack;
+                    this._sidecarAudioTracks = this._sidecarAudioTracks!.map((sc) => (sc.id === newSidecarTrack.id ? newSidecarTrack : sc));
+                    this._sidecarAudioTracksByName!.set(newSidecarTrack.id, newSidecarTrack);
+
+                    this.timelineService
+                      .getAudioGroupingLanes()
+                      ?.filter((gl) => gl.audioMediaTrack.media_id === newSidecarTrack.id)
+                      ?.forEach((lane) => {
+                        const audioTrack = StringUtil.isNonEmpty(lane.audioMediaTrack.media_id) ? this._sidecarAudioTracksByName?.get(lane.audioMediaTrack.media_id) : void 0;
+                        if (audioTrack) {
+                          lane.audioTrack = audioTrack;
+                        }
+                      });
+
+                    this.timelineService
+                      .getAudioChannelLanes()
+                      ?.filter((cl) => cl.audioMediaTrack.media_id === newSidecarTrack.id)
+                      .forEach((lane) => {
+                        const audioTrack = StringUtil.isNonEmpty(lane.audioMediaTrack.media_id) ? this._sidecarAudioTracksByName?.get(lane.audioMediaTrack.media_id) : void 0;
+                        if (audioTrack) {
+                          lane.audioTrack = audioTrack;
+                        }
+                      });
+                  },
+                });
+            },
+          });
+
+        combineLatest([timelineLanesAdded$, subtitlesLoaded$, this.sidecarTextsLoaded$])
+          .pipe(filter((p) => !!p.at(2)))
           .pipe(takeUntil(this._manifestLoadBreaker$), take(1))
           .subscribe({
             next: () => {
               // track subtitle changes (triggered for example by detached window)
-              this.ompApiService
-                .api!.subtitles.onSubtitlesLoaded$.pipe(
+              combineLatest([this.ompApiService.api!.subtitles.onSubtitlesLoaded$, this.ompApiService.api!.subtitles.onCreate$])
+                .pipe(
                   takeUntil(this._manifestLoadBreaker$),
                   filter((p) => !!p)
                 )
                 .pipe(takeUntil(this._manifestLoadBreaker$))
                 .subscribe({
                   next: () => {
-                    const subtitleTrack = this.ompApiService.api!.subtitles.getTracks().find((track) => track.label === this._currentSubtitleTrackLabel);
+                    const tracks = this.ompApiService.api!.subtitles.getTracks();
+                    this._subtitlesVttTracks?.forEach((track, index) => {
+                      // refresh references
+                      const newTrack = tracks.find((loadedTrack) => track.label === loadedTrack.label);
+                      if (newTrack) {
+                        this._subtitlesVttTracksByName?.set(newTrack.label!, newTrack);
+                        this._subtitlesVttTracks![index] = newTrack;
+                      }
+                    });
 
+                    const subtitleTrack = this.ompApiService.api!.subtitles.getTracks().find((track) => track.label === this._currentSubtitleTrackLabel);
                     if (subtitleTrack) {
                       this.ompApiService.api!.subtitles.showTrack(subtitleTrack.id);
                     }
@@ -745,7 +922,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             },
           });
 
-        combineLatest([timelineExceptTextTracksCreated$, subtitlesLoaded$])
+        combineLatest([timelineExceptTextTracksCreated$, subtitlesLoaded$, this.sidecarTextsLoaded$])
+          .pipe(filter((p) => !!p.at(2)))
           .pipe(takeUntil(this._manifestLoadBreaker$), take(1))
           .subscribe({
             next: () => {
@@ -759,9 +937,10 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           .subscribe({
             next: ([lanes1, lanes2]) => {
               let timelineLanes = [...lanes1, ...lanes2];
-              if (this._sessionData!.presentation?.timeline_configuration?.track_ordering?.length) {
-                timelineLanes = this.orderMediaTracks(timelineLanes, this._sessionData!.presentation.timeline_configuration.track_ordering);
-              }
+              timelineLanes = this.orderMediaTracks(
+                timelineLanes,
+                this._sessionData!.presentation!.timeline.tracks.map((track) => track.id)
+              );
               this.ompApiService.api!.timeline!.addTimelineLanes(timelineLanes);
 
               this._groupingLanes?.forEach((lane) => {
@@ -770,11 +949,10 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
               });
 
-              if (this._sessionData!.presentation?.timeline_configuration?.visible_tracks?.length) {
-                this.hideMediaTracks(timelineLanes, this._sessionData!.presentation.timeline_configuration.visible_tracks);
-              } else if (this._sessionData!.presentation?.timeline_configuration?.track_ordering?.length) {
-                this.hideMediaTracks(timelineLanes, this._sessionData!.presentation.timeline_configuration.track_ordering);
-              }
+              this.hideMediaTracks(
+                timelineLanes,
+                this._sessionData!.presentation!.timeline.tracks.filter((track) => !track.style?.hidden).map((track) => track.id)
+              );
 
               completeSub(timelineLanesAdded$);
 
@@ -804,6 +982,16 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
 
         timelineLanesAdded$.pipe(takeUntil(this._manifestLoadBreaker$), take(1)).subscribe({
           next: () => {
+            if (this.analysisGroups.size > 0 && this.sessionData?.presentation?.timeline.configuration?.visible_analysis_groups) {
+              this.analysisGroupsVisibility = new Map();
+
+              [...this._analysisGroups.keys()].forEach((key) => {
+                this.analysisGroupsVisibility!.set(key, this.sessionData!.presentation!.timeline.configuration!.visible_analysis_groups!.includes(key));
+              });
+
+              this.handleAnalysisGroupsVisibleChanged();
+            }
+
             const laneOptions =
               this.timelineService.getGroupingLanes()?.map((lane: any) => ({
                 label: `${lane.description.split(' ')[0]} - ${lane._videoMediaTrack?.name ?? lane._audioMediaTrack?.name ?? lane._textMediaTrack?.name}`,
@@ -832,13 +1020,24 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             next: (event) => {
               // populate audio tracks from hls stream
               this._audioTracks = this.ompApiService.api!.video.getAudioTracks();
+              const mainMediaSources = this._sessionData!.media.main.map((source) => source.url);
+              this._muxedAudioTracks = this._audioTracks.filter((track) => mainMediaSources.includes(track.src));
               this._audioTracksByName = new Map<string, OmpAudioTrack>();
               this._audioTracks.forEach((audioTrack) => {
                 this._audioTracksByName!.set(audioTrack.label!, audioTrack);
               });
+              this._muxedAudioTracks.forEach((audioTrack) => {
+                const source = this._sessionData!.media.main.find((source) => audioTrack.src === source.url)!;
+                const audioMediaTrack = this._audioMediaTracks?.find((amt) => amt.media_id === source.id);
+                this._audioTracksByName!.set(audioMediaTrack!.media_id, audioTrack);
+              });
               completeSub(appAudioLoaded$);
             },
           });
+
+        this.ompApiService.api!.audio.onSidecarAudioCreate$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
+          next: (sidecarAudioCreateEvent: SidecarAudioCreateEvent) => {},
+        });
 
         this.ompApiService
           .api!.subtitles.onSubtitlesLoaded$.pipe(
@@ -850,7 +1049,9 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
             next: (event) => {
               // populate text tracks from hls stream
               this._subtitlesVttTracks = this.ompApiService.api!.subtitles.getTracks();
-              this._subtitlesVttTracksByName = new Map<string, SubtitlesVttTrack>();
+              if (this._subtitlesVttTracksByName === undefined) {
+                this._subtitlesVttTracksByName = new Map<string, SubtitlesVttTrack>();
+              }
               this._subtitlesVttTracks.forEach((subtitlesVttTrack) => {
                 this._subtitlesVttTracksByName!.set(subtitlesVttTrack.label, subtitlesVttTrack);
               });
@@ -889,11 +1090,11 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       console.debug(`Selecting manifest with id: ${manifestId}`);
     }
 
-    this._currentMasterManifest = manifestId ? this._masterManifests!.find((p) => p.id === manifestId) : this._masterManifests![0];
+    this._currentMainMedia = manifestId ? this._mainMedias!.find((p) => p.id === manifestId) : this._mainMedias![0];
 
-    console.debug('Manifest selected: ', this._currentMasterManifest);
+    console.debug('Manifest selected: ', this._currentMainMedia);
 
-    if (!this._currentMasterManifest) {
+    if (!this._currentMainMedia) {
       throw new Error(`Could not select master manifest with id: ${manifestId}`);
     }
 
@@ -905,7 +1106,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(takeUntil(this._manifestLoadBreaker$), take(1))
       .subscribe({
         next: () => {
-          if (this._currentAudioLane) {
+          if (this._currentAudioLane && !this._currentAudioLane.isDisabled) {
             this._currentAudioLane.setAsActiveAudioTrack(false);
           }
           if (this._currentAudioTrack) {
@@ -934,6 +1135,20 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           } else {
             completeSub(this.videoLoaded$);
           }
+
+          combineLatest([this.sidecarAudiosLoaded$, this.sidecarTextsLoaded$]).subscribe(([areSidecarAudiosLoaded, areSidecarTextsLoaded]) => {
+            this.sidecarsLoaded$.next(areSidecarAudiosLoaded && areSidecarTextsLoaded);
+          });
+
+          this.ompApiService
+            .api!.subtitles.onSubtitlesLoaded$.pipe(
+              filter((p) => !!p),
+              take(1),
+              takeUntil(this._destroyed$)
+            )
+            .subscribe(() => this.loadSidecarTexts().subscribe());
+
+          this.loadSidecarAudios().subscribe();
         },
       });
   }
@@ -1009,29 +1224,48 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         )
         .optional(),
-      data: z.object({
-        master_manifests: z
+      media: z.object({
+        main: z
           .array(
             z.object({
-              id: z.string(),
+              id: z.string().optional(),
               name: z.string(),
-              // frame_rate: z.string(),
+              type: z.enum(['hls', 'mp4']),
+              frame_rate: z.union([z.string(), z.number()]).optional(),
               url: z.string(),
             })
           )
-          .min(1), // minimum of 1 master_manifest
-        media_tracks: z
+          .min(1)
+          .superRefine((data, ctx) => {
+            data.forEach((media) => {
+              if (media.type === 'mp4' && !media.id && media.frame_rate != undefined) {
+                ctx.addIssue({
+                  path: ['id'],
+                  code: z.ZodIssueCode.custom,
+                  message: "id and frame rate are required when media type is 'mp4'",
+                });
+              }
+            });
+          }),
+      }),
+      presentation: z.object({
+        timeline: z
           .object({
-            video: z
-              .array(z.object({}))
+            tracks: z
+              .array(
+                z.object({
+                  type: z.string(),
+                })
+              )
               .min(0)
-              .max(1) // to be relaxed in future
+              // .max(1) // to be relaxed in future
               .optional(),
-            audio: z.array(z.object({})).min(0).optional(),
           })
           .refine(
-            ({video, audio}) => {
-              return (video !== undefined && video.length > 0) || (audio !== undefined && audio.length > 0);
+            ({tracks}) => {
+              const videoTracks = tracks?.filter((track) => track.type === 'video');
+              const audioTracks = tracks?.filter((track) => track.type === 'audio');
+              return (videoTracks !== undefined && videoTracks.length > 0) || (audioTracks !== undefined && audioTracks.length > 0);
             },
             {
               message: 'Either video or audio must be provided',
@@ -1043,8 +1277,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       let parse = zodObject.parse(sessionData);
 
-      let masterManifests = sessionData.data.master_manifests.filter((p) => this.isManifestSupported(p));
-      if (masterManifests.length < 1) {
+      let mainMedias = sessionData.media.main.filter((p) => this.isMainMediaSupported(p));
+      if (mainMedias.length < 1) {
         throw new Error(`Could not find supported master manifests`);
       }
 
@@ -1055,8 +1289,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private isManifestSupported(masterManifest: MasterManifest): boolean {
-    return !(this.windowService.userAgent !== 'safari' && masterManifest.color_range && masterManifest.color_range !== 'sdr');
+  private isMainMediaSupported(mainMedia: MainMedia): boolean {
+    return !(this.windowService.userAgent !== 'safari' && mainMedia.color_range && mainMedia.color_range !== 'sdr');
   }
 
   private processScrubberLane() {
@@ -1149,13 +1383,14 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     return lane;
   }
 
-  private createAudioGroupingLane(audioMediaTrack: AudioMediaTrack, index: number): AudioGroupingLane {
+  private createAudioGroupingLane(audioMediaTrack: AudioMediaTrack, index: number, isSidecar?: boolean): AudioGroupingLane {
     let description = `A${index + 1}${audioMediaTrack.visual_reference && audioMediaTrack.visual_reference.length > 1 ? ` (${audioMediaTrack.visual_reference.length} ch)` : ``}`;
 
     let lane = new AudioGroupingLane({
       description: description,
       text: audioMediaTrack.name,
       audioMediaTrack: audioMediaTrack,
+      isSidecar: !!isSidecar,
     });
 
     this.addGroupingLaneConfigButtonListener(lane);
@@ -1164,9 +1399,11 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private createTextTrackGroupingLane(textMediaTrack: TextMediaTrack, subtitlesVttTrack: SubtitlesVttTrack | undefined, index: number): TextTrackGroupingLane {
-    let textTrackUsageLabel = DomainUtil.resolveTextTrackUsageLabel(textMediaTrack);
+    // let textTrackUsageLabel = textMediaTrack.id; //DomainUtil.resolveTextTrackUsageLabel(textMediaTrack);
 
-    let description = `T${index + 1}${textTrackUsageLabel ? ` (${textTrackUsageLabel})` : ``}`;
+    // let description = `T${index + 1}${textTrackUsageLabel ? ` (${textTrackUsageLabel})` : ``}`;
+
+    let description = `T${index + 1}`;
 
     let lane = new TextTrackGroupingLane(
       {
@@ -1189,7 +1426,8 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     audioGroupingLane: AudioGroupingLane,
     channelIndex: number,
     channelsCount: number,
-    loadingAnimationEnabled: boolean
+    loadingAnimationEnabled: boolean,
+    isSidecar: boolean
   ): AudioChannelLane {
     let lane = new AudioChannelLane(
       {
@@ -1198,6 +1436,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
         audioGroupingLane: audioGroupingLane,
         channelIndex: channelIndex,
         channelsCount: channelsCount,
+        isSidecar: !!isSidecar,
         style: {
           ...Constants.CUSTOM_AUDIO_TRACK_LANE_STYLE,
           ...LayoutService.themeStyleConstants.CUSTOM_AUDIO_TRACK_LANE_STYLE_COLORS,
@@ -1267,7 +1506,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  handleManifestChange(masterManifest: MasterManifest) {
+  handleManifestChange(masterManifest: MainMedia) {
     let videoPreviousIsPlaying = this.ompApiService.api!.video.isPlaying();
     let captureState = () => {
       this._videoPreviousTime = this.ompApiService.api!.video.getCurrentTime();
@@ -1318,14 +1557,14 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  handleAnalysisGroupsVisibleChanged(visibleLanesMap: Map<string, boolean>) {
-    let allFalse = ![...visibleLanesMap.values()].reduce((acc, curr) => acc || curr);
+  handleAnalysisGroupsVisibleChanged() {
+    let allFalse = ![...this.analysisGroupsVisibility.values()].reduce((acc, curr) => acc || curr);
 
-    this._analysisGroupsVisibility = visibleLanesMap;
+    // this.analysisGroupsVisibility = visibleLanesMap;
 
-    [...visibleLanesMap.keys()].forEach((group) => {
+    [...this.analysisGroupsVisibility.keys()].forEach((group) => {
       let ids = this._analysisGroups.get(group);
-      if (visibleLanesMap.get(group) || allFalse) {
+      if (this.analysisGroupsVisibility.get(group) || allFalse) {
         if (ids && ids.length > 0) {
           let maximizeIds = ids.filter((id) => this._analysisLaneParent.get(id)!.groupVisibility === 'maximized');
           let minimizeIds = ids.filter((id) => this._analysisLaneParent.get(id)!.groupVisibility === 'minimized');
@@ -1453,10 +1692,10 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.groupingLanes) {
       let maxLaneIndexForEasing = 0; // only first one
       // ease max numForEasing lanes
-      let osEased$ = this.groupingLanes.filter((p, index) => index <= maxLaneIndexForEasing).map((p) => (visibility === 'minimized' ? p.groupMinimizeEased() : p.groupMaximizeEased()));
+      let osEased$ = this.groupingLanes.filter((p, index) => index <= maxLaneIndexForEasing && p.isEnabled).map((p) => (visibility === 'minimized' ? p.groupMinimizeEased() : p.groupMaximizeEased()));
 
       this.groupingLanes
-        .filter((p, index) => index > maxLaneIndexForEasing)
+        .filter((p, index) => index > maxLaneIndexForEasing && p.isEnabled)
         .forEach((p) => {
           if (visibility === 'minimized') {
             p.groupMinimize();
@@ -1638,12 +1877,12 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
     return this._groupingLanes;
   }
 
-  get currentMasterManifest(): MasterManifest | undefined {
-    return this._currentMasterManifest;
+  get currentMainMedia(): MainMedia | undefined {
+    return this._currentMainMedia;
   }
 
-  get masterManifests(): MasterManifest[] | undefined {
-    return this._masterManifests;
+  get mainMedias(): MainMedia[] | undefined {
+    return this._mainMedias;
   }
 
   get analysisGroups(): Map<string, string[]> {
@@ -1668,13 +1907,12 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get groupingLanesVisible(): boolean {
-    let out = true;
-    try {
-      out = !!this._groupingLanes?.find((p) => !p.isMinimized());
-    } catch (e) {
-
+    let isVisible = true;
+    if (this._groupingLanes) {
+      isVisible = !!this._groupingLanes.find((p) => p.isEnabled);
     }
-    return out;
+
+    return isVisible;
   }
 
   get isVuMeterSupported(): boolean {
@@ -1702,7 +1940,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get isInfoModeVisible(): boolean {
-    return !!this.sessionData?.data.source_info?.length || !!this.sessionData?.presentation?.info_tabs?.length;
+    return !!this.sessionData?.sources?.length || !!this.sessionData?.presentation?.info_tabs?.length;
   }
 
   get isAnnotationModeVisible(): boolean {

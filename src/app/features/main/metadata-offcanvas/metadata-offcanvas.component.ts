@@ -15,7 +15,7 @@
  */
 
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, ViewChild} from '@angular/core';
-import {MediaInfo, SourceInfo} from '../../../model/domain.model';
+import {MediaInfo, Source, SourceInfo} from '../../../model/domain.model';
 import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
 import {BaseOffcanvas} from '../../../shared/components/offcanvas/base-offcanvas';
@@ -29,7 +29,7 @@ import {IconModule} from '../../../shared/components/icon/icon.module';
   imports: [CoreModule, SharedModule, IconModule],
   template: `
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title">{{ sourceInfo.name }}&nbsp;</h5>
+      <h5 class="offcanvas-title">{{ source.name }}&nbsp;</h5>
       <h5 class="offcanvas-title" id="tech-metadata">| Tech Metadata</h5>
       <button type="button" class="btn text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss()">
         <i appIcon="close"></i>
@@ -38,7 +38,7 @@ import {IconModule} from '../../../shared/components/icon/icon.module';
     <div class="offcanvas-body">
       <div class="d-flex flex-column h-100">
         <div class="flex-grow-1" style="overflow: scroll">
-          <ngx-json-viewer #ngxJsonViewer [json]="mediaInfo.general_properties" [expanded]="true"></ngx-json-viewer>
+          <ngx-json-viewer #ngxJsonViewer [json]="source.metadata" [expanded]="true"></ngx-json-viewer>
         </div>
       </div>
     </div>
@@ -48,8 +48,7 @@ import {IconModule} from '../../../shared/components/icon/icon.module';
 export class MetadataOffcanvasComponent extends BaseOffcanvas implements AfterViewInit {
   @ViewChild('ngxJsonViewer') ngxJsonViewer?: NgxJsonViewerComponent;
 
-  sourceInfo!: SourceInfo;
-  mediaInfo!: MediaInfo;
+  source!: Source;
 
   constructor(
     activeOffcanvas: NgbActiveOffcanvas,

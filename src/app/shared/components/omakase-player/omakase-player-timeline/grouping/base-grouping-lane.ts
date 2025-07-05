@@ -36,6 +36,8 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
   private _minimizeMaximizeInProgress = false;
   private _onVisbilityChange$: Subject<GroupingLaneVisibility> = new Subject<GroupingLaneVisibility>();
 
+  private _enabled: boolean = true;
+
   protected constructor(config: ConfigWithOptionalStyle<C>) {
     super(config);
 
@@ -153,11 +155,13 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
       this.onStyleChange();
       this.maximize();
       visibility === 'minimized' ? this.groupMaximize() : this.groupMinimize();
+      this._enabled = true;
     } else {
       this.minimize();
       this.style.textFontSize = 0;
       this.onStyleChange();
       this.groupMinimize();
+      this._enabled = false;
     }
   }
 
@@ -165,6 +169,10 @@ export abstract class BaseGroupingLane<C extends BaseGroupingLaneConfig> extends
 
   get groupVisibility(): GroupingLaneVisibility {
     return this._groupVisibility;
+  }
+
+  get isEnabled(): boolean {
+    return this._enabled;
   }
 
   private set groupVisibility(visibility: GroupingLaneVisibility) {

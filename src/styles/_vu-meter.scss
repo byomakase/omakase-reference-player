@@ -94,22 +94,6 @@
             &:nth-child(1) {
               // bars container with scale
               width: 100% !important;
-
-              > div {
-                // each bar
-                > div {
-                  &:nth-child(1) {
-                    // scale above bar
-                    display: none;
-                    height: 0 !important;
-                  }
-
-                  &:nth-child(2) {
-                    // bar
-                    height: 100% !important;
-                  }
-                }
-              }
             }
 
             &:nth-child(2) {

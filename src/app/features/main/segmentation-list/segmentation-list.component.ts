@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostBinding, HostListener, OnDestroy, OnInit} from '@angular/core';
 import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
 import {Select, Store} from '@ngxs/store';
@@ -31,7 +31,7 @@ import {InlineEditComponent} from '../../../shared/components/inline-edit/inline
   template: ` <div class="segmentation-list-container d-flex flex-row">
     @for (track of tracks$ | async; track track.id) {
       <div class="segmentation-list-item d-flex flex-row" [ngClass]="{active: track === (activeTrack$ | async), initial: isInInitialTracks(track)}">
-        <app-inline-edit [displayText]="track.name" (clicked)="setActiveTrack(track)" (edited)="editTrack(track, $event)"></app-inline-edit>
+        <app-inline-edit [displayText]="track.name" [close$]="closeSegmentationNameEdit$" (clicked)="setActiveTrack(track)" (edited)="editTrack(track, $event)"></app-inline-edit>
       </div>
     }
   </div>`,
@@ -41,6 +41,7 @@ export class SegmentationListComponent implements OnInit, OnDestroy {
   @Select(SegmentationState.activeTrack) activeTrack$!: Observable<SegmentationTrack>;
 
   public editingSegmentationName?: SegmentationTrack;
+  public closeSegmentationNameEdit$ = new Subject<boolean>();
 
   private _destroyed$ = new Subject<void>();
   private _initialTracks?: SegmentationTrack[];
@@ -54,6 +55,22 @@ export class SegmentationListComponent implements OnInit, OnDestroy {
   @HostBinding('id')
   get hostElementId(): string | undefined {
     return 'segmentation-list';
+  }
+
+  @HostListener('document:click', ['$event.target'])
+  public replyClickHandler(targetElement: HTMLElement): void {
+    if (!targetElement.classList.contains('inline-edit-text')) {
+      this.closeSegmentationNameEdit$.next(false);
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeypress(event: KeyboardEvent) {
+    if (event.code === 'Enter') {
+      this.closeSegmentationNameEdit$.next(true);
+    } else if (event.code === 'Escape') {
+      this.closeSegmentationNameEdit$.next(false);
+    }
   }
 
   ngOnInit() {

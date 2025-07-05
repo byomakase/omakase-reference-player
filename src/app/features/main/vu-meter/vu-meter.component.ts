@@ -19,25 +19,25 @@ import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
 import {animate, AnimationEvent, state, style, transition, trigger} from '@angular/animations';
 import {Select, Store} from '@ngxs/store';
-import {filter, map, Observable, Subject, take, takeUntil} from 'rxjs';
+import {filter, map, Observable, skip, Subject, take, takeUntil} from 'rxjs';
 import {VuMeterState, VuMeterStateModel} from './vu-meter.state';
 import {VuMeterActions} from './vu-meter.actions';
 import {OmpApiService} from '../../../shared/components/omakase-player/omp-api.service';
 import {LayoutService} from '../../../core/layout/layout.service';
 import {completeSub} from '../../../util/rx-util';
 import {IconModule} from '../../../shared/components/icon/icon.module';
-import {RouterVisualizationApi} from '@byomakase/omakase-player/dist/api/router-visualization-api';
 import {AudioMediaTrack} from '../../../model/domain.model';
 import {PeakMeterConfig, VuMeter, VuMeterApi} from '@byomakase/vu-meter';
+import {DomainUtil} from '../../../util/domain-util';
+import {AudioSwitchedEvent, RouterVisualizationApi} from '@byomakase/omakase-player';
 import Minimize = VuMeterActions.Minimize;
 import Maximize = VuMeterActions.Maximize;
-import {DomainUtil} from '../../../util/domain-util';
 
 const animateDurationMs = 300;
 const animateTimings = `${animateDurationMs}ms ease-in-out`;
 
 const vuMeterSingleBarWidth = 25;
-const viMeterScaleWidth = 30;
+const vuMeterScaleWidth = 30;
 let audioRouterWidth = 400;
 
 const peakMeterConfigDark: Partial<PeakMeterConfig> = {
@@ -92,7 +92,7 @@ const peakMeterConfigLight: Partial<PeakMeterConfig> = {
 
       <div class="vu-meter-eq flex-grow-1">
         <div class="d-flex flex-row h-100">
-          <div #audioRouter id="omakase-audio-router" [hidden]="(animationState | async) === 'minimized'"></div>
+          <div #audioRouter id="omakase-audio-router" [class.minimized]="(animationState | async) === 'minimized'" [class.maximized]="(animationState | async) === 'maximized'"></div>
           <div class="d-flex flex-column flex-grow-1 justify-content-end h-100">
             <div class="web-audio-peak-meter flex-grow-1" #vuMeter></div>
             <div class="channel-labels d-flex justify-content-between">
@@ -137,10 +137,11 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Input() audioMediaTracks?: AudioMediaTrack[];
 
-  private _audioRouter?: RouterVisualizationApi;
+  private _routerVisualization?: RouterVisualizationApi;
   private _vuMeter?: VuMeterApi;
 
   private _activeTrack?: AudioMediaTrack;
+  private _currentSidecarTrackId?: string;
 
   private _minimizedWidth: number = vuMeterSingleBarWidth * 6;
   private _maximizedWidth: number = this._minimizedWidth;
@@ -169,17 +170,47 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
                 let peakMeterConfig = presentationMode === 'dark' ? peakMeterConfigDark : peakMeterConfigLight;
                 this.initializeAudioRouter();
                 this.tryCreateVuMeter(peakMeterConfig);
-                this.ompApiService.api!.audio.onAudioSwitched$.pipe(takeUntil(this._destroyed$)).subscribe((event) => {
-                  const audioMediaTrack = this.audioMediaTracks?.find((track) => event.activeAudioTrack.label?.startsWith(track.program_name));
+
+                let createAttachedDetachedModeFilter = <T>() => {
+                  return filter<T>(() => this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'attached' || this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached');
+                };
+
+                let updateRouterVisualization = () => {
+                  let activeAudioTrack = this.ompApiService.api!.audio.getActiveAudioTrack();
+                  const audioMediaTrack = this.audioMediaTracks?.find((track) => activeAudioTrack?.label?.startsWith(track.media_id));
                   if (audioMediaTrack && audioMediaTrack.visual_reference && this._activeTrack !== audioMediaTrack) {
-                    this._activeTrack = audioMediaTrack;
                     let visualReferencesInOrder = DomainUtil.resolveAudioMediaTrackVisualReferencesInOrder(audioMediaTrack);
-                    this._audioRouter!.updateMainTrack({
-                      inputNumber: audioMediaTrack.visual_reference.length,
+                    this._routerVisualization!.updateMainTrack({
                       inputLabels: visualReferencesInOrder!.map((visualReference, index) => visualReference.channel ?? `C${index + 1}`),
                     });
                   }
-                });
+                };
+
+                this.ompApiService
+                  .api!.video.onVideoWindowPlaybackStateChange$.pipe(takeUntil(this._destroyed$))
+                  .pipe(createAttachedDetachedModeFilter())
+                  .subscribe((event) => {
+                    updateRouterVisualization();
+                  });
+
+                this.ompApiService
+                  .api!.audio.onAudioSwitched$.pipe(takeUntil(this._destroyed$))
+                  .pipe(createAttachedDetachedModeFilter<AudioSwitchedEvent>())
+                  .subscribe((event) => {
+                    updateRouterVisualization();
+                  });
+
+                this.ompApiService
+                  .api!.audio.onSidecarAudioChange$.pipe(takeUntil(this.layoutService.presentationMode$.pipe(skip(1))))
+                  .pipe(takeUntil(this._destroyed$))
+                  .subscribe((event) => {
+                    const id = this.isActiveTrackSidecar ? this.activeAudioTrack!.id : undefined;
+                    if (id !== this._currentSidecarTrackId) {
+                      this.tryCreateVuMeter(peakMeterConfig);
+                      this.initializeAudioRouter();
+                      this._currentSidecarTrackId = id;
+                    }
+                  });
               },
             });
           });
@@ -200,33 +231,61 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
     let channelCount = 6;
 
     this.minimizedWidth = channelCount * vuMeterSingleBarWidth;
-    this.maximizedWidth = this.minimizedWidth + viMeterScaleWidth + 14 + audioRouterWidth;
+    this.maximizedWidth = this.minimizedWidth + vuMeterScaleWidth + 14 + audioRouterWidth;
+    this.vuMeterElementRef.nativeElement.innerHTML = '';
 
     if (this._vuMeter) {
       this._vuMeter.destroy();
       this._vuMeter = void 0;
     }
 
-    this._vuMeter = new VuMeter(channelCount, this.vuMeterElementRef.nativeElement, peakMeterConfig).attachSource(this.ompApiService.api!.audio.createMainAudioPeakProcessor());
+    this._vuMeter = new VuMeter(channelCount, this.vuMeterElementRef.nativeElement, peakMeterConfig).attachSource(this.createVuMeterSource());
   }
 
   private initializeAudioRouter() {
-    const outputNumber = this.ompApiService.api!.audio.getAudioContext().destination.maxChannelCount >= 6 ? 6 : 2;
+    let outputNumber;
+    if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached') {
+      outputNumber = this._currentSidecarTrackId
+        ? this.ompApiService.api!.audio.getSidecarAudioState(this._currentSidecarTrackId)!.audioRouterState!.outputsNumber
+        : this.ompApiService.api!.audio.getMainAudioState()!.audioRouterState!.outputsNumber;
+    } else {
+      outputNumber = this.ompApiService.api!.audio.getAudioContext().destination.maxChannelCount >= 6 ? 6 : 2;
+    }
     audioRouterWidth = outputNumber === 6 ? 440 : 290;
     this.audioRouterElementRef.nativeElement.style.width = `${audioRouterWidth}px`;
 
-    const audioMediaTrack = this.audioMediaTracks?.find((track) => this.ompApiService.api!.audio.getActiveAudioTrack()?.label?.startsWith(track.program_name));
-    this._audioRouter = this.ompApiService.api!.initializeRouterVisualization({
-      size: 'large',
-      outputNumber,
-      routerVisualizationHTMLElementId: 'omakase-audio-router',
-      outputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
-      mainTrack: {
-        inputNumber: audioMediaTrack ? DomainUtil.resolveChannelNrFromSoundFieldLabel(audioMediaTrack) : 2,
-        maxInputNumber: 6,
-        inputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
-      },
-    });
+    const audioMediaTrack = this.audioMediaTracks?.find((track) => this.activeAudioTrack?.label?.startsWith(track.media_id));
+
+    if (this.ompApiService.api!.audio.getActiveSidecarAudioTracks().length === 0) {
+      this._routerVisualization = this.ompApiService.api!.initializeRouterVisualization({
+        size: 'large',
+        outputNumber,
+        routerVisualizationHTMLElementId: 'omakase-audio-router',
+        outputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
+        mainTrack: {
+          inputNumber: audioMediaTrack ? DomainUtil.resolveChannelNrFromChannelLayout(audioMediaTrack) : 2,
+          maxInputNumber: 6,
+          inputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
+        },
+      });
+    } else {
+      const id = this.activeAudioTrack!.id;
+      this._routerVisualization = this.ompApiService.api!.initializeRouterVisualization({
+        size: 'large',
+        outputNumber,
+        routerVisualizationHTMLElementId: 'omakase-audio-router',
+        outputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
+        sidecarTracks: [
+          {
+            trackId: id,
+            inputNumber: audioMediaTrack ? DomainUtil.resolveChannelNrFromChannelLayout(audioMediaTrack) : 2,
+            maxInputNumber: 6,
+            inputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
+          },
+        ],
+      });
+      this._currentSidecarTrackId = id;
+    }
   }
 
   toggleMinimizeMaximize() {
@@ -245,6 +304,16 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
     this.store.dispatch(new Maximize());
   }
 
+  createVuMeterSource() {
+    const activeSidecars = this.ompApiService.api!.audio.getActiveSidecarAudioTracks();
+
+    if (activeSidecars.length === 0) {
+      return this.ompApiService.api!.audio.createMainAudioPeakProcessor();
+    } else {
+      return this.ompApiService.api!.audio.createSidecarAudioPeakProcessor(activeSidecars.at(0)!.id);
+    }
+  }
+
   onAnimationEventStart(event: AnimationEvent) {}
 
   onAnimationEventDone(event: AnimationEvent) {}
@@ -254,6 +323,19 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
       take(1),
       map((p) => p.visibility)
     );
+  }
+
+  get activeAudioTrack() {
+    const activeSidecars = this.ompApiService.api!.audio.getActiveSidecarAudioTracks();
+    if (activeSidecars.length > 0) {
+      return activeSidecars.at(0);
+    } else {
+      return this.ompApiService.api!.audio.getActiveAudioTrack();
+    }
+  }
+
+  get isActiveTrackSidecar() {
+    return this.ompApiService.api!.audio.getActiveSidecarAudioTracks().length > 0;
   }
 
   get minimizedWidth(): number {

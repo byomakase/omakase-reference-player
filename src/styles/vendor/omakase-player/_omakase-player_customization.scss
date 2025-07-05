@@ -21,6 +21,11 @@
     width: 100%;
     background-color: #000000;
 
+    .omakase-player-text-toggle,
+    .end-container omakase-dropdown-toggle {
+      display: none;
+    }
+
     .omakase-background-image {
       background-image: url(/assets/images/omakase-player/background-omp.svg);
     }

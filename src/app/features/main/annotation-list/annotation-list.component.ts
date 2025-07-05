@@ -53,7 +53,7 @@ export type ExtendedAnnotation = Annotation & {
             <span class="annotation-item-created">{{ annotation.timeDisplay }}</span>
           </div>
           <div class="annotation-item-details">
-            <app-inline-edit [displayText]="annotation.body" [edit$]="annotation.edit$" (edited)="saveAnnotationBody(annotation, $event)"></app-inline-edit>
+            <app-inline-edit [displayText]="annotation.body" [open$]="annotation.edit$" [close$]="close$" (edited)="saveAnnotationBody(annotation, $event)"></app-inline-edit>
             <div class="annotation-item-actions">
               <i appIcon="edit" (click)="editAnnotation($event, annotation)"></i>
               <i appIcon="delete" (click)="deleteAnnotation($event, annotation)"></i>
@@ -78,7 +78,7 @@ export type ExtendedAnnotation = Annotation & {
               <span class="annotation-item-created">{{ child.timeDisplay }}</span>
             </div>
             <div class="annotation-item-details">
-              <app-inline-edit [displayText]="child.body" [edit$]="child.edit$" (edited)="saveAnnotationBody(child, $event)"></app-inline-edit>
+              <app-inline-edit [displayText]="child.body" [open$]="child.edit$" [close$]="close$" (edited)="saveAnnotationBody(child, $event)"></app-inline-edit>
               <div class="annotation-item-actions">
                 <i appIcon="edit" (click)="editAnnotation($event, child)"></i>
                 <i appIcon="delete" (click)="deleteAnnotation($event, child, true)"></i>
@@ -106,6 +106,7 @@ export class AnnotationListComponent implements OnInit, OnDestroy {
 
   public edit$ = new Subject<Annotation>();
   public reply$ = new Subject<Annotation | null>();
+  public close$ = new Subject<boolean>();
   public selectedId?: string;
 
   private _destroyed$ = new Subject<void>();
@@ -245,6 +246,16 @@ export class AnnotationListComponent implements OnInit, OnDestroy {
   @HostListener('document:click')
   public replyClickHandler(): void {
     this.reply$.next(null);
+    this.close$.next(false);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeypress(event: KeyboardEvent) {
+    if (event.code === 'Enter') {
+      this.close$.next(true);
+    } else if (event.code === 'Escape') {
+      this.close$.next(false);
+    }
   }
 
   editAnnotation(event: MouseEvent, annotation: Annotation) {

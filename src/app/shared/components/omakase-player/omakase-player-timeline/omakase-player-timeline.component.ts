@@ -81,18 +81,19 @@ export class OmakasePlayerTimelineComponent implements OnDestroy {
 
     this.layoutService.presentationMode$.pipe(takeUntil(this._onDestroy$)).subscribe({
       next: (presentationMode) => {
+        this._config = {
+          ...this.config,
+          style: {
+            ...Constants.TIMELINE_CONFIG.style,
+            ...LayoutService.themeStyleConstants.TIMELINE_CONFIG_STYLE_COLORS.style,
+            loadingAnimationTheme: presentationMode,
+          },
+        };
+
         if (this.ompApiService.api?.timeline) {
           this.segmentationService.saveSegmentationMode();
           const marker = this.segmentationService.selectedMarker;
           this._baseGroupingLanes = [];
-
-          this._config = {
-            ...this.config,
-            style: {
-              ...Constants.TIMELINE_CONFIG.style,
-              ...LayoutService.themeStyleConstants.TIMELINE_CONFIG_STYLE_COLORS.style,
-            },
-          };
 
           const laneOptions = this.store.selectSnapshot(TimelineConfiguratorState.laneOptions);
           laneOptions.forEach((laneOption) => {
