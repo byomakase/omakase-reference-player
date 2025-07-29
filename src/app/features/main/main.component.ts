@@ -16,7 +16,18 @@
 
 import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 import {OmakasePlayerVideoComponent} from '../../shared/components/omakase-player/omakase-player-video/omakase-player-video.component';
-import {ImageButton, ImageButtonConfig, OmpAudioTrack, OmpAudioTrackCreateType, SidecarAudioCreateEvent, SubtitlesVttTrack, ThumbnailLane, TimelineApi, TimelineLaneApi, Video} from '@byomakase/omakase-player';
+import {
+  ImageButton,
+  ImageButtonConfig,
+  OmpAudioTrack,
+  OmpAudioTrackCreateType,
+  SidecarAudioCreateEvent,
+  SubtitlesVttTrack,
+  ThumbnailLane,
+  TimelineApi,
+  TimelineLaneApi,
+  Video,
+} from '@byomakase/omakase-player';
 import {BehaviorSubject, combineLatest, filter, forkJoin, fromEvent, map, Observable, of, Subject, take, takeUntil} from 'rxjs';
 import {CoreModule} from '../../core/core.module';
 import {SharedModule} from '../../shared/shared.module';
@@ -26,7 +37,18 @@ import {StringUtil} from '../../util/string-util';
 import {UrlUtil} from '../../util/url-util';
 import {MainService} from './main.service';
 import {z} from 'zod';
-import {AudioMediaTrack, BasicAuthenticationData, BearerAuthenticationData, MainMedia, SessionData, SidecarEntry, TextMediaTrack, TimelineLaneWithOptionalGroup, VideoMediaTrack, VisualReference} from '../../model/domain.model';
+import {
+  AudioMediaTrack,
+  BasicAuthenticationData,
+  BearerAuthenticationData,
+  MainMedia,
+  SessionData,
+  SidecarEntry,
+  TextMediaTrack,
+  TimelineLaneWithOptionalGroup,
+  VideoMediaTrack,
+  VisualReference,
+} from '../../model/domain.model';
 import {DomainUtil} from '../../util/domain-util';
 import {TelemetryLane, TimelineService} from '../timeline/timeline.service';
 import {ErrorData} from 'hls.js';
@@ -1558,7 +1580,7 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   handleAnalysisGroupsVisibleChanged() {
-    let allFalse = ![...this.analysisGroupsVisibility.values()].reduce((acc, curr) => acc || curr);
+    let allFalse = ![...this.analysisGroupsVisibility.values()].reduce((acc, curr) => acc || curr, false);
 
     // this.analysisGroupsVisibility = visibleLanesMap;
 

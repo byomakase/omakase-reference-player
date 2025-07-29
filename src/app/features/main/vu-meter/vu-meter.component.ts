@@ -29,9 +29,10 @@ import {IconModule} from '../../../shared/components/icon/icon.module';
 import {AudioMediaTrack} from '../../../model/domain.model';
 import {PeakMeterConfig, VuMeter, VuMeterApi} from '@byomakase/vu-meter';
 import {DomainUtil} from '../../../util/domain-util';
-import {AudioSwitchedEvent, RouterVisualizationApi} from '@byomakase/omakase-player';
+import {AudioSwitchedEvent, RouterVisualizationApi, SidecarAudioChangeEvent} from '@byomakase/omakase-player';
 import Minimize = VuMeterActions.Minimize;
 import Maximize = VuMeterActions.Maximize;
+import {RouterVisualizationConfig, RouterVisualizationTrack} from '@byomakase/omakase-player/dist/router-visualization/router-visualization';
 
 const animateDurationMs = 300;
 const animateTimings = `${animateDurationMs}ms ease-in-out`;
@@ -176,15 +177,27 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
                 };
 
                 let updateRouterVisualization = () => {
-                  let activeAudioTrack = this.ompApiService.api!.audio.getActiveAudioTrack();
-                  const audioMediaTrack = this.audioMediaTracks?.find((track) => activeAudioTrack?.label?.startsWith(track.media_id));
-                  if (audioMediaTrack && audioMediaTrack.visual_reference && this._activeTrack !== audioMediaTrack) {
-                    let visualReferencesInOrder = DomainUtil.resolveAudioMediaTrackVisualReferencesInOrder(audioMediaTrack);
-                    this._routerVisualization!.updateMainTrack({
-                      inputLabels: visualReferencesInOrder!.map((visualReference, index) => visualReference.channel ?? `C${index + 1}`),
-                    });
+                  if (!this._currentSidecarTrackId) {
+                    let activeAudioTrack = this.ompApiService.api!.audio.getActiveAudioTrack();
+                    const audioMediaTrack = this.audioMediaTracks?.find((track) => activeAudioTrack?.label?.startsWith(track.media_id));
+                    if (audioMediaTrack && audioMediaTrack.visual_reference && this._activeTrack !== audioMediaTrack) {
+                      let visualReferencesInOrder = DomainUtil.resolveAudioMediaTrackVisualReferencesInOrder(audioMediaTrack);
+
+                      this._routerVisualization!.updateMainTrack({
+                        inputLabels: visualReferencesInOrder!.map((visualReference, index) => visualReference.channel ?? `C${index + 1}`),
+                      });
+                    }
                   }
                 };
+
+                let initializeSidecarRouterVisualization = () => {
+                  const id = this.isActiveTrackSidecar ? this.activeAudioTrack!.id : undefined;
+                  if (id !== this._currentSidecarTrackId) {
+                    this.tryCreateVuMeter(peakMeterConfig);
+                    this.initializeAudioRouter();
+                    this._currentSidecarTrackId = id;
+                  }
+                }
 
                 this.ompApiService
                   .api!.video.onVideoWindowPlaybackStateChange$.pipe(takeUntil(this._destroyed$))
@@ -203,13 +216,9 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.ompApiService
                   .api!.audio.onSidecarAudioChange$.pipe(takeUntil(this.layoutService.presentationMode$.pipe(skip(1))))
                   .pipe(takeUntil(this._destroyed$))
+                  .pipe(createAttachedDetachedModeFilter<SidecarAudioChangeEvent>())
                   .subscribe((event) => {
-                    const id = this.isActiveTrackSidecar ? this.activeAudioTrack!.id : undefined;
-                    if (id !== this._currentSidecarTrackId) {
-                      this.tryCreateVuMeter(peakMeterConfig);
-                      this.initializeAudioRouter();
-                      this._currentSidecarTrackId = id;
-                    }
+                    initializeSidecarRouterVisualization();
                   });
               },
             });
@@ -256,36 +265,42 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const audioMediaTrack = this.audioMediaTracks?.find((track) => this.activeAudioTrack?.label?.startsWith(track.media_id));
 
+    let routerVisualizationConfig: RouterVisualizationConfig = {
+      size: 'large',
+      outputNumber,
+      routerVisualizationHTMLElementId: 'omakase-audio-router',
+      outputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
+    }
+
+    let routerVisualizationTrack: RouterVisualizationTrack = {
+      inputNumber: audioMediaTrack ? DomainUtil.resolveChannelNrFromChannelLayout(audioMediaTrack) : 2,
+      maxInputNumber: 6,
+      inputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
+    }
+
     if (this.ompApiService.api!.audio.getActiveSidecarAudioTracks().length === 0) {
-      this._routerVisualization = this.ompApiService.api!.initializeRouterVisualization({
-        size: 'large',
-        outputNumber,
-        routerVisualizationHTMLElementId: 'omakase-audio-router',
-        outputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
-        mainTrack: {
-          inputNumber: audioMediaTrack ? DomainUtil.resolveChannelNrFromChannelLayout(audioMediaTrack) : 2,
-          maxInputNumber: 6,
-          inputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
-        },
-      });
+      routerVisualizationConfig = {
+        ...routerVisualizationConfig,
+        mainTrack: routerVisualizationTrack,
+      }
     } else {
       const id = this.activeAudioTrack!.id;
-      this._routerVisualization = this.ompApiService.api!.initializeRouterVisualization({
-        size: 'large',
-        outputNumber,
-        routerVisualizationHTMLElementId: 'omakase-audio-router',
-        outputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
+      routerVisualizationConfig = {
+        ...routerVisualizationConfig,
         sidecarTracks: [
           {
             trackId: id,
-            inputNumber: audioMediaTrack ? DomainUtil.resolveChannelNrFromChannelLayout(audioMediaTrack) : 2,
-            maxInputNumber: 6,
-            inputLabels: ['L', 'R', 'C', 'LFE', 'LS', 'RS'],
+            ...routerVisualizationTrack
           },
         ],
-      });
+      }
       this._currentSidecarTrackId = id;
     }
+
+    this._routerVisualization = this.ompApiService.api!.initializeRouterVisualization(routerVisualizationConfig)
+
+    // @ts-ignore
+    window['rv'] = this._routerVisualization;
   }
 
   toggleMinimizeMaximize() {
