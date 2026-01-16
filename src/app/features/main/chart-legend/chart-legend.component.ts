@@ -20,10 +20,9 @@ import {Store} from '@ngxs/store';
 import {ChartLegendState} from './chart-legend.state';
 
 @Component({
-  selector: 'div[appChartLegend]',
-  standalone: true,
-  imports: [CoreModule, SharedModule],
-  template: `
+    selector: 'div[appChartLegend]',
+    imports: [CoreModule, SharedModule],
+    template: `
     @if (items$ | async) {
       <div class="chart-legend-container" [ngStyle]="{bottom, left}">
         @for (item of items$ | async; track item.label) {
@@ -34,7 +33,7 @@ import {ChartLegendState} from './chart-legend.state';
         }
       </div>
     }
-  `,
+  `
 })
 export class ChartLegendComponent {
   items$ = this.store.select(ChartLegendState.items);

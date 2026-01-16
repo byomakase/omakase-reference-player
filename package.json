@@ -1,6 +1,6 @@
 {
   "name": "omakase-reference-player",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -11,18 +11,19 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^17.2.0",
-    "@angular/common": "^17.2.0",
-    "@angular/compiler": "^17.2.0",
-    "@angular/core": "^17.2.0",
-    "@angular/forms": "^17.2.0",
-    "@angular/platform-browser": "^17.2.0",
-    "@angular/platform-browser-dynamic": "^17.2.0",
-    "@angular/router": "^17.2.0",
-    "@byomakase/omakase-player": "0.20.0",
+    "@angular/animations": "^19.2.17",
+    "@angular/cli": "^19.2.19",
+    "@angular/common": "^19.2.17",
+    "@angular/compiler": "^19.2.17",
+    "@angular/core": "^19.2.17",
+    "@angular/forms": "^19.2.17",
+    "@angular/platform-browser": "^19.2.17",
+    "@angular/platform-browser-dynamic": "^19.2.17",
+    "@angular/router": "^19.2.17",
+    "@byomakase/omakase-player": "0.22.1",
     "@byomakase/vu-meter": "1.1.1-SNAPSHOT.1744379168",
-    "@ng-bootstrap/ng-bootstrap": "^16.0.0",
-    "@ngxs/store": "^3.8.2",
+    "@ng-bootstrap/ng-bootstrap": "^18.0.0",
+    "@ngxs/store": "19.0.0",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "ngx-json-viewer": "^3.2.1",
@@ -32,14 +33,13 @@
     "stats.js": "^0.17.0",
     "tslib": "^2.3.0",
     "zod": "^3.23.0-canary.20240315T001949",
-    "zone.js": "~0.14.3"
+    "zone.js": "~0.15.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^17.2.0",
-    "@angular/cli": "^17.2.0",
-    "@angular/compiler-cli": "^17.2.0",
-    "@angular/localize": "^17.2.0",
-    "@ngxs/devtools-plugin": "^3.8.2",
+    "@angular-devkit/build-angular": "^19.2.17",
+    "@angular/compiler-cli": "^19.2.17",
+    "@angular/localize": "^19.2.17",
+    "@ngxs/devtools-plugin": "19.0.0",
     "@types/jasmine": "~5.1.0",
     "@types/stats.js": "^0.17.3",
     "@types/uuid": "^9.0.8",
@@ -51,6 +51,6 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "prettier": "^3.3.3",
-    "typescript": "~5.3.2"
+    "typescript": "^5.4.5"
   }
 }

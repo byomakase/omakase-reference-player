@@ -4,10 +4,9 @@ import {IconModule} from '../icon/icon.module';
 import {ColorUtil} from '../../../util/color-util';
 
 @Component({
-  selector: 'app-color-picker',
-  standalone: true,
-  imports: [IconModule, CommonModule],
-  template: `<div class="color-picker-container d-flex">
+    selector: 'app-color-picker',
+    imports: [IconModule, CommonModule],
+    template: `<div class="color-picker-container d-flex">
     @for (color of colors; track color) {
       <div class="color-picker-color" [ngStyle]="{'background-color': color}" (click)="selectColor(color)">
         @if (color === activeColor) {
@@ -15,7 +14,7 @@ import {ColorUtil} from '../../../util/color-util';
         }
       </div>
     }
-  </div>`,
+  </div>`
 })
 export class ColorPickerComponent implements OnInit {
   @Input() colors!: string[];

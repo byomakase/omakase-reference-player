@@ -18,10 +18,9 @@ import {Component, OnInit} from '@angular/core';
 import Stats from 'stats.js';
 
 @Component({
-  selector: 'app-debug-stats',
-  standalone: true,
-  imports: [],
-  template: ``,
+    selector: 'app-debug-stats',
+    imports: [],
+    template: ``
 })
 export class DebugStatsComponent implements OnInit {
   stats: Stats;

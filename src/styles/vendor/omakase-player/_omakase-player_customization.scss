@@ -21,79 +21,8 @@
     width: 100%;
     background-color: #000000;
 
-    .omakase-player-text-toggle,
-    .end-container omakase-dropdown-toggle {
-      display: none;
-    }
-
     .omakase-background-image {
       background-image: url(/assets/images/omakase-player/background-omp.svg);
-    }
-
-    .omakase-video-controls {
-      .omakase-video-safe-zone-wrapper {
-        .omakase-video-safe-zone {
-          outline: 2px solid #e6eb00;
-        }
-      }
-
-      .omakase-overlay-buttons {
-        .omakase-button-play {
-          background-image: url(/assets/images/omakase-player/play.svg);
-        }
-
-        .omakase-button-pause {
-          background-image: url(/assets/images/omakase-player/pause.svg);
-        }
-
-        .omakase-button-replay {
-          background-image: url(/assets/images/omakase-player/replay.svg);
-        }
-
-        .omakase-button-loading {
-          background-image: url(/assets/images/omakase-player/loading.svg);
-        }
-
-        .omakase-button-error {
-          background-image: url(/assets/images/modal-triangle-exclamation.svg);
-        }
-
-        .omakase-overlay-button-attach {
-          background-image: url(/assets/images/omakase-player/attach.svg);
-        }
-      }
-    }
-
-    .omakase-help {
-      .omakase-help-dropdown {
-        .omakase-help-button {
-          background-image: url(/assets/images/omakase-player/help2.svg);
-        }
-
-        .omakase-help-menu {
-          .omakase-help-group-title {
-            background: var(--color-42);
-            text-transform: uppercase;
-            font-size: 12px;
-            line-height: 17px;
-            color: var(--color-69);
-          }
-
-          .omakase-help-group {
-            background: var(--color-61);
-            border-radius: 3px;
-
-            .omakase-help-item {
-              border-bottom: 1px solid var(--color-42);
-              color: var(--color-69);
-
-              &:hover {
-                background: var(--color-73);
-              }
-            }
-          }
-        }
-      }
     }
 
     .omakase-section-bottom-right {
@@ -128,6 +57,10 @@
       }
     }
 
+    .omakase-video {
+      aspect-ratio: 16/9;
+    }
+
     //.omakase-error-message {
     //  display: none !important;
     //}
@@ -157,73 +90,5 @@
         }
       }
     }
-  }
-}
-
-media-controller {
-  height: fit-content;
-
-  .media-chrome-play {
-    background-image: url(/assets/images/omakase-player/media-chrome-play.svg);
-  }
-
-  .media-chrome-pause {
-    background-image: url(/assets/images/omakase-player/media-chrome-pause.svg);
-  }
-
-  .media-chrome-rewind {
-    background-image: url(/assets/images/omakase-player/media-chrome-rewind.svg);
-  }
-
-  .media-chrome-fast-rewind {
-    background-image: url(/assets/images/omakase-player/media-chrome-fast-rewind.svg);
-  }
-
-  .media-chrome-forward {
-    background-image: url(/assets/images/omakase-player/media-chrome-forward.svg);
-  }
-
-  .media-chrome-fast-forward {
-    background-image: url(/assets/images/omakase-player/media-chrome-fast-forward.svg);
-  }
-
-  .media-chrome-fullscreen-enter {
-    background-image: url(/assets/images/omakase-player/media-chrome-fullscreen-enter.svg);
-  }
-
-  .media-chrome-fullscreen-exit {
-    background-image: url(/assets/images/omakase-player/media-chrome-fullscreen-exit.svg);
-  }
-
-  .media-chrome-detach {
-    background-image: url(/assets/images/omakase-player/media-chrome-detach.svg);
-  }
-
-  .media-chrome-attach {
-    background-image: url(/assets/images/omakase-player/media-chrome-attach.svg);
-  }
-
-  .media-chrome-audio-mute {
-    background-image: url(/assets/images/omakase-player/media-chrome-audio-mute.svg);
-  }
-
-  .media-chrome-audio-low {
-    background-image: url(/assets/images/omakase-player/media-chrome-audio-low.svg);
-  }
-
-  .media-chrome-audio-medium {
-    background-image: url(/assets/images/omakase-player/media-chrome-audio-medium.svg);
-  }
-
-  .media-chrome-audio-high {
-    background-image: url(/assets/images/omakase-player/media-chrome-audio-high.svg);
-  }
-
-  .media-chrome-bitc-enabled {
-    background-image: url(/assets/images/omakase-player/media-chrome-bitc-enabled.svg);
-  }
-
-  .media-chrome-bitc-disabled {
-    background-image: url(/assets/images/omakase-player/media-chrome-bitc-disabled.svg);
   }
 }

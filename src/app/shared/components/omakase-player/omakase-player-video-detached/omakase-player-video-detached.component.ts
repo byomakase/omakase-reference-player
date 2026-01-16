@@ -1,15 +1,14 @@
 import {AfterViewInit, Component, HostBinding, Input, OnDestroy, OnInit} from '@angular/core';
 import {CryptoUtil} from '../../../../util/crypto-util';
 import {Subject, takeUntil} from 'rxjs';
-import {OmakasePlayerConfig} from '@byomakase/omakase-player';
+import {ControlBarVisibility, DefaultThemeControl, OmakasePlayerConfig, PlayerChromingTheme} from '@byomakase/omakase-player';
 import {OmpApiService} from '../omp-api.service';
 import {Constants} from '../../../constants/constants';
 
 @Component({
-  selector: 'div[appOmakasePlayerVideoDetached]',
-  standalone: true,
-  imports: [],
-  template: ` <div>radi</div>`,
+    selector: 'div[appOmakasePlayerVideoDetached]',
+    imports: [],
+    template: ` <div>radi</div>`
 })
 export class OmakasePlayerVideoDetachedComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input('config')
@@ -24,6 +23,26 @@ export class OmakasePlayerVideoDetachedComponent implements OnInit, OnDestroy, A
   ngOnInit(): void {
     let possibleConfig: Partial<OmakasePlayerConfig> = {
       playerHTMLElementId: CryptoUtil.uuid(),
+      playerChroming: {
+        theme: PlayerChromingTheme.Default,
+        themeConfig: {
+          controlBarVisibility: ControlBarVisibility.Enabled,
+          controlBar: [
+            DefaultThemeControl.PlaybackRate,
+            DefaultThemeControl.Volume,
+            DefaultThemeControl.TenFramesBackward,
+            DefaultThemeControl.FrameBackward,
+            DefaultThemeControl.Play,
+            DefaultThemeControl.FrameForward,
+            DefaultThemeControl.TenFramesForward,
+            DefaultThemeControl.Bitc,
+            DefaultThemeControl.Detach,
+            DefaultThemeControl.Fullscreen,
+            DefaultThemeControl.Scrubber,
+          ],
+        },
+        styleUrl: './assets/css/chroming.css',
+      },
     };
 
     // ensure playerHTMLElementId is set because it has to be in component template before OmakasePlayer instantiation

@@ -1,0 +1,34 @@
+media-controller {
+  height: fit-content;
+}
+
+.omakase-help .omakase-help-dropdown .omakase-help-button {
+  background-image: url(/assets/images/omakase-player/help2.svg);
+}
+.omakase-help .omakase-help-dropdown .omakase-help-menu .omakase-help-group-title {
+  background: var(--color-42, #292d43);
+  text-transform: uppercase;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--color-69, #cacfea);
+}
+.omakase-help .omakase-help-dropdown .omakase-help-menu .omakase-help-group {
+  background: var(--color-61, #3a3d4b);
+  border-radius: 3px;
+}
+.omakase-help .omakase-help-dropdown .omakase-help-menu .omakase-help-group .omakase-help-item {
+  border-bottom: 1px solid var(--color-42, #292d43);
+  color: var(--color-69, #cacfea);
+}
+.omakase-help .omakase-help-dropdown .omakase-help-menu .omakase-help-group .omakase-help-item:hover {
+  background: var(--color-73, #525979);
+}
+
+.omakase-video-controls .omakase-video-safe-zone-wrapper .omakase-video-safe-zone {
+  outline: 2px solid #e6eb00;
+}
+
+.omakase-player-text-toggle,
+.end-container omakase-dropdown-toggle {
+  display: none;
+}

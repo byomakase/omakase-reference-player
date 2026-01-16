@@ -4,13 +4,12 @@ import {SharedModule} from '../../shared.module';
 import {Observable, Subject, Subscription, takeUntil} from 'rxjs';
 
 @Component({
-  selector: 'app-inline-edit',
-  standalone: true,
-  imports: [CommonModule, SharedModule],
-  template: `
+    selector: 'app-inline-edit',
+    imports: [CommonModule, SharedModule],
+    template: `
     <input [ngStyle]="{display: editing ? 'block' : 'none'}" #input class="inline-edit-input" [value]="displayText" (click)="$event.stopPropagation()" />
     <div [ngStyle]="{display: editing ? 'none' : 'block'}" class="inline-edit-text" (click)="handleClick()">{{ displayText }}</div>
-  `,
+  `
 })
 export class InlineEditComponent implements OnDestroy {
   @Input() displayText!: string;

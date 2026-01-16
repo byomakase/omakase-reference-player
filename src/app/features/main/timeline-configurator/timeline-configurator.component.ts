@@ -36,27 +36,20 @@ const maximizedWidth = 375;
 const animateTimings = `${animateDurationMs}ms ease-in-out`;
 
 @Component({
-  selector: 'div[timelineConfigurator]',
-  standalone: true,
-  imports: [SharedModule, DropdownComponent, CheckboxComponent],
-  animations: [
-    trigger('toggleMinimizeMaximize', [
-      state(
-        'minimized',
-        style({
-          width: `${minimizedWidth}px`,
-        })
-      ),
-      state(
-        'maximized',
-        style({
-          width: `${maximizedWidth}px`,
-        })
-      ),
-      transition('* => *', [animate(animateTimings)]),
-    ]),
-  ],
-  template: `
+    selector: 'div[timelineConfigurator]',
+    imports: [SharedModule, DropdownComponent, CheckboxComponent],
+    animations: [
+        trigger('toggleMinimizeMaximize', [
+            state('minimized', style({
+                width: `${minimizedWidth}px`,
+            })),
+            state('maximized', style({
+                width: `${maximizedWidth}px`,
+            })),
+            transition('* => *', [animate(animateTimings)]),
+        ]),
+    ],
+    template: `
     <div
       id="timeline-configurator"
       [ngStyle]="{opacity: hideComponent ? 0 : 1}"
@@ -107,7 +100,7 @@ const animateTimings = `${animateDurationMs}ms ease-in-out`;
         </div>
       </div-->
     </div>
-  `,
+  `
 })
 export class TimelineConfiguratorComponent implements OnInit, OnDestroy {
   @Select(TimelineConfiguratorState) state$!: Observable<TimelineConfiguratorStateModel>;

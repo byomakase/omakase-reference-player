@@ -7,15 +7,14 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {AnnotationService} from '../annotation/annotation.service';
 
 @Component({
-  selector: 'div[appAnnotationCreate]',
-  standalone: true,
-  imports: [CoreModule, SharedModule],
-  template: `<form class="annotation-create-input-wrapper" [formGroup]="formGroup" (submit)="submitAnnotation()">
+    selector: 'div[appAnnotationCreate]',
+    imports: [CoreModule, SharedModule],
+    template: `<form class="annotation-create-input-wrapper" [formGroup]="formGroup" (submit)="submitAnnotation()">
     <input formControlName="text" placeholder="Add a comment..." (focus)="haltPlayback()" (blur)="resumePlayback()" />
     <div class="annotation-create-time" [class.active]="formGroup.value.timeEnabled" (click)="toggleTime()">{{ formattedCurrentTime }}</div>
     <div class="annotation-create-public" [class.active]="formGroup.value.privateEnabled" (click)="togglePrivate()">Private</div>
     <button type="submit" class="annotation-create-send" [class.active]="formGroup.valid"><i appIcon="send"></i></button>
-  </form>`,
+  </form>`
 })
 export class AnnotationCreateComponent implements OnInit, OnDestroy {
   private _destroyed$ = new Subject<void>();

@@ -22,8 +22,8 @@ import {LayoutService} from './layout.service';
 import {IconName} from '../../shared/components/icon/icon.service';
 import {TimelineService} from '../../features/timeline/timeline.service';
 @Component({
-  selector: 'app-layout',
-  template: `
+    selector: 'app-layout',
+    template: `
     <header>
       <nav class="navbar border-body">
         <div class="container-fluid h-100">
@@ -54,6 +54,7 @@ import {TimelineService} from '../../features/timeline/timeline.service';
       <app-debug-stats></app-debug-stats>
     }
   `,
+    standalone: false
 })
 export class LayoutComponent implements OnInit, OnDestroy {
   debugMode = false;

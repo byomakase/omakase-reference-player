@@ -16,15 +16,12 @@
 
 import {Component} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
-import {HttpClientModule} from '@angular/common/http';
 import {Title} from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [HttpClientModule, RouterOutlet],
-  providers: [],
-  template: ` <router-outlet></router-outlet>`,
+    selector: 'app-root',
+    imports: [RouterOutlet],
+    template: `<router-outlet></router-outlet>`
 })
 export class AppComponent {
   constructor(private title: Title) {

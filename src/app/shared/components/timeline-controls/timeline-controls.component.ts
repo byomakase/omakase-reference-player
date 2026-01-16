@@ -36,10 +36,9 @@ import {AnnotationService} from '../../../features/main/annotation/annotation.se
 const INACTIVE_SEGMENTATION_COLOR = '#cccccc';
 
 @Component({
-  selector: 'div[appTimelineControls]',
-  standalone: true,
-  imports: [NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, CommonModule, IconModule, CheckboxComponent, ColorPickerComponent],
-  template: `
+    selector: 'div[appTimelineControls]',
+    imports: [NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, CommonModule, IconModule, CheckboxComponent, ColorPickerComponent],
+    template: `
     <div>
       <div class="btn-group" role="group">
         <button type="button" class="btn btn-minimize-maximize" [disabled]="isDisabled" (click)="buttonClickChangeVisibility()">
@@ -144,8 +143,7 @@ const INACTIVE_SEGMENTATION_COLOR = '#cccccc';
         <i appIcon="gear"></i>
       </button>
     </div>
-  `,
-  //changeDetection: ChangeDetectionStrategy.OnPush,
+  `
 })
 export class TimelineControlsComponent {
   groupingDropdownOpened = false;

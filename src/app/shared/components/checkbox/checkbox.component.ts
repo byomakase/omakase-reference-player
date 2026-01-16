@@ -3,17 +3,16 @@ import {IconModule} from '../icon/icon.module';
 import {CommonModule} from '@angular/common';
 
 @Component({
-  selector: 'app-checkbox',
-  standalone: true,
-  imports: [IconModule, CommonModule],
-  template: `<div class="app-checkbox" (click)="!isDisabled && toggleChecked()" [ngClass]="{disabled: isDisabled}">
+    selector: 'app-checkbox',
+    imports: [IconModule, CommonModule],
+    template: `<div class="app-checkbox" (click)="!isDisabled && toggleChecked()" [ngClass]="{disabled: isDisabled}">
     @if (isChecked) {
       <i class="icon-checked" appIcon="checkbox-checked"></i>
     } @else {
       <i class="icon-unchecked" appIcon="checkbox-unchecked"></i>
     }
     {{ label }}
-  </div>`,
+  </div>`
 })
 export class CheckboxComponent {
   @Input() isChecked!: boolean;

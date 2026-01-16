@@ -7,10 +7,9 @@ import {AnnotationService} from './annotation.service';
 import {AnnotationOffcanvasService} from '../annotation-offcanvas/annotation-offcanvas.service';
 
 @Component({
-  selector: 'div[appAnnotation]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, AnnotationListComponent, AnnotationCreateComponent],
-  template: `<div class="annotation-wrapper d-flex flex-column h-100">
+    selector: 'div[appAnnotation]',
+    imports: [CoreModule, SharedModule, AnnotationListComponent, AnnotationCreateComponent],
+    template: `<div class="annotation-wrapper d-flex flex-column h-100">
     @if (annotationService.isInitialized) {
       <div class="annotation-header" style="opacity:1">
         <i (click)="openAnnotationOffcanvas()" appIcon="fly-out"></i>
@@ -22,7 +21,7 @@ import {AnnotationOffcanvasService} from '../annotation-offcanvas/annotation-off
         <div appAnnotationCreate></div>
       </div>
     }
-  </div>`,
+  </div>`
 })
 export class AnnotationComponent {
   @Input() isThreadingSupported = false;

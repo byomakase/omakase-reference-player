@@ -21,10 +21,9 @@ import {NgbNav} from '@ng-bootstrap/ng-bootstrap';
 import {MetadataExplorerService} from './metadata-explorer.service';
 
 @Component({
-  selector: 'div[appMetadataExplorerContent]',
-  standalone: true,
-  imports: [CoreModule, SharedModule],
-  template: `
+    selector: 'div[appMetadataExplorerContent]',
+    imports: [CoreModule, SharedModule],
+    template: `
     <div class="d-flex flex-column flex-grow-1" id="metadata-explorer-container">
       @if (metadataExplorerService.infoTabHeaderActive) {
         <div class="d-flex" style="border: 1px solid transparent">
@@ -41,7 +40,7 @@ import {MetadataExplorerService} from './metadata-explorer.service';
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataExplorerContentComponent {
   @ViewChild('metadataContent') metadataContentElementRef!: ElementRef;

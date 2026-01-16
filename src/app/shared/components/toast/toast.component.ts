@@ -6,10 +6,9 @@ import {IconModule} from '../icon/icon.module';
 import {IconName} from '../icon/icon.service';
 
 @Component({
-  selector: 'app-toast',
-  standalone: true,
-  imports: [NgbToast, NgClass, IconModule],
-  template: `
+    selector: 'app-toast',
+    imports: [NgbToast, NgClass, IconModule],
+    template: `
     <ngb-toast class="toast" [ngClass]="typeToClass[toast.type]" [autohide]="toast.duration !== undefined" [delay]="toast.duration ?? 0" (hidden)="toastService.remove(toast)">
       <div class="toast-content">
         <i [appIcon]="typeToIcon[toast.type]"></i>
@@ -17,7 +16,7 @@ import {IconName} from '../icon/icon.service';
       </div>
       <div class="toast-close-container" (click)="toastService.remove(toast)"><i appIcon="close"></i></div>
     </ngb-toast>
-  `,
+  `
 })
 export class ToastComponent {
   @Input() toast!: Toast;

@@ -20,10 +20,9 @@ import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {IconModule} from '../icon/icon.module';
 
 @Component({
-  selector: 'app-info-modal',
-  standalone: true,
-  imports: [IconModule],
-  template: `
+    selector: 'app-info-modal',
+    imports: [IconModule],
+    template: `
     <div class="modal-header">
       <button type="button" class="btn close" aria-label="Close" (click)="activeModal.dismiss()">
         <i appIcon="close"></i>
@@ -45,7 +44,7 @@ import {IconModule} from '../icon/icon.module';
     <div class="modal-footer">
       <!--      <button type="button" class="btn btn-primary" (click)="activeModal.close()">Close</button>-->
     </div>
-  `,
+  `
 })
 export class InfoModalComponent extends BaseModal {
   messages: string[] = [];

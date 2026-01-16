@@ -4,10 +4,9 @@ import {Constants} from '../../shared/constants/constants';
 import {LocalStorageService} from '../../shared/storage/local-storage.service';
 
 @Component({
-  selector: 'app-detached',
-  standalone: true,
-  imports: [OmakasePlayerVideoDetachedComponent],
-  templateUrl: './detached.component.html',
+    selector: 'app-detached',
+    imports: [OmakasePlayerVideoDetachedComponent],
+    templateUrl: './detached.component.html'
 })
 export class DetachedComponent {
   OmakasePlayerConstants = Constants;

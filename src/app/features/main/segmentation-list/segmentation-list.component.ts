@@ -25,16 +25,15 @@ import {SegmentationService} from './segmentation.service';
 import {InlineEditComponent} from '../../../shared/components/inline-edit/inline-edit.component';
 
 @Component({
-  selector: 'div[appSegmentationList]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, InlineEditComponent],
-  template: ` <div class="segmentation-list-container d-flex flex-row">
+    selector: 'div[appSegmentationList]',
+    imports: [CoreModule, SharedModule, InlineEditComponent],
+    template: ` <div class="segmentation-list-container d-flex flex-row">
     @for (track of tracks$ | async; track track.id) {
       <div class="segmentation-list-item d-flex flex-row" [ngClass]="{active: track === (activeTrack$ | async), initial: isInInitialTracks(track)}">
         <app-inline-edit [displayText]="track.name" [close$]="closeSegmentationNameEdit$" (clicked)="setActiveTrack(track)" (edited)="editTrack(track, $event)"></app-inline-edit>
       </div>
     }
-  </div>`,
+  </div>`
 })
 export class SegmentationListComponent implements OnInit, OnDestroy {
   @Select(SegmentationState.tracks) tracks$!: Observable<SegmentationTrack[]>;

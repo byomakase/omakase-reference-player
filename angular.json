@@ -20,9 +20,7 @@
             "outputPath": "dist/reference-player",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js", "@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -33,12 +31,9 @@
                 "output": "demo-assets/"
               }
             ],
-            "styles": [
-              "src/styles/styles.scss"
-            ],
-            "scripts": [
-              "./node_modules/bootstrap/dist/js/bootstrap.js"
-            ]
+            "styles": ["src/styles/styles.scss"],
+            "scripts": ["./node_modules/bootstrap/dist/js/bootstrap.js"],
+            "allowedCommonJsDependencies": ["stats.js"]
           },
           "configurations": {
             "production": {
@@ -61,9 +56,7 @@
                   "with": "src/environments/environment.production.ts"
                 }
               ],
-              "assets": [
-                "src/assets"
-              ]
+              "assets": ["src/assets"]
             },
             "development": {
               "optimization": false,
@@ -132,18 +125,11 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
-            "assets": [
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles/styles.scss"
-            ],
+            "assets": ["src/assets"],
+            "styles": ["src/styles/styles.scss"],
             "scripts": []
           }
         }

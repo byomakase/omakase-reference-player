@@ -101,25 +101,24 @@ import SelectLane = TimelineConfiguratorActions.SelectLane;
 type GroupingLane = VideoGroupingLane | AudioGroupingLane | TextTrackGroupingLane;
 
 @Component({
-  selector: 'app-main',
-  templateUrl: './main.component.html',
-  standalone: true,
-  imports: [
-    CoreModule,
-    SharedModule,
-    TimelineConfiguratorComponent,
-    MetadataExplorerContentComponent,
-    MetadataExplorerNavComponent,
-    SessionNavigationComponent,
-    StatusComponent,
-    VuMeterComponent,
-    TelemetryComponent,
-    ChartLegendComponent,
-    SegmentationListComponent,
-    SegmentationComponent,
-    ToastComponent,
-    AnnotationComponent,
-  ],
+    selector: 'app-main',
+    templateUrl: './main.component.html',
+    imports: [
+        CoreModule,
+        SharedModule,
+        TimelineConfiguratorComponent,
+        MetadataExplorerContentComponent,
+        MetadataExplorerNavComponent,
+        SessionNavigationComponent,
+        StatusComponent,
+        VuMeterComponent,
+        TelemetryComponent,
+        ChartLegendComponent,
+        SegmentationListComponent,
+        SegmentationComponent,
+        ToastComponent,
+        AnnotationComponent,
+    ]
 })
 export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(OmakasePlayerVideoComponent) appOmakasePlayerVideo?: OmakasePlayerVideoComponent;
@@ -855,15 +854,20 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
               });
 
               // track audio changes (triggered for example by detached window)
+              // this.ompApiService
+              //   .api!.audio.onSidecarAudioCreate$.pipe(
+              //     takeUntil(this._manifestLoadBreaker$),
+              //     filter((p) => !!p)
+              //   )
               this.ompApiService
-                .api!.audio.onSidecarAudioCreate$.pipe(
-                  takeUntil(this._manifestLoadBreaker$),
-                  filter((p) => !!p)
-                )
+                .api!.audio.onSidecarAudioLoaded$.pipe(
+                takeUntil(this._manifestLoadBreaker$),
+                filter((p) => !!p)
+              )
                 .pipe(takeUntil(this._manifestLoadBreaker$))
                 .subscribe({
                   next: (sidecarAudioCreateEvent) => {
-                    const newSidecarTrack = sidecarAudioCreateEvent.createdSidecarAudioState.audioTrack;
+                    const newSidecarTrack = sidecarAudioCreateEvent.sidecarAudioState.audioTrack;
                     this._sidecarAudioTracks = this._sidecarAudioTracks!.map((sc) => (sc.id === newSidecarTrack.id ? newSidecarTrack : sc));
                     this._sidecarAudioTracksByName!.set(newSidecarTrack.id, newSidecarTrack);
 
@@ -1056,10 +1060,6 @@ export class MainComponent implements OnInit, OnDestroy, AfterViewInit {
               completeSub(appAudioLoaded$);
             },
           });
-
-        this.ompApiService.api!.audio.onSidecarAudioCreate$.pipe(takeUntil(this._manifestLoadBreaker$)).subscribe({
-          next: (sidecarAudioCreateEvent: SidecarAudioCreateEvent) => {},
-        });
 
         this.ompApiService
           .api!.subtitles.onSubtitlesLoaded$.pipe(

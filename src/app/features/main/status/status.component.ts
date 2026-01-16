@@ -14,10 +14,9 @@ interface StatusItem {
 }
 
 @Component({
-  selector: 'div[appStatus]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, IconModule],
-  template: `
+    selector: 'div[appStatus]',
+    imports: [CoreModule, SharedModule, IconModule],
+    template: `
     <div id="status">
       <div class="status-btn-group" ngbDropdown role="group" #dropdown="ngbDropdown" [class.d-none]="!isStatusVisible" [class.read-only]="!approval" [class]="statusColor">
         <button type="button" class="btn btn-primary btn-status" ngbDropdownToggle [disabled]="!approval">
@@ -48,7 +47,7 @@ interface StatusItem {
         </div>
       </div>
     </div>
-  `,
+  `
 })
 export class StatusComponent {
   @ViewChild('dropdown') ngbDropdown?: NgbDropdown;

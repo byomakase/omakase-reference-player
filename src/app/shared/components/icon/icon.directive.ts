@@ -18,7 +18,8 @@ import {ChangeDetectorRef, Directive, ElementRef, HostBinding, Input, OnChanges,
 import {IconName, IconService} from './icon.service';
 
 @Directive({
-  selector: 'i[appIcon]',
+    selector: 'i[appIcon]',
+    standalone: false
 })
 export class IconDirective implements OnChanges {
   @Input() appIcon?: IconName;

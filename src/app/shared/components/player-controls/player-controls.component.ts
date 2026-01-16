@@ -37,10 +37,9 @@ interface PlayerControlsFormGroup {
 }
 
 @Component({
-  selector: 'div[appPlayerControls]',
-  standalone: true,
-  imports: [NgbDropdownModule, IconModule, FormsModule, ReactiveFormsModule],
-  template: `
+    selector: 'div[appPlayerControls]',
+    imports: [NgbDropdownModule, IconModule, FormsModule, ReactiveFormsModule],
+    template: `
     <div class="col-4 d-flex justify-content-start">
       <div class="btn-group btn-group-speed" ngbDropdown role="group" [placement]="'top-start'">
         <button type="button" class="btn btn-primary btn-speed" ngbDropdownToggle>Speed: {{ playbackRate }}x <i appIcon="arrow-down"></i></button>
@@ -103,7 +102,7 @@ interface PlayerControlsFormGroup {
         </button>
       </div>
     </div>
-  `,
+  `
 })
 export class PlayerControlsComponent {
   @ViewChild('volumeControlInput')

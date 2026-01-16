@@ -24,10 +24,9 @@ import {NgxJsonViewerComponent} from 'ngx-json-viewer';
 import {IconModule} from '../../../shared/components/icon/icon.module';
 
 @Component({
-  selector: 'div[appMetadataOffcanvas]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, IconModule],
-  template: `
+    selector: 'div[appMetadataOffcanvas]',
+    imports: [CoreModule, SharedModule, IconModule],
+    template: `
     <div class="offcanvas-header">
       <h5 class="offcanvas-title">{{ source.name }}&nbsp;</h5>
       <h5 class="offcanvas-title" id="tech-metadata">| Tech Metadata</h5>
@@ -43,7 +42,7 @@ import {IconModule} from '../../../shared/components/icon/icon.module';
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataOffcanvasComponent extends BaseOffcanvas implements AfterViewInit {
   @ViewChild('ngxJsonViewer') ngxJsonViewer?: NgxJsonViewerComponent;

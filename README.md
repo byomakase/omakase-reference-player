@@ -29,6 +29,8 @@ Application requires a JSON configuration file to be passed as a `session` query
 
 The configuration file describes the media that is presented in the player as well as the layout of the timeline (see the default demo example).
 
+Full documentation of the JSON configuration file is available here: [Session JSON v3.0](https://github.com/byomakase/omakase-reference-player/SESSION_JSON_v30.md)
+
 The JSON configuration file must correspond to structure defined in `src/app/model/domain.model.ts`:
 
 ```ts
@@ -64,6 +66,7 @@ Run `ng build --configuration=dev --localize=false --base-href=/` to build the p
 - Omakase Player Web: [https://player.byomakase.org/](https://player.byomakase.org/)
 - Omakase Player GitHub: [https://github.com/byomakase/omakase-player](https://github.com/byomakase/omakase-player)
 - Omakase Media Tools GitHub: [https://github.com/byomakase/omakase-media-tools](https://github.com/byomakase/omakase-media-tools)
+- Omakase Reference Player Session JSON v3.0: [https://github.com/byomakase/omakase-reference-player/session_json_v30.md](https://github.com/byomakase/omakase-reference-player/SESSION_JSON_v30.md)
 
 ## Further help
 

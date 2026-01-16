@@ -22,10 +22,9 @@ export type ExtendedAnnotation = Annotation & {
 };
 
 @Component({
-  selector: 'div[appAnnotationList]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, InlineEditComponent, AnnotationListFilterPipe, AnnotationListSortPipe],
-  template: `@for (annotation of annotationList | annotationListFilter: filterToken : filterTokenSetDate : selectedId | annotationListSort: sortingStrategy; track annotation.id) {
+    selector: 'div[appAnnotationList]',
+    imports: [CoreModule, SharedModule, InlineEditComponent, AnnotationListFilterPipe, AnnotationListSortPipe],
+    template: `@for (annotation of annotationList | annotationListFilter: filterToken : filterTokenSetDate : selectedId | annotationListSort: sortingStrategy; track annotation.id) {
     <div
       class="annotation-item d-flex flex-column"
       id="annotation-{{ annotation.id }}"
@@ -97,7 +96,7 @@ export type ExtendedAnnotation = Annotation & {
         </div>
       }
     </div>
-  }`,
+  }`
 })
 export class AnnotationListComponent implements OnInit, OnDestroy {
   @Input() isThreadingSupported = false;

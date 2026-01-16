@@ -12,10 +12,9 @@ import {IconName} from '../../../shared/components/icon/icon.service';
 import {DownloadService} from '../../../shared/services/download.service';
 
 @Component({
-  selector: 'div[appMetadataExplorerNav]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, IconModule],
-  template: `
+    selector: 'div[appMetadataExplorerNav]',
+    imports: [CoreModule, SharedModule, IconModule],
+    template: `
     <div class="d-flex">
       <div class="d-flex flex-grow-1 align-items-center justify-content-between" [class.d-none]="!(showInfo$ | async)" #metadataNav>
         <ul ngbNav #nav="ngbNav" class="nav-pills h-100" [(activeId)]="metadataExplorerService.navActiveId" (activeIdChange)="onNavChange($event)" [destroyOnHide]="false" [animation]="false">
@@ -113,7 +112,7 @@ import {DownloadService} from '../../../shared/services/download.service';
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataExplorerNavComponent {
   @ViewChild('nav') nbgNav!: NgbNav;

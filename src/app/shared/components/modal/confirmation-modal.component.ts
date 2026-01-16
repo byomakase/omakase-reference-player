@@ -20,10 +20,9 @@ import {BaseModal} from '../modal/base-modal';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'app-confirmation-modal',
-  standalone: true,
-  imports: [],
-  template: `
+    selector: 'app-confirmation-modal',
+    imports: [],
+    template: `
     <div class="custom-modal">
       <div class="modal-header">
         @if (headerText) {
@@ -44,7 +43,7 @@ import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
         </div>
       </div>
     </div>
-  `,
+  `
 })
 export class ConfirmationModalComponent {
   @Input()

@@ -6,10 +6,9 @@ import {CoreModule} from '../../../core/core.module';
 import {SharedModule} from '../../../shared/shared.module';
 
 @Component({
-  selector: 'div[appSessionNavigation]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, IconModule],
-  template: `
+    selector: 'div[appSessionNavigation]',
+    imports: [CoreModule, SharedModule, IconModule],
+    template: `
     <div id="session-navigation">
       <div class="btn-group" role="group" [class.d-none]="!(showButtons$ | async)">
         <button type="button" class="btn" [disabled]="isPrevDisabled" (click)="onPreviousSessionClick()">
@@ -20,7 +19,7 @@ import {SharedModule} from '../../../shared/shared.module';
         </button>
       </div>
     </div>
-  `,
+  `
 })
 export class SessionNavigationComponent {
   showButtons$ = new BehaviorSubject<boolean>(false);

@@ -27,11 +27,10 @@ import {TimelineConfiguratorState} from '../../../../features/main/timeline-conf
 import {BaseGroupingLane} from './grouping/base-grouping-lane';
 
 @Component({
-  selector: 'div[appOmakasePlayerTimeline]',
-  standalone: true,
-  imports: [],
-  template: ` <ng-content></ng-content>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'div[appOmakasePlayerTimeline]',
+    imports: [],
+    template: ` <ng-content></ng-content>`,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OmakasePlayerTimelineComponent implements OnDestroy {
   @Output()

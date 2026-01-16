@@ -33,6 +33,7 @@ import {AudioSwitchedEvent, RouterVisualizationApi, SidecarAudioChangeEvent} fro
 import Minimize = VuMeterActions.Minimize;
 import Maximize = VuMeterActions.Maximize;
 import {RouterVisualizationConfig, RouterVisualizationTrack} from '@byomakase/omakase-player/dist/router-visualization/router-visualization';
+import {WindowService} from '../../../core/browser/window.service';
 
 const animateDurationMs = 300;
 const animateTimings = `${animateDurationMs}ms ease-in-out`;
@@ -66,10 +67,9 @@ const peakMeterConfigLight: Partial<PeakMeterConfig> = {
 };
 
 @Component({
-  selector: 'div[appVuMeter]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, IconModule],
-  template: `
+    selector: 'div[appVuMeter]',
+    imports: [CoreModule, SharedModule, IconModule],
+    template: `
     <div
       class="vu-meter-frame d-flex flex-column h-100"
       [class.minimized]="(animationState | async) === 'minimized'"
@@ -110,25 +110,17 @@ const peakMeterConfigLight: Partial<PeakMeterConfig> = {
       </div>
     </div>
   `,
-  animations: [
-    trigger('toggleMinimizeMaximize', [
-      state(
-        'minimized',
-        style({
-          width: `{{minimizedWidth}}px`,
-        }),
-        {params: {minimizedWidth: 0}}
-      ),
-      state(
-        'maximized',
-        style({
-          width: `{{maximizedWidth}}px`,
-        }),
-        {params: {maximizedWidth: 0}}
-      ),
-      transition('* => *', [animate(animateTimings)]),
-    ]),
-  ],
+    animations: [
+        trigger('toggleMinimizeMaximize', [
+            state('minimized', style({
+                width: `{{minimizedWidth}}px`,
+            }), { params: { minimizedWidth: 0 } }),
+            state('maximized', style({
+                width: `{{maximizedWidth}}px`,
+            }), { params: { maximizedWidth: 0 } }),
+            transition('* => *', [animate(animateTimings)]),
+        ]),
+    ]
 })
 export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('vuMeter') vuMeterElementRef!: ElementRef;
@@ -152,7 +144,8 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     protected store: Store,
     protected ompApiService: OmpApiService,
-    protected layoutService: LayoutService
+    protected layoutService: LayoutService,
+    protected windowService: WindowService,
   ) {}
 
   ngOnInit(): void {}
@@ -169,8 +162,6 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
             this.layoutService.presentationMode$.pipe(takeUntil(this._destroyed$)).subscribe({
               next: (presentationMode) => {
                 let peakMeterConfig = presentationMode === 'dark' ? peakMeterConfigDark : peakMeterConfigLight;
-                this.initializeAudioRouter();
-                this.tryCreateVuMeter(peakMeterConfig);
 
                 let createAttachedDetachedModeFilter = <T>() => {
                   return filter<T>(() => this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'attached' || this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached');
@@ -183,7 +174,7 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
                     if (audioMediaTrack && audioMediaTrack.visual_reference && this._activeTrack !== audioMediaTrack) {
                       let visualReferencesInOrder = DomainUtil.resolveAudioMediaTrackVisualReferencesInOrder(audioMediaTrack);
 
-                      this._routerVisualization!.updateMainTrack({
+                      this._routerVisualization?.updateMainTrack({
                         inputLabels: visualReferencesInOrder!.map((visualReference, index) => visualReference.channel ?? `C${index + 1}`),
                       });
                     }
@@ -194,10 +185,19 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
                   const id = this.isActiveTrackSidecar ? this.activeAudioTrack!.id : undefined;
                   if (id !== this._currentSidecarTrackId) {
                     this.tryCreateVuMeter(peakMeterConfig);
-                    this.initializeAudioRouter();
+                    this.tryCreateRouterVisualization();
                     this._currentSidecarTrackId = id;
                   }
                 }
+
+                this.ompApiService
+                  .api!.video.onVideoLoaded$.pipe(takeUntil(this._destroyed$))
+                  .pipe(filter(p => !!p))
+                  .pipe(createAttachedDetachedModeFilter())
+                  .subscribe((event) => {
+                    this.tryCreateRouterVisualization();
+                    this.tryCreateVuMeter(peakMeterConfig);
+                  });
 
                 this.ompApiService
                   .api!.video.onVideoWindowPlaybackStateChange$.pipe(takeUntil(this._destroyed$))
@@ -251,7 +251,11 @@ export class VuMeterComponent implements OnInit, AfterViewInit, OnDestroy {
     this._vuMeter = new VuMeter(channelCount, this.vuMeterElementRef.nativeElement, peakMeterConfig).attachSource(this.createVuMeterSource());
   }
 
-  private initializeAudioRouter() {
+  private tryCreateRouterVisualization() {
+    if (this._routerVisualization) {
+      this._routerVisualization.destroy()
+    }
+
     let outputNumber;
     if (this.ompApiService.api!.video.getVideoWindowPlaybackState() === 'detached') {
       outputNumber = this._currentSidecarTrackId

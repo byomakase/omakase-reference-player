@@ -34,10 +34,9 @@ type AnnotationSortingStrategyEntry = {
 type AnnotationSortingName = 'Timecode' | 'Created';
 
 @Component({
-  selector: 'div[appAnnotationOffcanvas]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, IconModule, AnnotationListComponent, AnnotationCreateComponent],
-  template: `
+    selector: 'div[appAnnotationOffcanvas]',
+    imports: [CoreModule, SharedModule, IconModule, AnnotationListComponent, AnnotationCreateComponent],
+    template: `
     <div class="annotation-wrapper d-flex flex-column h-100">
       <div class="annotation-flyout-header">
         <span>NOTES</span>
@@ -81,7 +80,7 @@ type AnnotationSortingName = 'Timecode' | 'Created';
         </div>
       }
     </div>
-  `,
+  `
 })
 export class AnnotationOffcanvasComponent extends BaseOffcanvas implements AfterViewInit {
   public isThreadingSupported = true;

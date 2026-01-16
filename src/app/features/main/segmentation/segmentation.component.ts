@@ -38,10 +38,9 @@ interface MarkerExportItem {
 }
 
 @Component({
-  selector: 'div[appSegmentation]',
-  standalone: true,
-  imports: [CoreModule, SharedModule, IconModule],
-  template: ` <div class="segmentation-wrapper">
+    selector: 'div[appSegmentation]',
+    imports: [CoreModule, SharedModule, IconModule],
+    template: ` <div class="segmentation-wrapper">
     @if (!(activeTrack$ | async)) {
       <div>No segmentation tracks defined</div>
     }
@@ -90,7 +89,7 @@ interface MarkerExportItem {
         </div>
       </div>
     </template>
-  </div>`,
+  </div>`
 })
 export class SegmentationComponent implements OnInit, OnDestroy {
   public openSegmentationMenu = false;

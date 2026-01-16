@@ -25,23 +25,22 @@ import {AppState} from './shared/state/app.state';
 import {NgxsReduxDevtoolsPluginModule} from '@ngxs/devtools-plugin';
 import {TimelineConfiguratorState} from './features/main/timeline-configurator/timeline-configurator.state';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {HttpClientModule} from '@angular/common/http';
 import {CustomErrorHandler} from './shared/handlers/custom-error-handler';
 import {VuMeterState} from './features/main/vu-meter/vu-meter.state';
 import {TelemetryState} from './features/main/telemetry/telemetry.state';
 import {ChartLegendState} from './features/main/chart-legend/chart-legend.state';
 import {SegmentationState} from './features/main/segmentation/segmentation.state';
 import {AnnotationState} from './features/main/annotation/annotation.state';
+import {provideHttpClient} from '@angular/common/http';
 
 function initializeApp(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    resolve();
-  });
+  return Promise.resolve();
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
+    provideHttpClient(),
     {
       provide: APP_INITIALIZER,
       useFactory: () => initializeApp,
@@ -52,14 +51,10 @@ export const appConfig: ApplicationConfig = {
       provide: WindowToken,
       useFactory: windowProvider,
     },
-    // https://angular.io/guide/standalone-components
     importProvidersFrom([
-      NgxsModule.forRoot([AppState, TimelineConfiguratorState, VuMeterState, TelemetryState, ChartLegendState, SegmentationState, AnnotationState], {
-        developmentMode: true,
-      }),
+      NgxsModule.forRoot([AppState, TimelineConfiguratorState, VuMeterState, TelemetryState, ChartLegendState, SegmentationState, AnnotationState], {developmentMode: true}),
       NgxsReduxDevtoolsPluginModule.forRoot(),
       BrowserAnimationsModule,
-      HttpClientModule,
     ]),
     {
       provide: ErrorHandler,

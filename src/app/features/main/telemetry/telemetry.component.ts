@@ -37,10 +37,9 @@ const maximizedWidth = 350;
 const sampleTimeSyncVideoMetadata: number = 100;
 
 @Component({
-  selector: 'div[appTelemetry]',
-  standalone: true,
-  imports: [CoreModule, SharedModule],
-  template: `
+    selector: 'div[appTelemetry]',
+    imports: [CoreModule, SharedModule],
+    template: `
     <div
       class="telemetry-frame d-flex flex-column h-100"
       [class.minimized]="(animationState | async) === 'minimized'"
@@ -94,25 +93,17 @@ const sampleTimeSyncVideoMetadata: number = 100;
       </div>
     </div>
   `,
-  animations: [
-    trigger('toggleMinimizeMaximize', [
-      state(
-        'minimized',
-        style({
-          width: `{{minimizedWidth}}px`,
-        }),
-        {params: {minimizedWidth: 0}}
-      ),
-      state(
-        'maximized',
-        style({
-          width: `{{maximizedWidth}}px`,
-        }),
-        {params: {maximizedWidth: 0}}
-      ),
-      transition('* => *', [animate(animateTimings)]),
-    ]),
-  ],
+    animations: [
+        trigger('toggleMinimizeMaximize', [
+            state('minimized', style({
+                width: `{{minimizedWidth}}px`,
+            }), { params: { minimizedWidth: 0 } }),
+            state('maximized', style({
+                width: `{{maximizedWidth}}px`,
+            }), { params: { maximizedWidth: 0 } }),
+            transition('* => *', [animate(animateTimings)]),
+        ]),
+    ]
 })
 export class TelemetryComponent implements OnInit, OnDestroy {
   @Select(TelemetryState) state$!: Observable<TelemetryStateModel>;

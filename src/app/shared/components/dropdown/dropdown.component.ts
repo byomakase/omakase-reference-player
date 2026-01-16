@@ -9,10 +9,9 @@ export interface DropdownOption<T> {
 }
 
 @Component({
-  selector: 'app-dropdown',
-  standalone: true,
-  imports: [NgbDropdownModule, CommonModule, IconModule],
-  template: `<div class="app-dropdown btn-group btn-group-manifest" ngbDropdown role="group" [placement]="'bottom-start'" [ngClass]="{small: isSmall}">
+    selector: 'app-dropdown',
+    imports: [NgbDropdownModule, CommonModule, IconModule],
+    template: `<div class="app-dropdown btn-group btn-group-manifest" ngbDropdown role="group" [placement]="'bottom-start'" [ngClass]="{small: isSmall}">
     <button type="button" class="btn btn-primary btn-manifest" ngbDropdownToggle>
       <div class="dropdown-toggle-text">{{ getSelectedLabel() }}</div>
       <i appIcon="chevron-down"></i>
@@ -24,7 +23,7 @@ export interface DropdownOption<T> {
         </button>
       }
     </div>
-  </div>`,
+  </div>`
 })
 export class DropdownComponent<T> {
   @Input() options?: DropdownOption<T>[] | null;

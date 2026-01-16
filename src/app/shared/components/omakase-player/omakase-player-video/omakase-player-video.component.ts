@@ -15,16 +15,15 @@
  */
 
 import {AfterViewInit, Component, HostBinding, Input, OnDestroy, OnInit} from '@angular/core';
-import {OmakasePlayerConfig} from '@byomakase/omakase-player';
+import {ControlBarVisibility, OmakasePlayerConfig, PlayerChromingTheme} from '@byomakase/omakase-player';
 import {Subject} from 'rxjs';
 import {CryptoUtil} from '../../../../util/crypto-util';
 import {OmpApiService} from '../omp-api.service';
 
 @Component({
-  selector: 'div[appOmakasePlayerVideo]',
-  standalone: true,
-  imports: [],
-  template: ` <ng-content></ng-content>`,
+    selector: 'div[appOmakasePlayerVideo]',
+    imports: [],
+    template: ` <ng-content></ng-content>`
 })
 export class OmakasePlayerVideoComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input('config')
@@ -37,6 +36,13 @@ export class OmakasePlayerVideoComponent implements OnInit, OnDestroy, AfterView
   ngOnInit(): void {
     let possibleConfig: Partial<OmakasePlayerConfig> = {
       playerHTMLElementId: CryptoUtil.uuid(),
+      playerChroming: {
+        theme: PlayerChromingTheme.Default,
+        themeConfig: {
+          controlBarVisibility: ControlBarVisibility.FullscreenOnly,
+        },
+        styleUrl: './assets/css/chroming.css',
+      },
     };
 
     // ensure playerHTMLElementId is set because it has to be in component template before OmakasePlayer instantiation

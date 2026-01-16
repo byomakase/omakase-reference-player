@@ -382,25 +382,6 @@ export class TimelineService {
   private createBarOrLedChart(type: 'bar' | 'led', analysis: Analysis): TelemetryBarChartLane | TelemetryOgChartLane {
     let chartAnalysis = analysis as ChartAnalysis;
 
-    let valueMax: number | undefined;
-    let valueMin: number | undefined;
-    let valueTransformFn: ((value: number) => number) | undefined;
-
-    if (chartAnalysis.y_min !== void 0 && chartAnalysis.y_max !== void 0) {
-      if (chartAnalysis.y_min >= 0 && chartAnalysis.y_max > chartAnalysis.y_min) {
-        valueMax = chartAnalysis.y_max;
-        valueMin = chartAnalysis.y_min;
-      } else if (chartAnalysis.y_min < 0 && chartAnalysis.y_max <= 0 && chartAnalysis.y_min < chartAnalysis.y_max) {
-        valueMax = Math.abs(chartAnalysis.y_min) - Math.abs(chartAnalysis.y_max);
-        valueMin = Math.abs(chartAnalysis.y_max);
-        valueTransformFn = (value: number) => {
-          return valueMax! - Math.abs(value);
-        };
-      } else if (chartAnalysis.y_min > chartAnalysis.y_max) {
-        throw new Error(`${type === 'bar' ? 'BarChartLane' : 'OgChartLane'} data with y_min: ${chartAnalysis.y_min} and y_max: ${chartAnalysis.y_max} not supported`);
-      }
-    }
-
     const style =
       type === 'bar'
         ? {
@@ -414,9 +395,8 @@ export class TimelineService {
     const config: any = {
       vttUrl: analysis.url,
       description: analysis.name,
-      valueMax: valueMax,
-      valueMin: valueMin,
-      valueTransformFn: valueTransformFn,
+      valueMax: chartAnalysis.y_max,
+      valueMin: chartAnalysis.y_min,
       valueInterpolationStrategy: 'max',
       style: {
         ...style,
